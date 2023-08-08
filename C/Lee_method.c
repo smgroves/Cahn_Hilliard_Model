@@ -1,17 +1,18 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <malloc.h>
+// #include <malloc.h>
 #include <time.h>
 #define gnx 32
 #define gny 32
 #define PI 4.0 * atan(1.0)
-#define iloop                  \
-    for (i = 1; i <= gnx; i++) \
-    #define jloop for (j = 1; j <= gny; j++) #define ijloop iloop jloop
-#define iloopt                 \
-    for (i = 1; i <= nxt; i++) \
-    #define jloopt for (j = 1; j <= nyt; j++) #define ijloopt iloopt jloopt
+#define iloop for (i = 1; i <= gnx; i++)
+#define jloop for (j = 1; j <= gny; j++)
+#define ijloop iloop jloop
+#define iloopt for (i = 1; i <= nxt; i++)
+#define jloopt for (j = 1; j <= nyt; j++)
+#define ijloopt iloopt jloopt
+
 int nx, ny, n_level, c_relax;
 double **ct, **sc, **smu, **sor, h, h2, dt, xleft, xright, yleft, yright, gam, Cahn, **mu, **mi;
 double **dmatrix(long nrl, long nrh, long ncl, long nch)
@@ -114,19 +115,19 @@ void laplace(double **a, double **lap_a, int nxt, int nyt)
         if (i > 1)
             dadx_L = a[i][j] - a[i - 1][j];
         else
-               dadx_L = 0.0;
+            dadx_L = 0.0;
         if (i < nxt)
             dadx_R = a[i + 1][j] - a[i][j];
         else
-               dadx_R = 0.0;
+            dadx_R = 0.0;
         if (j > 1)
             dady_B = a[i][j] - a[i][j - 1];
         else
-               dady_B = 0.0;
+            dady_B = 0.0;
         if (j < nyt)
             dady_T = a[i][j + 1] - a[i][j];
         else
-               dady_T = 0.0;
+            dady_T = 0.0;
         lap_a[i][j] = (dadx_R - dadx_L + dady_T - dady_B) / ht2;
     }
 }
