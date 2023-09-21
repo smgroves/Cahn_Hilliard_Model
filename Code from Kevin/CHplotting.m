@@ -2,7 +2,7 @@ clear
 close all hidden
 warning off
 
-phi = readmatrix('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Code from Kevin/phi_CPC.m','FileType','text');
+phi = readmatrix('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Code from Kevin/phi_spinodal.m','FileType','text');
 phidims = size(phi);
 phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured
 phidims(1) = phidims(2); %Determine size of square grid
@@ -10,7 +10,7 @@ phi = reshape(phi,phidims(1),phidims(3),phidims(2)); %Reshape multidimensional a
 phi = shiftdim(phi,2); %Shift dimensions to move frames to the third dimension
 myfig = figure();
 hold on
-phi_movie = VideoWriter('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/C_output/phi_CPC_movie.mp4','MPEG-4');
+phi_movie = VideoWriter('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/C_output/phi_spinodal_short_movie.mp4','MPEG-4');
 phi_movie.Quality = 100; %Highest quality video
 open(phi_movie);
 for i = 1:phidims(3)
@@ -25,13 +25,13 @@ end
 for i = 1:30
     writeVideo(phi_movie,getframe); %Pause on end frame
 end
-surf(double(phi(:,:,size(phi,3))>0),'EdgeColor','none');
-view(2);
-axis([0 size(phi,1) 0 size(phi,2)]);
-colormap(gray);
-colorbar;
-writeVideo(phi_movie,getframe);
-for i = 1:30
-    writeVideo(phi_movie,getframe); %Pause on discretized frame
-end
+% surf(double(phi(:,:,size(phi,3))>0),'EdgeColor','none');
+% view(2);
+% axis([0 size(phi,1) 0 size(phi,2)]);
+% colormap(gray);
+% colorbar;
+% writeVideo(phi_movie,getframe);
+% for i = 1:30
+%     writeVideo(phi_movie,getframe); %Pause on discretized frame
+% end
 close(phi_movie);

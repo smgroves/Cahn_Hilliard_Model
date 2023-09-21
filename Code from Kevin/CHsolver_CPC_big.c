@@ -124,7 +124,7 @@ from nrl –> nrh and ncl –> nch */
 void print_data(double **phi)
 { /* Prints the conserved scalar field phi as a space-delimited file */
     FILE *fphi;
-    fphi = fopen("phi_CPC.m", "a");
+    fphi = fopen("phi_CPC_big.m", "a");
     print_mat(fphi, phi, 1, nx, 1, ny);
     fclose(fphi); /* Appends to an existing file */
 }
@@ -435,7 +435,7 @@ int main()
     zero_matrix(mu, 1, nx, 1, ny);
     initialization(oc);
     mat_copy(nc, oc, 1, nx, 1, ny); /* Initialize oc and copy oc to nc */
-    fphi = fopen("phi_CPC.m", "w");
+    fphi = fopen("phi_CPC_big.m", "w");
     fclose(fphi);
     print_data(oc); /* Save initial conditions by opening a new writeable file and appending with print_data */
     for (it = 1; it <= max_it; it++)
