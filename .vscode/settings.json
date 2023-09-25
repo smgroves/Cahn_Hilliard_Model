@@ -1,7 +1,11 @@
 {
     "files.associations": {
+        "*.m": "matlab",
         "tests.C": "cpp",
         "tests_matrix.C": "cpp",
-        "TestMatrix.C": "cpp"
+        "TestMatrix.C": "cpp",
+        "queue": "c",
+        "stack": "c",
+        "random": "c"
     }
 }
