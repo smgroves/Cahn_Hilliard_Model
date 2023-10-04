@@ -3,8 +3,8 @@
 #include <stdlib.h>
 /* #include <malloc.h> <malloc.h> is apparently in <stdlib.h> and is Linux specific */
 #include <time.h>
-#define gnx 64                            /* Number of grid points in x- direction defined as a global variable */
-#define gny 64                            /* Number of grid points in y- direction defined as a global variable */
+#define gnx 8                             /* Number of grid points in x- direction defined as a global variable */
+#define gny 8                             /* Number of grid points in y- direction defined as a global variable */
 #define PI 4.0 * atan(1.0)                /* Defines π as a global variable */
 #define iloop for (i = 1; i <= gnx; i++)  /* Increments i from 1 to gnx */
 #define jloop for (j = 1; j <= gny; j++)  /* Increments j from 1 to gny */
@@ -38,6 +38,29 @@ double **dmatrix(long nrl, long nrh, long ncl, long nch)
     for (i = nrl + 1; i <= nrh; i++)
         m[i] = m[i - 1] + ncol; /* Add columns to each row from nrl+1 to nrh */
     return m;
+}
+
+void make_oc_random(double **oc, int nxt, int nyt)
+{ /* Make initial condition for oc */
+    int i, j;
+    ijloopt
+    {
+        oc[i][j] = rand() % 10;
+    }
+}
+
+void make_oc_identity(double **oc, int nxt, int nyt)
+{ /* Make initial condition for oc */
+    int i, j;
+    ijloopt
+    {
+        oc[i][j] = 0.0;
+    }
+    ijloopt
+    {
+        if (i == j)
+            oc[i][j] = 1.0;
+    }
 }
 
 void free_dmatrix(double **m, long nrl, long nrh, long ncl, long nch)
@@ -109,24 +132,16 @@ and matrix b2 to matrix a2 from xl –> xr and yl –> yr */
         }
 }
 
-void print_mat(FILE *fptr, double **a, int nrl, int nrh, int ncl, int nch)
-{ /* Prints matrix a in a space-delimited format
-from nrl –> nrh and ncl –> nch */
-    int i, j;
-    for (i = nrl; i <= nrh; i++)
+void print_mat(double **a, int nxt, int nyt)
+{ /* Print matrix a */
+    for (int i = 1; i < nxt + 1; i++)
     {
-        for (j = ncl; j <= nch; j++)
-            fprintf(fptr, " %16.15f", a[i][j]);
-        fprintf(fptr, "\n");
-    } /* Newline used to separate rows */
-}
-
-void print_data(double **phi)
-{ /* Prints the conserved scalar field phi as a space-delimited file */
-    FILE *fphi;
-    fphi = fopen("phi.m", "a");
-    print_mat(fphi, phi, 1, nx, 1, ny);
-    fclose(fphi); /* Appends to an existing file */
+        for (int j = 1; j < nyt + 1; j++)
+        {
+            printf("%f ", a[i][j]);
+        }
+        printf("\n");
+    }
 }
 
 void laplace(double **a, double **lap_a, int nxt, int nyt)
@@ -297,10 +312,12 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
     relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf); /* Relax the input data */
     if (ilevel < n_level)
     { /* If the number of multigrid levels has not been reached */
+        printf("%d \n", ilevel);
         int nxc, nyc;
         double **duc, **dwc, **uc_new, **wc_new, **uc_def, **wc_def, **uf_def, **wf_def;
         nxc = nxf / 2;
         nyc = nyf / 2; /* Coarsen grid by twofold */
+        printf("%d %d \n", nxc, nyc);
         duc = dmatrix(1, nxc, 1, nyc);
         dwc = dmatrix(1, nxc, 1, nyc); /* Initialize matrices */
         uc_new = dmatrix(1, nxc, 1, nyc);
@@ -309,14 +326,48 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         wf_def = dmatrix(1, nxf, 1, nyf);
         uc_def = dmatrix(1, nxc, 1, nyc);
         wc_def = dmatrix(1, nxc, 1, nyc);
-        restrictCH(uf_new, uc_new, wf_new, wc_new, nxc, nyc);                         /* Restrict the defect upon initialization */
+        restrictCH(uf_new, uc_new, wf_new, wc_new, nxc, nyc);
+        /* Restrict the defect upon initialization */
+        printf("uf_new after restrict \n");
+        print_mat(uf_new, nxf, nyf);
+        printf("uc_new \n");
+        print_mat(uc_new, nxc, nyc);
+        printf("wf_new \n");
+        print_mat(wf_new, nxf, nyf);
+        printf("wc_new \n");
+        print_mat(wc_new, nxc, nyc);
+
         defect(duc, dwc, uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc); /* Compute the defect */
-        mat_copy2(uc_def, uc_new, wc_def, wc_new, 1, nxc, 1, nyc);                    /* Copy uc_new to uc_def and wc_new to wc_def */
-        vcycle(uc_def, wc_def, duc, dwc, nxc, nyc, ilevel + 1);                       /* FAS multigrid cycle at the next coarser multigrid level */
-        mat_sub2(uc_def, uc_def, uc_new, wc_def, wc_def, wc_new, 1, nxc, 1, nyc);     /* uc_def = uc_def - uc_new and wc_def = wc_def - wc_new */
-        prolong_ch(uc_def, uf_def, wc_def, wf_def, nxc, nyc);                         /* Expand grid twofold; Step 7 of Page 7 of Mathematics 8:97 (2020) */
-        mat_add2(uf_new, uf_new, uf_def, wf_new, wf_new, wf_def, 1, nxf, 1, nyf);     /* uf_new = uf_new + uf_def and wf_new = wf_new + wf_def; Step 8 of Page 7 of Mathematics 8:97 (2020) */
-        relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf);                              /* Post-smoothing; Step 9 of Page 7 of Mathematics 8:97 (2020) */
+
+        printf("duc after defect \n");
+        print_mat(duc, nxc, nyc);
+        printf("dwc \n");
+        print_mat(dwc, nxc, nyc);
+
+        mat_copy2(uc_def, uc_new, wc_def, wc_new, 1, nxc, 1, nyc); /* Copy uc_new to uc_def and wc_new to wc_def */
+        vcycle(uc_def, wc_def, duc, dwc, nxc, nyc, ilevel + 1);    /* FAS multigrid cycle at the next coarser multigrid level */
+
+        printf("uc_def \n");
+        print_mat(uc_def, nxc, nyc);
+        printf("wc_def \n");
+        print_mat(wc_def, nxc, nyc);
+
+        mat_sub2(uc_def, uc_def, uc_new, wc_def, wc_def, wc_new, 1, nxc, 1, nyc); /* uc_def = uc_def - uc_new and wc_def = wc_def - wc_new */
+        prolong_ch(uc_def, uf_def, wc_def, wf_def, nxc, nyc);                     /* Expand grid twofold; Step 7 of Page 7 of Mathematics 8:97 (2020) */
+
+        printf("uc_def after prolong \n");
+        print_mat(uc_def, nxc, nyc);
+        printf("wc_def \n");
+        print_mat(wc_def, nxc, nyc);
+
+        mat_add2(uf_new, uf_new, uf_def, wf_new, wf_new, wf_def, 1, nxf, 1, nyf); /* uf_new = uf_new + uf_def and wf_new = wf_new + wf_def; Step 8 of Page 7 of Mathematics 8:97 (2020) */
+        relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf);                          /* Post-smoothing; Step 9 of Page 7 of Mathematics 8:97 (2020) */
+
+        printf("uf_new after relax \n");
+        print_mat(uf_new, nxf, nyf);
+        printf("wf_new \n");
+        print_mat(wf_new, nxf, nyf);
+
         free_dmatrix(duc, 1, nxc, 1, nyc);
         free_dmatrix(dwc, 1, nxc, 1, nyc); /* Free up pointers */
         free_dmatrix(uc_new, 1, nxc, 1, nyc);
@@ -328,103 +379,50 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
     }
 }
 
-double error2(double **c_old, double **c_new, double **mu, int nxt, int nyt)
-{ /* Calculates 2D residual for phi */
-    int i, j;
-    double **rr, res2, x = 0.0;
-    rr = dmatrix(1, nxt, 1, nyt);                                        /* Initialize matrix */
-    ijloopt { rr[i][j] = mu[i][j] - c_old[i][j]; }                       /* Calculate starting residual */
-    laplace(rr, sor, nx, ny);                                            /* Update with Laplace operator from rr applied to sor [~WHY IS SOR INITIALIZED OUTSIDE THIS
-                                                  FUNCTION AS A GLOBAL VARIABLE INSTEAD OF LOCALLY LIKE rr? ~] */
-    ijloopt { rr[i][j] = sor[i][j] - (c_new[i][j] - c_old[i][j]) / dt; } /* Update residual to reflect Laplacian step; Equation 27 of Mathematics 8:97 (2020) */
-    ijloopt { x = (rr[i][j]) * (rr[i][j]) + x; }                         /* Calculate sum of squares */
-    res2 = sqrt(x / (nx * ny));                                          /* Calculate Frobenius norm */
-    free_dmatrix(rr, 1, nxt, 1, nyt);                                    /* Free up pointers */
-    return res2;
-}
-
-void initialization(double **phi)
-{ /* Initialize the domain for convergence test; Equation 26 of Mathematics 8:97 (2020) */
-    int i, j;
-    double x, y;
-    srand(time(NULL)); /* Initialize pseudorandom number generator seed */
-    ijloop
-    {
-        x = (i - 0.5) * h;
-        y = (j - 0.5) * h;
-        /*phi[i][j]=cos(PI*x)*cos(PI*y);*/ /* Sinusoidal input for convergence test */
-        phi[i][j] = 0.1 * (1 - 2 * rand() % 2);
-    }
-}
-
-void cahn(double **c_old, double **c_new)
-{ /* Cahn-Hilliard solver */
-    FILE *fphi2;
-    int i, j, max_it_CH = 10000, it_mg2 = 1;
-    double tol = 1.0e-10, resid2 = 1.0;
-    source(c_old, sc, smu); /* Initialize source terms for phi and mu from c_old */
-    while (it_mg2 <= max_it_CH && resid2 > tol)
-    { /* While max iterations have not been hit and residual is greater than tolerance */
-        it_mg2++;
-        vcycle(c_new, mu, sc, smu, nx, ny, 1);              /* Update counter and run vcycle */
-        resid2 = error2(c_old, c_new, mu, nx, ny);          /* Calculate residual error */
-        printf("error2 %16.15f %d \n", resid2, it_mg2 - 1); /* Outputs error */
-        fphi2 = fopen("phi2.m", "a");
-        fprintf(fphi2, "%16.15f %d \n", resid2, it_mg2 - 1);
-        fclose(fphi2);
-    } /* [~NOT CLEAR WHY THIS STEP IS IN THE WHILE LOOP~] */
-}
-
 int main()
 {
     int it = 1, max_it, ns, count = 1, it_mg = 1;
+
     double **oc, **nc, resid2 = 1.0;
-    FILE *fphi, *fphi2;
     c_relax = 2;
     nx = gnx;
     ny = gny;
     n_level = (int)(log(nx) / log(2.0) + 0.1); /* Set number of relaxation cycles and number of muligrid levels */
+
     xleft = 0.0;
     xright = 1.0;
     yleft = 0.0;
     yright = 1.0;
-    max_it = 100;
-    ns = 1;
     dt = 0.01; /* Set x-y dimenison, max iterations, and number of steps before printing results */
     h = xright / (double)nx;
     h2 = pow(h, 2);
     gam = 0.06;
-    Cahn = pow(gam, 2); /* gam is gradient interfacial energy; Page 1 of Mathematics 8:97 (2020) */
-    printf("nx=%d,ny=%d\n", nx, ny);
-    printf("dt=%f\n", dt); /* Output model parameters */
-    printf("max_it=%d\n", max_it);
-    printf("ns=%d\n", ns);
-    printf("n_level=%d\n\n", n_level);
+    Cahn = pow(gam, 2);
     oc = dmatrix(0, nx + 1, 0, ny + 1);
     nc = dmatrix(0, nx + 1, 0, ny + 1);
-    mu = dmatrix(1, nx, 1, ny); /* Initialize matrices; note that oc and nc are larger than the other */
-    sor = dmatrix(1, nx, 1, ny);
-    ct = dmatrix(1, nx, 1, ny);
     sc = dmatrix(1, nx, 1, ny);
-    // mi = dmatrix(1, nx, 1, ny);
     smu = dmatrix(1, nx, 1, ny);
+    ct = dmatrix(1, nx, 1, ny);
+    mu = dmatrix(1, nx, 1, ny); /* Initialize matrices; note that oc and nc are larger than the other */
     zero_matrix(mu, 1, nx, 1, ny);
-    initialization(oc);
-    mat_copy(nc, oc, 1, nx, 1, ny); /* Initialize oc and copy oc to nc */
-    fphi = fopen("phi.m", "w");
-    fclose(fphi);
-    print_data(oc); /* Save initial conditions by opening a new writeable file and appending with print_data */
-    for (it = 1; it <= max_it; it++)
-    { /* Run Cahn-Hilliard solver */
-        cahn(oc, nc);
-        mat_copy(oc, nc, 1, nx, 1, ny); /* Run one iteration of Cahn-Hilliard and copy oc to nc */
-        if (it % ns == 0)
-        {
-            count++;
-            print_data(oc);
-            printf("print out counts %d \n", count);
-        } /* Every ns iterations print out counts to phi.m*/
-        printf(" %d \n", it);
-    }
-    return 0;
+
+    // printf("%d \n", c);
+    // make_oc_random(oc, nx, ny);
+    make_oc_identity(oc, nx, ny);
+
+    /* print sc and smu to command line; matching print_mat by starting at 1s */
+    printf("oc before vcycle \n");
+    print_mat(oc, nx, ny);
+    /* in original code, source gets called in the cahn function with c_old = oc, src_c = sc and src_mu = smu */
+    source(oc, sc, smu);
+    printf("source sc and smu \n");
+    print_mat(sc, nx, ny);
+    print_mat(smu, nx, ny);
+
+    printf("starting vcycle \n");
+    vcycle(oc, mu, sc, smu, nx, ny, 1); /* Update counter and run vcycle */
+
+    printf("after vcycle \n");
+    print_mat(oc, nx, ny);
+    print_mat(mu, nx, ny);
 }
