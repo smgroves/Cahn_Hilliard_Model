@@ -12,7 +12,8 @@
 #define iloopt for (i = 1; i <= nxt; i++) /* Increments i from 1 to nxt (nx temp defined locally) */
 #define jloopt for (j = 1; j <= nyt; j++) /* Increments j from 1 to nyt (ny temp defined locally) */
 #define ijloopt iloopt jloopt
-
+clock_t start, end;
+double cpu_time_used;
 int nx, ny, n_level, c_relax;                                                                    /* Declare integers as global variables:
                                                                       max number of grid points in x- direction, max number of grid points in y- direction
                                                                       number of multigrid levels, number of SMOOTH relaxation operations */
@@ -377,6 +378,8 @@ void cahn(double **c_old, double **c_new)
 
 int main()
 {
+    start = clock();
+
     int it = 1, max_it, ns, count = 1, it_mg = 1;
     double **oc, **nc, resid2 = 1.0;
     FILE *fphi, *fphi2;
@@ -426,5 +429,8 @@ int main()
         } /* Every ns iterations print out counts to phi.m*/
         printf(" %d \n", it);
     }
+    end = clock();
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Total time: %d \n", cpu_time_used);
     return 0;
 }

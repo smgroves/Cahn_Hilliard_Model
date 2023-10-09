@@ -3,6 +3,9 @@
 #include <stdlib.h>
 /* #include <malloc.h> <malloc.h> is apparently in <stdlib.h> and is Linux specific */
 #include <time.h>
+
+clock_t start, end;
+double cpu_time_used;
 #define gnx 256                           /* Number of grid points in x- direction defined as a global variable */
 #define gny 256                           /* Number of grid points in y- direction defined as a global variable */
 #define PI 4.0 * atan(1.0)                /* Defines π as a global variable */
@@ -401,6 +404,8 @@ void cahn(double **c_old, double **c_new)
 
 int main()
 {
+    start = clock();
+
     int it = 1, max_it, ns, count = 1, it_mg = 1;
     double **oc, **nc, resid2 = 1.0;
     FILE *fphi, *fphi2;
@@ -450,5 +455,8 @@ int main()
         } /* Every ns iterations print out counts to phi_CPC.m*/
         printf(" %d \n", it);
     }
+    end = clock();
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Total time: %d \n", cpu_time_used);
     return 0;
 }

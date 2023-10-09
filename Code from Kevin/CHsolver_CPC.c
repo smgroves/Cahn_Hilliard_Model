@@ -3,8 +3,8 @@
 #include <stdlib.h>
 /* #include <malloc.h> <malloc.h> is apparently in <stdlib.h> and is Linux specific */
 #include <time.h>
-#define gnx 128                           /* Number of grid points in x- direction defined as a global variable */
-#define gny 128                           /* Number of grid points in y- direction defined as a global variable */
+#define gnx 64                            /* Number of grid points in x- direction defined as a global variable */
+#define gny 64                            /* Number of grid points in y- direction defined as a global variable */
 #define PI 4.0 * atan(1.0)                /* Defines π as a global variable */
 #define iloop for (i = 1; i <= gnx; i++)  /* Increments i from 1 to gnx */
 #define jloop for (j = 1; j <= gny; j++)  /* Increments j from 1 to gny */
@@ -124,7 +124,7 @@ from nrl –> nrh and ncl –> nch */
 void print_data(double **phi)
 { /* Prints the conserved scalar field phi as a space-delimited file */
     FILE *fphi;
-    fphi = fopen("phi_CPC.m", "a");
+    fphi = fopen("phi_CPC_update.m", "a");
     print_mat(fphi, phi, 1, nx, 1, ny);
     fclose(fphi); /* Appends to an existing file */
 }
@@ -357,13 +357,13 @@ void initialization(double **phi)
             phi[i][j]=-0.5*cos(0.5*(i-round(nx/2)/nx))-0.5*cos(0.5*(j-round(ny/2)/ny));}
         else {phi[i][j]=-1;}*/
         /* Setting to zero gives ringing artifacts */
-        if (i > round(nx / 2) - 10 && i < round(nx / 2) + 10)
+        if (i > round(nx / 2) - 5 && i < round(nx / 2) + 5)
         {
-            if (j > round(ny / 2) - 10 && j < round(ny / 2) + 10)
+            if (j > round(ny / 2) - 5 && j < round(ny / 2) + 5)
             {
                 phi[i][j] = 1;
             }
-            else if (i > round(nx / 2) - 2 && i < round(nx / 2) + 2)
+            else if (i > round(nx / 2) - 1 && i < round(nx / 2) + 1)
             {
                 phi[i][j] = 1;
             }
@@ -410,8 +410,8 @@ int main()
     xright = 1.0;
     yleft = 0.0;
     yright = 1.0;
-    max_it = 600;
-    ns = 5; /* Set x-y dimenison, max iterations, and number of steps before printing results */
+    max_it = 100;
+    ns = 1; /* Set x-y dimenison, max iterations, and number of steps before printing results */
     h = xright / (double)nx;
     h2 = pow(h, 2);
     gam = 4 * h / (2 * sqrt(2) * atanh(0.9));
@@ -433,7 +433,7 @@ int main()
     zero_matrix(mu, 1, nx, 1, ny);
     initialization(oc);
     mat_copy(nc, oc, 1, nx, 1, ny); /* Initialize oc and copy oc to nc */
-    fphi = fopen("phi_CPC.m", "w");
+    fphi = fopen("phi_CPC_update.m", "w");
     fclose(fphi);
     print_data(oc); /* Save initial conditions by opening a new writeable file and appending with print_data */
     for (it = 1; it <= max_it; it++)

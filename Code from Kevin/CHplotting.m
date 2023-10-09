@@ -2,7 +2,9 @@ clear
 close all hidden
 warning off
 
-phi = readmatrix('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Code from Kevin/phi_CPC.m','FileType','text');
+% phi = readmatrix('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Code from Kevin/phi_CPC.m','FileType','text');
+
+phi = readmatrix('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Code from Kevin/phi_CPC_update.m','FileType','text');
 phidims = size(phi);
 phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured
 phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured
@@ -14,7 +16,7 @@ phi = reshape(phi,phidims(1),phidims(3),phidims(2)); %Reshape multidimensional a
 phi = shiftdim(phi,2); %Shift dimensions to move frames to the third dimension
 myfig = figure();
 % hold on
-phi_movie = VideoWriter('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/C_output/phi_CPC.mp4','MPEG-4');
+phi_movie = VideoWriter('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/C_output/phi_CPC_C_64x64.mp4','MPEG-4');
 phi_movie.Quality = 100; %Highest quality video
 open(phi_movie);
 for i = 1:phidims(3)
