@@ -53,6 +53,18 @@ void zero_matrix(double **a, int xl, int xr, int yl, int yr)
         }
     }
 }
+void mat_copy(double **a, double **b, int xl, int xr, int yl, int yr)
+{ /* Copies matrix b to matrix a
+from xl –> xr and yl –> yr */
+    int i, j;
+    for (i = xl; i <= xr; i++)
+    {
+        for (j = yl; j <= yr; j++)
+        {
+            a[i][j] = b[i][j];
+        }
+    }
+}
 
 void laplace(double **a, double **lap_a, int nxt, int nyt)
 { /* Calculate discrete Laplace operator of matrix a,
@@ -184,7 +196,16 @@ passed for no reason] */
             c_new[i][j] = (a[3] * f[0] - a[1] * f[1]) / det; /* Solve for the next phi */
             mu_new[i][j] = (-a[2] * f[0] + a[0] * f[1]) / det;
         }
-
+        printf("F and A matrices \n");
+        printf("%f \n", f[0]);
+        printf("%f \n", f[1]);
+        printf("%f \n", a[0]);
+        printf("%f \n", a[1]);
+        printf("%f \n", a[2]);
+        printf("%f \n", a[3]);
+        printf("c_new and mu_new \n");
+        print_mat(c_new, nxt, nyt);
+        print_mat(mu_new, nxt, nyt);
     } /* Solve for the next mu */
 }
 
@@ -217,12 +238,20 @@ int main()
     // {
     // printf("%d \n", c);
     make_oc_identity(oc, nx, ny);
+    mat_copy(nc, oc, 1, nx, 1, ny); /* Initialize oc and copy oc to nc */
+
     /* print sc and smu to command line; matching print_mat by starting at 1s */
     // print_mat(oc, nx, ny);
     /* in original code, source gets called in the cahn function with c_old = oc, src_c = sc and src_mu = smu */
     source(oc, sc, smu);
+    printf("sc and smu \n");
+    print_mat(sc, nx, ny);
+    print_mat(smu, nx, ny);
+    printf("c_new, mu_new before relax \n");
+    print_mat(nc, nx, ny);
+    print_mat(mu, nx, ny);
     relax(nc, mu, sc, smu, 1, nx, ny);
-    // printf("final c_new and mu_new \n");
+    printf("final c_new and mu_new \n");
     print_mat(nc, nx, ny);
     print_mat(mu, nx, ny);
     // }

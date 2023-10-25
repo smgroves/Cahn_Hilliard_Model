@@ -4,7 +4,7 @@ warning off
 
 % phi = readmatrix('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Code from Kevin/phi_CPC.m','FileType','text');
 
-phi = readmatrix('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Code from Kevin/phi_CPC_update.m','FileType','text');
+phi = readmatrix('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Code from Kevin/phi_CPC.m','FileType','text');
 phidims = size(phi);
 phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured
 phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured
