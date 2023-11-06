@@ -5,3 +5,19 @@ C/.DS_Store
 C/Tests/.DS_Store
 Code from Kevin/phi_CPC_circle.m
 outputs/phi_CPC_big.m
+outputs/phi_CPC.m
+outputs/phi_CPC_big_from_file.m
+outputs/phi_CPC_big_from_file_128x128_100s_10max.m
+outputs/phi_CPC_big_from_file_128x128_100s_5max.m
+outputs/phi_CPC_big_from_file_128x128_100s_6max.m
+outputs/phi_CPC_big_from_file_128x128_500s_5max.m
+outputs/phi_CPC_circle.m
+outputs/phi_CPC_cohesin_width_4.m
+outputs/phi_CPC_from_file_128x128_100s_10max.m
+outputs/phi_CPC_from_file_128x128_100s_4max.m
+outputs/phi_CPC_from_file_128x128_100s_5max.m
+outputs/phi_CPC_from_file_128x128_100s_7max.m
+outputs/phi_CPC_from_file_128x128_100s_8max.m
+outputs/phi_CPC_from_file_128x128_500s_10max.m
+outputs/phi_CPC_from_file_128x128_500s_5max.m
+outputs/phi_CPC_update.m
