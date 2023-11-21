@@ -1,0 +1,2 @@
+time, max_it, nx, ny, c_relax, max_it_CH, ms, dt, gam, Cahn, h, n_level 
+9.513832, 50, 256, 256, 2, 10000, 50, 0.000002, 0.007505, 0.000056, 0.003906, 8

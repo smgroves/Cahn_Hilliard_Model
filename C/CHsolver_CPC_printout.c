@@ -3,8 +3,8 @@
 #include <stdlib.h>
 /* #include <malloc.h> <malloc.h> is apparently in <stdlib.h> and is Linux specific */
 #include <time.h>
-#define gnx 8                             /* Number of grid points in x- direction defined as a global variable */
-#define gny 8                             /* Number of grid points in y- direction defined as a global variable */
+#define gnx 64                            /* Number of grid points in x- direction defined as a global variable */
+#define gny 64                            /* Number of grid points in y- direction defined as a global variable */
 #define PI 4.0 * atan(1.0)                /* Defines π as a global variable */
 #define iloop for (i = 1; i <= gnx; i++)  /* Increments i from 1 to gnx */
 #define jloop for (j = 1; j <= gny; j++)  /* Increments j from 1 to gny */
@@ -57,7 +57,7 @@ void zero_matrix(double **a, int xl, int xr, int yl, int yr)
         }
     }
 }
-void print_mat(double **a, int nxt, int nyt)
+void print_mat_console(double **a, int nxt, int nyt)
 { /* Print matrix a */
     for (int i = 1; i < nxt + 1; i++)
     {
@@ -68,6 +68,27 @@ void print_mat(double **a, int nxt, int nyt)
         printf("\n");
     }
 }
+
+void print_mat(FILE *fptr, double **a, int nrl, int nrh, int ncl, int nch)
+{ /* Prints matrix a in a space-delimited format
+from nrl –> nrh and ncl –> nch */
+    int i, j;
+    for (i = nrl; i <= nrh; i++)
+    {
+        for (j = ncl; j <= nch; j++)
+            fprintf(fptr, " %16.15f", a[i][j]);
+        fprintf(fptr, "\n");
+    } /* Newline used to separate rows */
+}
+
+void print_data(double **phi)
+{ /* Prints the conserved scalar field phi as a space-delimited file */
+    FILE *fphi;
+    fphi = fopen("phi_CPC_test.m", "a");
+    print_mat(fphi, phi, 1, nx, 1, ny);
+    fclose(fphi); /* Appends to an existing file */
+}
+
 void mat_add2(double **a, double **b, double **c, double **a2,
               double **b2, double **c2, int xl, int xr, int yl, int yr)
 { /* Adds two matrices a = b + c and a2 = b2 + c2
@@ -152,13 +173,13 @@ void source(double **c_old, double **src_c, double **src_mu)
 passing old phi, the spatial residual of phi, and the spatial residual of mu */
     int i, j;
     // printf("c_old in source \n");
-    // print_mat(c_old, nx = nx, ny = ny);
+    // print_mat_console(c_old, nx = nx, ny = ny);
     // printf("nx in source: %d \n", nx);
     // printf("ny in source: %d \n", ny);
     // printf("dt in source: %f \n", dt);
     laplace(c_old, ct, nx, ny); /* Grab the Laplacian of the c_old and assign to ct given the spatial grid nx by ny */
     // printf("ct in source \n");
-    // print_mat(ct, nx = nx, ny = ny);
+    // print_mat_console(ct, nx = nx, ny = ny);
     ijloop
     {
         src_c[i][j] = c_old[i][j] / dt - ct[i][j];
@@ -177,14 +198,14 @@ passed for no reason] */
     int i, j, iter;
     double ht2, x_fac, y_fac, a[4], f[2], det;
     ht2 = pow((xright - xleft) / (double)nxt, 2); /* Space step size squared [~THIS ASSUMES A SQUARE MESH GRID... NOTE THAT nyt IS NOT USED~] */
-    printf("c_new before relaxation: \n");
-    print_mat(c_new, nxt, nyt);
+    // printf("c_new before relaxation: \n");
+    // print_mat_console(c_new, nxt, nyt);
     // printf("mu_new before relaxation: \n");
-    // print_mat(mu_new, nxt, nyt);
+    // print_mat_console(mu_new, nxt, nyt);
     // printf("su before relaxation: \n");
-    // print_mat(su, nxt, nyt);
+    // print_mat_console(su, nxt, nyt);
     // printf("sw before relaxation: \n");
-    // print_mat(sw, nxt, nyt);
+    // print_mat_console(sw, nxt, nyt);
     for (iter = 1; iter <= c_relax; iter++)
     { /* For each relaxation cycle */
         ijloopt
@@ -229,16 +250,16 @@ passed for no reason] */
             c_new[i][j] = (a[3] * f[0] - a[1] * f[1]) / det; /* Solve for the next phi */
             mu_new[i][j] = (-a[2] * f[0] + a[0] * f[1]) / det;
         }
-        printf("F and A matrices \n");
-        printf("%f \n", f[0]);
-        printf("%f \n", f[1]);
-        printf("%f \n", a[0]);
-        printf("%f \n", a[1]);
-        printf("%f \n", a[2]);
-        printf("%f \n", a[3]);
+        // printf("F and A matrices \n");
+        // printf("%f \n", f[0]);
+        // printf("%f \n", f[1]);
+        // printf("%f \n", a[0]);
+        // printf("%f \n", a[1]);
+        // printf("%f \n", a[2]);
+        // printf("%f \n", a[3]);
         // printf("c_new and mu_new \n");
-        // print_mat(c_new, nxt, nyt);
-        // print_mat(mu_new, nxt, nyt);
+        // print_mat_console(c_new, nxt, nyt);
+        // print_mat_console(mu_new, nxt, nyt);
     } /* Solve for the next mu */
 }
 
@@ -309,22 +330,22 @@ passing uf and vf matrices expanded to uc and vc with original dimensions nxc an
 void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf, int nyf,
             int ilevel)
 { /* FAS multigrid cycle */
-    printf("before relaxing IN VCYCLE \n");
-    printf("nxf: %d \n", nxf);
-    printf("uf_new \n");
-    print_mat(uf_new, nx = nxf, ny = nyf);
-    // print_mat(wf_new, nx = nxf, ny = nyf);
-    // print_mat(su, nx = nxf, ny = nyf);
-    // print_mat(sw, nx = nxf, ny = nyf);
+    // printf("before relaxing IN VCYCLE \n");
+    // printf("nxf: %d \n", nxf);
+    // printf("uf_new \n");
+    // print_mat_console(uf_new, nx = nxf, ny = nyf);
+    // print_mat_console(wf_new, nx = nxf, ny = nyf);
+    // print_mat_console(su, nx = nxf, ny = nyf);
+    // print_mat_console(sw, nx = nxf, ny = nyf);
     relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf); /* Relax the input data */
-    printf("after relaxing IN VCYCLE \n");
-    print_mat(uf_new, nx = nx, ny = ny);
-    // print_mat(wf_new, nx = nx, ny = ny);
-    // print_mat(su, nx = nx, ny = ny);
-    // print_mat(sw, nx = nx, ny = ny);
+    // printf("after relaxing IN VCYCLE \n");
+    // print_mat_console(uf_new, nx = nx, ny = ny);
+    // print_mat_console(wf_new, nx = nx, ny = ny);
+    // print_mat_console(su, nx = nx, ny = ny);
+    // print_mat_console(sw, nx = nx, ny = ny);
     if (ilevel < n_level)
     { /* If the number of multigrid levels has not been reached */
-        printf("ilevel: %d \n", ilevel);
+        // printf("ilevel: %d \n", ilevel);
         int nxc, nyc;
         double **duc, **dwc, **uc_new, **wc_new, **uc_def, **wc_def, **uf_def, **wf_def;
         nxc = nxf / 2;
@@ -339,25 +360,26 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         wc_def = dmatrix(1, nxc, 1, nyc);
         restrictCH(uf_new, uc_new, wf_new, wc_new, nxc, nyc);                         /* Restrict the defect upon initialization */
         defect(duc, dwc, uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc); /* Compute the defect */
-        printf("after defect \n");
-        printf("nxc: %d \n", nxc);
-
-        mat_copy2(uc_def, uc_new, wc_def, wc_new, 1, nxc, 1, nyc); /* Copy uc_new to uc_def and wc_new to wc_def */
-        printf("before recursion \n");
-        print_mat(uc_def, nx = nxc, ny = nyc);
-        print_mat(wc_def, nx = nxc, ny = nyc);
+        mat_copy2(uc_def, uc_new, wc_def, wc_new, 1, nxc, 1, nyc);                    /* Copy uc_new to uc_def and wc_new to wc_def */
+        // printf("before recursion \n");
+        // printf("nxc: %d \n", nxc);
+        // print_mat_console(duc, nx = nxc, ny = nyc);
+        // print_mat_console(dwc, nx = nxc, ny = nyc);
+        // printf("ilevel: %d \n", ilevel);
+        // print_mat_console(uc_def, nx = nxc, ny = nyc);
+        // print_mat_console(wc_def, nx = nxc, ny = nyc);
         vcycle(uc_def, wc_def, duc, dwc, nxc, nyc, ilevel + 1); /* FAS multigrid cycle at the next coarser multigrid level */
-        printf("uc_def right after vcycle \n");
-        print_mat(uc_def, nx = nxc, ny = nyc);
-        print_mat(uc_new, nx = nxc, ny = nyc);
+        // printf("uc_def right after vcycle \n");
+        // print_mat_console(uc_def, nx = nxc, ny = nyc);
+        // print_mat_console(uc_new, nx = nxc, ny = nyc);
         mat_sub2(uc_def, uc_def, uc_new, wc_def, wc_def, wc_new, 1, nxc, 1, nyc); /* uc_def = uc_def - uc_new and wc_def = wc_def - wc_new */
-        printf("uc_def after vcycle \n");
-        print_mat(uc_def, nx = nxc, ny = nyc);
+        // printf("uc_def after matrix subtraction \n");
+        // print_mat_console(uc_def, nx = nxc, ny = nyc);
         prolong_ch(uc_def, uf_def, wc_def, wf_def, nxc, nyc); /* Expand grid twofold; Step 7 of Page 7 of Mathematics 8:97 (2020) */
-        printf("after prolonging \n");
-        printf("nxc: %d \n", nxc);
-        print_mat(uf_new, nx = nxf, ny = nyf);
-        print_mat(uf_def, nx = nxf, ny = nyf);
+        // printf("after prolonging \n");
+        // printf("nxc: %d \n", nxc);
+        // print_mat_console(uf_new, nx = nxf, ny = nyf);
+        // print_mat_console(uf_def, nx = nxf, ny = nyf);
         mat_add2(uf_new, uf_new, uf_def, wf_new, wf_new, wf_def, 1, nxf, 1, nyf); /* uf_new = uf_new + uf_def and wf_new = wf_new + wf_def; Step 8 of Page 7 of Mathematics 8:97 (2020) */
         relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf);                          /* Post-smoothing; Step 9 of Page 7 of Mathematics 8:97 (2020) */
         free_dmatrix(duc, 1, nxc, 1, nyc);
@@ -368,9 +390,10 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         free_dmatrix(wf_def, 1, nxf, 1, nyf);
         free_dmatrix(uc_def, 1, nxc, 1, nyc);
         free_dmatrix(wc_def, 1, nxc, 1, nyc);
-        printf("after final relaxing IN VCYCLE \n");
-        print_mat(uf_new, nx = nxf, ny = nyf);
+        // printf("after final relaxing IN VCYCLE \n");
+        // print_mat_console(uf_new, nx = nxf, ny = nyf);
     }
+    // printf("Done with VCycle \n");
 }
 
 double error2(double **c_old, double **c_new, double **mu, int nxt, int nyt)
@@ -431,33 +454,33 @@ void cahn(double **c_old, double **c_new)
     FILE *fphi2;
     int i, j, max_it_CH = 1, it_mg2 = 1;
     double tol = 1.0e-10, resid2 = 1.0;
-    printf("sc before sourcing \n");
-    print_mat(sc, nx = nx, ny = ny);
+    // printf("sc before sourcing \n");
+    // print_mat_console(sc, nx = nx, ny = ny);
     source(c_old, sc, smu); /* Initialize source terms for phi and mu from c_old */
-    printf("sc after sourcing \n");
-    print_mat(sc, nx = nx, ny = ny);
+    // printf("sc after sourcing \n");
+    // print_mat_console(sc, nx = nx, ny = ny);
     while (it_mg2 <= max_it_CH && resid2 > tol)
     { /* While max iterations have not been hit and residual is greater than tolerance */
         it_mg2++;
-        printf("c_new before vcycle \n");
-        print_mat(c_new, nx = nx, ny = ny);
-        printf("mu before vcycle \n");
-        print_mat(mu, nx = nx, ny = ny);
-        printf("sc before vcycle \n");
-        print_mat(sc, nx = nx, ny = ny);
-        printf("smu before vcycle \n");
-        print_mat(smu, nx = nx, ny = ny);
+        // printf("c_new before vcycle \n");
+        // print_mat_console(c_new, nx = nx, ny = ny);
+        // printf("mu before vcycle \n");
+        // print_mat_console(mu, nx = nx, ny = ny);
+        // printf("sc before vcycle \n");
+        // print_mat_console(sc, nx = nx, ny = ny);
+        // printf("smu before vcycle \n");
+        // print_mat_console(smu, nx = nx, ny = ny);
         vcycle(c_new, mu, sc, smu, nx, ny, 1); /* Update counter and run vcycle */
-        printf("c_new after vcycle \n");
-        print_mat(c_new, nx = nx, ny = ny);
-        printf("mu after vcycle \n");
-        print_mat(mu, nx = nx, ny = ny);
-        printf("sc after vcycle \n");
-        print_mat(sc, nx = nx, ny = ny);
-        printf("smu after vcycle \n");
-        print_mat(smu, nx = nx, ny = ny);
-        resid2 = error2(c_old, c_new, mu, nx, ny);          /* Calculate residual error */
-        printf("error2 %16.15f %d \n", resid2, it_mg2 - 1); /* Outputs error */
+        // printf("c_new after vcycle \n");
+        // print_mat_console(c_new, nx = nx, ny = ny);
+        // printf("mu after vcycle \n");
+        // print_mat_console(mu, nx = nx, ny = ny);
+        // printf("sc after vcycle \n");
+        // print_mat_console(sc, nx = nx, ny = ny);
+        // printf("smu after vcycle \n");
+        // print_mat_console(smu, nx = nx, ny = ny);
+        resid2 = error2(c_old, c_new, mu, nx, ny); /* Calculate residual error */
+        // printf("error2 %16.15f %d \n", resid2, it_mg2 - 1); /* Outputs error */
         fphi2 = fopen("phi2.m", "a");
         fprintf(fphi2, "%16.15f %d \n", resid2, it_mg2 - 1);
         fclose(fphi2);
@@ -478,7 +501,7 @@ int main()
     xright = 1.0;
     yleft = 0.0;
     yright = 1.0;
-    max_it = 1;
+    max_it = 2;
     ns = 1; /* Set x-y dimenison, max iterations, and number of steps before printing results */
     h = xright / (double)nx;
     h2 = pow(h, 2);
@@ -501,10 +524,11 @@ int main()
     smu = dmatrix(1, nx, 1, ny);
     zero_matrix(mu, 1, nx, 1, ny);
     initialization(oc);
-    print_mat(oc, nx = gnx, ny = gny);
+    // print_mat_console(oc, nx = gnx, ny = gny);
     mat_copy(nc, oc, 1, nx, 1, ny); /* Initialize oc and copy oc to nc */
-    fphi = fopen("phi_CPC_update.m", "w");
+    fphi = fopen("phi_CPC_test.m", "w");
     fclose(fphi);
+    print_data(oc);
     for (it = 1; it <= max_it; it++)
     { /* Run Cahn-Hilliard solver */
         cahn(oc, nc);
@@ -512,6 +536,7 @@ int main()
         if (it % ns == 0)
         {
             count++;
+            print_data(oc);
             printf("print out counts %d \n", count);
         } /* Every ns iterations print out counts to phi_CPC.m*/
         printf(" %d \n", it);

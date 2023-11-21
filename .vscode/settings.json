@@ -6,6 +6,7 @@
         "TestMatrix.C": "cpp",
         "queue": "c",
         "stack": "c",
-        "random": "c"
+        "random": "c",
+        "filesystem": "c"
     }
 }
