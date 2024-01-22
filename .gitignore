@@ -22,3 +22,4 @@ outputs/phi_CPC_from_file_128x128_500s_10max.m
 outputs/phi_CPC_from_file_128x128_500s_5max.m
 outputs/phi_CPC_update.m
 C/phi_CPC_time.m
+outputs/julia/output_128_10000.txt
