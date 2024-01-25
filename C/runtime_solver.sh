@@ -7,6 +7,6 @@ arg2=("1000" "10000" "100000")
 # Iterate over the matrices and run the C program
 for a1 in "${arg1[@]}"; do
     for a2 in "${arg2[@]}"; do
-        ./solver_128 "$a1" "$a2" 
+        ./solver_256 "$a1" "$a2" 
     done
 done

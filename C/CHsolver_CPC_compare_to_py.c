@@ -7,8 +7,8 @@
 
 clock_t start, end;
 double cpu_time_used;
-#define gnx 16                            /* Number of grid points in x- direction defined as a global variable */
-#define gny 16                            /* Number of grid points in y- direction defined as a global variable */
+#define gnx 128                           /* Number of grid points in x- direction defined as a global variable */
+#define gny 128                           /* Number of grid points in y- direction defined as a global variable */
 #define PI 4.0 * atan(1.0)                /* Defines π as a global variable */
 #define iloop for (i = 1; i <= gnx; i++)  /* Increments i from 1 to gnx */
 #define jloop for (j = 1; j <= gny; j++)  /* Increments j from 1 to gny */
