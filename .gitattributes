@@ -2,7 +2,7 @@
 * text=auto
 *.4th linguist-detectable=false
 .vscode/** linguist-vendored
-C/dSYM/** linguist-vendored
+C/** linguist-vendored
 
 
 
