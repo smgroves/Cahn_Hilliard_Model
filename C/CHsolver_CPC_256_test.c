@@ -124,8 +124,8 @@ from nrl –> nrh and ncl –> nch */
 void print_data(double **phi)
 { /* Prints the conserved scalar field phi as a space-delimited file */
     FILE *fphi;
-    fphi = fopen("phi_CPC_update.m", "a");
-    print_mat(fphi, phi, 1, nx, 1, ny);
+    fphi = fopen("phi_CPC_test256.txt", "a");
+    print_mat(fphi, phi, 0, nx + 1, 0, ny + 1);
     fclose(fphi); /* Appends to an existing file */
 }
 
@@ -178,7 +178,8 @@ void relax(double **c_new, double **mu_new, double **su, double **sw, int ilevel
 { /* Relaxation operator passing new phi, new mu, 𝝵 source term, ψ source term, [ilevel multigrid index appears to be
 passed for no reason] */
     int i, j, iter;
-    double ht2, x_fac, y_fac, a[4], f[2], det;
+    FILE *fphi_a, *fphi_f, *fphi_d2f, *fphi_cnew;
+    double ht2, x_fac, y_fac, a[4], f[2], det, d2f_val, cnew_val;
     ht2 = pow((xright - xleft) / (double)nxt, 2); /* Space step size squared [~THIS ASSUMES A SQUARE MESH GRID... NOTE THAT nyt IS NOT USED~] */
     for (iter = 1; iter <= c_relax; iter++)
     { /* For each relaxation cycle */
@@ -195,6 +196,8 @@ passed for no reason] */
             a[0] = 1.0 / dt;
             a[1] = (x_fac + y_fac) / ht2; /* First- and second-term coefficients of Equation 22 in Mathematics 8:97 (2020) */
             a[2] = -(x_fac + y_fac) * Cahn / ht2 - d2f(c_new[i][j]);
+            cnew_val = c_new[i][j];
+            d2f_val = -d2f(c_new[i][j]);
             a[3] = 1.0; /* First- and second-term coefficients of Equation 23 in Mathematics 8:97 (2020) */
             f[0] = su[i][j];
             f[1] = sw[i][j] + df(c_new[i][j]) - d2f(c_new[i][j]) * c_new[i][j]; /* Third term of Equation 22 and third and fourth terms
@@ -223,6 +226,31 @@ passed for no reason] */
             det = a[0] * a[3] - a[1] * a[2];                 /* Calculate determinant */
             c_new[i][j] = (a[3] * f[0] - a[1] * f[1]) / det; /* Solve for the next phi */
             mu_new[i][j] = (-a[2] * f[0] + a[0] * f[1]) / det;
+
+            // - d2f(c_new[i][j])
+            fphi_f = fopen("Test_256/f_full.csv", "a");
+            fprintf(fphi_f, "%16.15f %16.15f \n", f[0], f[1]); /* Outputs error */
+            fclose(fphi_f);
+
+            fphi_a = fopen("Test_256/a_full.csv", "a");
+            fprintf(fphi_a, "%16.15f %16.15f %16.15f %16.15f  \n", a[0], a[1], a[2], a[3]); /* Outputs error */
+            fclose(fphi_a);
+
+            // fphi_cnew = fopen("Test_256/cnew.csv", "a");
+            // fprintf(fphi_cnew, "%16.15f ", cnew_val); /* Outputs error */
+            // if (j == nxt)
+            // {
+            //     fprintf(fphi_cnew, "\n");
+            // }
+            // fclose(fphi_cnew);
+
+            // fphi_d2f = fopen("Test_256/d2f.csv", "a");
+            // fprintf(fphi_d2f, "%16.15f ", d2f_val); /* Outputs error */
+            // if (j == nxt)
+            // {
+            //     fprintf(fphi_d2f, "\n");
+            // }
+            // fclose(fphi_d2f);
         }
     } /* Solve for the next mu */
 }
@@ -295,14 +323,14 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
             int ilevel)
 {
     FILE *wf_new_1, *wf_new_2, *wf_new_3, *wf_new_4, *wf_new_5, *wf_new_6;
-    wf_new_1 = fopen("Test_256/wf_new_1.csv", "a");
-    print_mat(wf_new_1, wf_new, 1, nxf, 1, nyf);
-    fclose(wf_new_1);
-    /* FAS multigrid cycle */
+    // wf_new_1 = fopen("Test_256/wf_new_1.csv", "a");
+    // print_mat(wf_new_1, wf_new, 1, nxf, 1, nyf);
+    // fclose(wf_new_1);
+    // /* FAS multigrid cycle */
     relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf); /* Relax the input data */
-    wf_new_2 = fopen("Test_256/wf_new_2.csv", "a");
-    print_mat(wf_new_2, wf_new, 1, nxf, 1, nyf);
-    fclose(wf_new_2);
+    // wf_new_2 = fopen("Test_256/wf_new_2.csv", "a");
+    // print_mat(wf_new_2, wf_new, 1, nxf, 1, nyf);
+    // fclose(wf_new_2);
     if (ilevel < n_level)
     { /* If the number of multigrid levels has not been reached */
         int nxc, nyc;
@@ -319,9 +347,9 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         wc_def = dmatrix(1, nxc, 1, nyc);
         restrictCH(uf_new, uc_new, wf_new, wc_new, nxc, nyc); /* Restrict the defect upon initialization */
 
-        wf_new_3 = fopen("Test_256/wf_new_3.csv", "a");
-        print_mat(wf_new_3, wf_new, 1, nxf, 1, nyf);
-        fclose(wf_new_3);
+        // wf_new_3 = fopen("Test_256/wf_new_3.csv", "a");
+        // print_mat(wf_new_3, wf_new, 1, nxf, 1, nyf);
+        // fclose(wf_new_3);
 
         defect(duc, dwc, uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc); /* Compute the defect */
         mat_copy2(uc_def, uc_new, wc_def, wc_new, 1, nxc, 1, nyc);                    /* Copy uc_new to uc_def and wc_new to wc_def */
@@ -330,15 +358,15 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         prolong_ch(uc_def, uf_def, wc_def, wf_def, nxc, nyc);                         /* Expand grid twofold; Step 7 of Page 7 of Mathematics 8:97 (2020) */
         mat_add2(uf_new, uf_new, uf_def, wf_new, wf_new, wf_def, 1, nxf, 1, nyf);     /* uf_new = uf_new + uf_def and wf_new = wf_new + wf_def; Step 8 of Page 7 of Mathematics 8:97 (2020) */
 
-        wf_new_4 = fopen("Test_256/wf_new_4.csv", "a");
-        print_mat(wf_new_4, wf_new, 1, nxf, 1, nyf);
-        fclose(wf_new_4);
+        // wf_new_4 = fopen("Test_256/wf_new_4.csv", "a");
+        // print_mat(wf_new_4, wf_new, 1, nxf, 1, nyf);
+        // fclose(wf_new_4);
 
         relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf); /* Post-smoothing; Step 9 of Page 7 of Mathematics 8:97 (2020) */
 
-        wf_new_5 = fopen("Test_256/wf_new_5.csv", "a");
-        print_mat(wf_new_5, wf_new, 1, nxf, 1, nyf);
-        fclose(wf_new_5);
+        // wf_new_5 = fopen("Test_256/wf_new_5.csv", "a");
+        // print_mat(wf_new_5, wf_new, 1, nxf, 1, nyf);
+        // fclose(wf_new_5);
 
         free_dmatrix(duc, 1, nxc, 1, nyc);
         free_dmatrix(dwc, 1, nxc, 1, nyc); /* Free up pointers */
@@ -349,9 +377,9 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         free_dmatrix(uc_def, 1, nxc, 1, nyc);
         free_dmatrix(wc_def, 1, nxc, 1, nyc);
     }
-    wf_new_6 = fopen("Test_256/wf_new_6.csv", "a");
-    print_mat(wf_new_6, wf_new, 1, nxf, 1, nyf);
-    fclose(wf_new_6);
+    // wf_new_6 = fopen("Test_256/wf_new_6.csv", "a");
+    // print_mat(wf_new_6, wf_new, 1, nxf, 1, nyf);
+    // fclose(wf_new_6);
 }
 
 double error2(double **c_old, double **c_new, double **mu, int nxt, int nyt)
@@ -361,24 +389,24 @@ double error2(double **c_old, double **c_new, double **mu, int nxt, int nyt)
     FILE *fphi_rr, *fphi_rr2, *fphi_mu, *fphi_c_old;
     rr = dmatrix(1, nxt, 1, nyt);                  /* Initialize matrix */
     ijloopt { rr[i][j] = mu[i][j] - c_old[i][j]; } /* Calculate starting residual */
-    fphi_mu = fopen("Test_256/mu.csv", "a");
-    print_mat(fphi_mu, mu, 1, nxt, 1, nyt);
-    fclose(fphi_mu);
+    // fphi_mu = fopen("Test_256/mu.csv", "a");
+    // print_mat(fphi_mu, mu, 1, nxt, 1, nyt);
+    // fclose(fphi_mu);
 
-    fphi_c_old = fopen("Test_256/c_old.csv", "a");
-    print_mat(fphi_c_old, c_old, 1, nxt, 1, nyt);
-    fclose(fphi_c_old);
+    // fphi_c_old = fopen("Test_256/c_old.csv", "a");
+    // print_mat(fphi_c_old, c_old, 1, nxt, 1, nyt);
+    // fclose(fphi_c_old);
 
-    fphi_rr = fopen("Test_256/rr_1.csv", "a");
-    print_mat(fphi_rr, rr, 1, nxt, 1, nyt);
-    fclose(fphi_rr);
+    // fphi_rr = fopen("Test_256/rr_1.csv", "a");
+    // print_mat(fphi_rr, rr, 1, nxt, 1, nyt);
+    // fclose(fphi_rr);
 
     laplace(rr, sor, nx, ny);                                            /* Update with Laplace operator from rr applied to sor [~WHY IS SOR INITIALIZED OUTSIDE THIS
                                                   FUNCTION AS A GLOBAL VARIABLE INSTEAD OF LOCALLY LIKE rr? ~] */
     ijloopt { rr[i][j] = sor[i][j] - (c_new[i][j] - c_old[i][j]) / dt; } /* Update residual to reflect Laplacian step; Equation 27 of Mathematics 8:97 (2020) */
-    fphi_rr2 = fopen("Test_256/rr_2.csv", "a");
-    print_mat(fphi_rr2, rr, 1, nxt, 1, nyt);
-    fclose(fphi_rr2);
+    // fphi_rr2 = fopen("Test_256/rr_2.csv", "a");
+    // print_mat(fphi_rr2, rr, 1, nxt, 1, nyt);
+    // fclose(fphi_rr2);
     ijloopt { x = (rr[i][j]) * (rr[i][j]) + x; } /* Calculate sum of squares */
     res2 = sqrt(x / (nx * ny));                  /* Calculate Frobenius norm */
     free_dmatrix(rr, 1, nxt, 1, nyt);            /* Free up pointers */
@@ -424,7 +452,7 @@ void initialization(double **phi)
 void cahn(double **c_old, double **c_new)
 { /* Cahn-Hilliard solver */
     FILE *fphi2, *fphi_mu, *fphi_c_new;
-    int i, j, max_it_CH = 10, it_mg2 = 1;
+    int i, j, max_it_CH = 1, it_mg2 = 1;
     double tol = 1.0e-10, resid2 = 1.0;
     source(c_old, sc, smu); /* Initialize source terms for phi and mu from c_old */
     while (it_mg2 <= max_it_CH && resid2 > tol)
@@ -432,19 +460,19 @@ void cahn(double **c_old, double **c_new)
         it_mg2++;
         vcycle(c_new, mu, sc, smu, nx, ny, 1); /* Update counter and run vcycle */
 
-        fphi_mu = fopen("Test_256/mu_7.csv", "a");
-        print_mat(fphi_mu, mu, 1, nx, 1, ny);
-        fclose(fphi_mu);
+        // fphi_mu = fopen("Test_256/mu_7.csv", "a");
+        // print_mat(fphi_mu, mu, 1, nx, 1, ny);
+        // fclose(fphi_mu);
 
-        fphi_c_new = fopen("Test_256/c_new.csv", "a");
-        print_mat(fphi_c_new, c_new, 1, nx, 1, ny);
-        fclose(fphi_c_new);
+        // fphi_c_new = fopen("Test_256/c_new.csv", "a");
+        // print_mat(fphi_c_new, c_new, 1, nx, 1, ny);
+        // fclose(fphi_c_new);
 
         resid2 = error2(c_old, c_new, mu, nx, ny);          /* Calculate residual error */
         printf("error2 %16.15f %d \n", resid2, it_mg2 - 1); /* Outputs error */
-        fphi2 = fopen("Test_256/res2.csv", "a");
-        fprintf(fphi2, "%16.15f %d \n", resid2, it_mg2 - 1);
-        fclose(fphi2);
+        // fphi2 = fopen("Test_256/res2.csv", "a");
+        // fprintf(fphi2, "%16.15f %d \n", resid2, it_mg2 - 1);
+        // fclose(fphi2);
     } /* [~NOT CLEAR WHY THIS STEP IS IN THE WHILE LOOP~] */
 }
 
@@ -461,7 +489,7 @@ int main()
     xright = 1.0;
     yleft = 0.0;
     yright = 1.0;
-    max_it = 10;
+    max_it = 1;
     ns = 1; /* Set x-y dimenison, max iterations, and number of steps before printing results */
     h = xright / (double)nx;
     h2 = pow(h, 2);
@@ -484,7 +512,7 @@ int main()
     zero_matrix(mu, 1, nx, 1, ny);
     initialization(oc);
     mat_copy(nc, oc, 1, nx, 1, ny); /* Initialize oc and copy oc to nc */
-    fphi = fopen("phi_CPC_update.m", "w");
+    fphi = fopen("phi_CPC_test256.txt", "w");
     fclose(fphi);
     print_data(oc); /* Save initial conditions by opening a new writeable file and appending with print_data */
     for (it = 1; it <= max_it; it++)

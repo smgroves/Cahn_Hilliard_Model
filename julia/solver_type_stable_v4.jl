@@ -39,6 +39,7 @@ global version = "v4" #undef -> 0
 
 #dmatrix function: m = Array{Float64}(undef, 0, 0)
 
+# double d2f(double c) { return 3.0 * c * c; } 
 
 # laplacian function: laplacian(m, nx, ny, h2)
 # tested with same results as Python implementation
@@ -120,7 +121,11 @@ function relax(c_new, mu_new, su, sw, nxt, nyt; c_relax=c_relax, xright=xright, 
                 end
                 a[1] = 1 / dt
                 a[2] = (x_fac + y_fac) / ht2
+                #a[2] = -(x_fac + y_fac) * Cahn / ht2 - d2f(c_new[i][j]);
                 a[3] = -(x_fac + y_fac) * Cahn / ht2 - 3 * (c_new[i, j])^2
+                cnew_val = (c_new[i, j])
+                d2f = -3 * (c_new[i, j])^2
+
                 a[4] = 1.0
 
                 f[1] = su[i, j]
@@ -144,9 +149,54 @@ function relax(c_new, mu_new, su, sw, nxt, nyt; c_relax=c_relax, xright=xright, 
                 det = a[1] * a[4] - a[2] * a[3]
                 c_new[i, j] = (a[4] * f[1] - a[2] * f[2]) / det
                 mu_new[i, j] = (-a[3] * f[1] + a[1] * f[2]) / det
+                open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/a_v5_full.txt", "a", lock=false) do file
+                    for i in 1:4
+                        Printf.@printf(file, "%16.15f ", a[i])
+                    end
+                    println(file)
+                end
+                open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/f_v5_full.txt", "a", lock=false) do file
+                    for i in 1:2
+                        Printf.@printf(file, "%16.15f ", f[i])
+                    end
+                    println(file)
+                end
+
+                #         open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/cnew.txt", "a", lock=false) do file
+                #             Printf.@printf(file, "%16.15f ", cnew_val)
+                #         end
+
+                #         open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/d2f.txt", "a", lock=false) do file
+                #             Printf.@printf(file, "%16.15f ", d2f)
+                #         end
+
             end
+            #     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/d2f.txt", "a", lock=false) do file
+            #         println(file)
+            #     end
+
+            #     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/cnew.txt", "a", lock=false) do file
+            #         println(file)
+            #     end
         end
     end
+
+    # open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/a_v4.txt", "a", lock=false) do file
+    #     for i in 1:4
+    #         Printf.@printf(file, "%16.15f ", a[i])
+    #     end
+    #     println(file)
+    # end
+
+    # open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/f_v4.txt", "a", lock=false) do file
+    #     for i in 1:2
+    #         Printf.@printf(file, "%16.15f ", f[i])
+    #     end
+    #     println(file)
+    # end
+
+
+
     return c_new, mu_new
 end
 
@@ -210,7 +260,12 @@ end
 function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel)
     global n_level
     # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_1_$(version).csv", wf_new)
-
+    # open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/a_v4_full.txt", "a", lock=false) do file
+    #     Printf.@printf(file, "First relax %d %d \n", ilevel, nxf)
+    # end
+    # open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/f_v4_full.txt", "a", lock=false) do file
+    #     Printf.@printf(file, "First relax %d %d \n", ilevel, nxf)
+    # end
     uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax=c_relax, xright=xright,
         xleft=xleft, dt=dt, Cahn=Cahn)
     # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_2_$(version).csv", wf_new)
@@ -236,7 +291,12 @@ function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel)
         uf_new = uf_new + uf_def
         wf_new = wf_new + wf_def
         # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_4_$(version).csv", wf_new)
-
+        open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/a_v4_full.txt", "a", lock=false) do file
+            Printf.@printf(file, "Second relax %d %d \n", ilevel, nxf)
+        end
+        open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/f_v4_full.txt", "a", lock=false) do file
+            Printf.@printf(file, "Second relax %d %d \n", ilevel, nxf)
+        end
         uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax=c_relax, xright=xright,
             xleft=xleft, dt=dt, Cahn=Cahn)
         # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_5_$(version).csv", wf_new)
@@ -274,7 +334,7 @@ function error2(c_old, c_new, mu, nxt, nyt; dt=dt)
         end
     end
     res2 = sqrt(x / (nxt * nyt))
-    print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/res2_$(version).csv", res2)
+    # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/res2_$(version).csv", res2)
 
     return res2
 end
@@ -305,10 +365,12 @@ function cahn(c_old, c_new, mu; nx=nx, ny=ny, dt=dt, max_it_CH=10000, tol=1e-10)
     it_mg2 = 0
     resid2 = 1
     sc, smu = source(c_old, nx=nx, ny=ny, dt=dt)
+    print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/sc_$(version).csv", sc)
+
     while resid2 > tol && it_mg2 < max_it_CH
         c_new, mu = vcycle(c_new, mu, sc, smu, nx, ny, 1)
-        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/mu_7_$(version).csv", mu)
-        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/c_new_$(version).csv", c_new)
+        # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/mu_7_$(version).csv", mu)
+        # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/c_new_$(version).csv", c_new)
 
         resid2 = error2(c_old, c_new, mu, nx, ny, dt=dt)
         it_mg2 += 1
@@ -353,7 +415,7 @@ end
 
 
 
-@time main(10, 10) #ignore first one with compile time
+@time main(1, 1) #ignore first one with compile time
 
 function write(max_it, max_it_CH)
     time_passed = @elapsed main(max_it, max_it_CH)
