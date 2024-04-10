@@ -2,12 +2,13 @@
 
 % Space parameters
     Lx = 1; para.Lx=Lx; Ly=Lx; para.Ly=Ly;
-    Nx = 2^7; para.Nx=Nx; Ny=Nx; para.Ny=Nx;
+    Nx = 2^4; para.Nx=Nx; Ny=Nx; para.Ny=Nx;
     hx = Lx/Nx;
     hy = Ly/Ny;
     x  = hx*(0:Nx-1);           
     y  = hy*(0:Ny-1);
     [xx,yy] = meshgrid(x,y); 
+
 
     k_x = 1i*[0:Nx/2 -Nx/2+1:-1]*(2*pi/Lx);
 
@@ -55,11 +56,11 @@
     para.phi0=phi0;
 
 % Plot initial
-    % figure
-    % contourf(x,y,psi0); colorbar; axis square
+    figure
+    contourf(x,y,psi0); colorbar; axis square
     %     % contourf(x,y,phi0); colorbar; axis square
     %     % contour(x,y,psi0,[0.3,0.3],'k',LineWidth=1.5); axis square
-    % set(gca,'FontSize',16);title('t = 0'); xlabel('x'); ylabel('y');
+    set(gca,'FontSize',16);title('t = 0'); xlabel('x'); ylabel('y');
 
 % Interface and energy parameters
     epsilon=gam/2^0; para.epsilon=epsilon;

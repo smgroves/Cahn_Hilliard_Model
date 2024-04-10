@@ -5,20 +5,21 @@
 # uncomment the following line to install the DataFrames package
 # using Pkg
 # Pkg.add("DataFrames")
-# import Pkg
 # Pkg.add("BenchmarkTools")
 # Pkg.add("StaticArrays");
 # Pkg.add("ProfileView")
 
-using ProfileView
+# using ProfileView
 using DataFrames
 using DelimitedFiles
 using LinearAlgebra
 using BenchmarkTools
 using StaticArrays
+using Printf
 
-const nx = 16
-const ny = 16
+
+const nx = 256
+const ny = 256
 const n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
 const c_relax::Int = 2  # number of SMOOTH relaxation operations defined as a global variable
 const xleft = 0.0  # left x-coordinate defined as a global variable
@@ -71,6 +72,17 @@ function laplace(a, nxt, nyt)
         end
     end
     return lap_a
+end
+
+function print_mat(file, matrix)
+    open(file, "a", lock=false) do f
+        for i = axes(matrix, 1)
+            for j = axes(matrix, 2)
+                Printf.@printf(f, "%16.15f ", matrix[i, j])
+            end
+            println(f)
+        end
+    end
 end
 
 function source(c_old; nx=nx, ny=ny, dt=dt)
@@ -194,12 +206,18 @@ end
 
 function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel)
     global n_level
+    print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_1.csv", wf_new)
+
     uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax=c_relax, xright=xright,
         xleft=xleft, dt=dt, Cahn=Cahn)
+    print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_2.csv", wf_new)
+
     if ilevel < n_level
         nxc = trunc(Int64, nxf / 2)
         nyc = trunc(Int64, nyf / 2)
         uc_new, wc_new = restrict_ch(uf_new, wf_new, nxc, nyc)
+        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_3.csv", wf_new)
+
         duc, dwc = defect(uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc)
 
         uc_def = copy(uc_new)
@@ -214,10 +232,15 @@ function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel)
 
         uf_new = uf_new + uf_def
         wf_new = wf_new + wf_def
+        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_4.csv", wf_new)
 
         uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax=c_relax, xright=xright,
             xleft=xleft, dt=dt, Cahn=Cahn)
+        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_5.csv", wf_new)
+
     end
+    print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/wf_new_6.csv", wf_new)
+
     return uf_new, wf_new
 end
 
@@ -229,18 +252,27 @@ function error2(c_old, c_new, mu, nxt, nyt; dt=dt)
             rr[i, j] = mu[i, j] - c_old[i, j]
         end
     end
+    # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/mu.csv", mu)
+    # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/c_old.csv", c_old)
+    # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/rr_1.csv", rr)
+
     sor = laplace(rr, nxt, nyt)
     for i in 1:nxt
         for j in 1:nyt
             rr[i, j] = sor[i, j] - (c_new[i, j] - c_old[i, j]) / dt
         end
     end
+
+    # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/rr_2.csv", rr)
+
     for i in 1:nxt
         for j in 1:nyt
             x += rr[i, j]^2
         end
     end
     res2 = sqrt(x / (nxt * nyt))
+    print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/res2.csv", res2)
+
     return res2
 end
 
@@ -272,6 +304,9 @@ function cahn(c_old, c_new, mu; nx=nx, ny=ny, dt=dt, max_it_CH=10000, tol=1e-10)
     sc, smu = source(c_old, nx=nx, ny=ny, dt=dt)
     while resid2 > tol && it_mg2 < max_it_CH
         c_new, mu = vcycle(c_new, mu, sc, smu, nx, ny, 1)
+        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/mu_7.csv", mu)
+        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/test_256/c_new.csv", c_new)
+
         resid2 = error2(c_old, c_new, mu, nx, ny, dt=dt)
         it_mg2 += 1
     end
@@ -294,7 +329,7 @@ end
 #print_data function: writedlm(filename, m, " ")
 
 function main(max_it, max_it_CH)
-    # println("nx = $nx, ny = $ny, dt = $dt, Cahn = $Cahn, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
+    println("nx = $nx, ny = $ny, dt = $dt, Cahn = $Cahn, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
     mu = zeros(Float64, nx, ny)
     oc = initialization(nx, ny)
     nc = copy(oc)
@@ -315,29 +350,29 @@ end
 
 
 
-@time main(10, 10000) #ignore first one with compile time
+@time main(10, 10) #ignore first one with compile time
 
 function write(max_it, max_it_CH)
     time_passed = @elapsed main(max_it, max_it_CH)
-    open("/Users/smgroves/Documents/GitHub/pyCHSolver/Job_specs_all_py_c.csv", "a", lock=false) do f
+    open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Job_specs_all_py_c_julia.csv", "a", lock=false) do f
         writedlm(f, [c_relax Cahn "Julia" dt max_it max_it_CH n_level ns nx ny time_passed tol], ",")
     end
 end
 
-write(10, 1000)
-write(100, 1000)
-write(1000, 1000)
-write(10000, 1000)
+# write(10, 10000)
+# write(100, 1000)
+# write(1000, 1000)
+# write(10000, 1000)
 
-write(10, 10000)
-write(100, 10000)
-write(1000, 10000)
-write(10000, 10000)
+# write(10, 10000)
+# write(100, 10000)
+# write(1000, 10000)
+# write(10000, 10000)
 
-write(10, 100000)
-write(100, 100000)
-write(1000, 100000)
-write(10000, 100000)
+# write(10, 100000)
+# write(100, 100000)
+# write(1000, 100000)
+# write(10000, 100000)
 
 
 
