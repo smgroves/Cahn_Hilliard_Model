@@ -101,43 +101,99 @@ plt.close()
 # import matplotlib
 
 # print(matplotlib.__version__)
-arr_c = np.genfromtxt(f"{c_dir}/a_full.csv", delimiter= " ", max_rows = 131072)
-arr_j = np.genfromtxt(f"{julia_dir}/a_v5_full.txt",
+arr_c = np.genfromtxt(f"{c_dir}/f_full.csv", delimiter= " ", max_rows = 131072)
+arr_j = np.genfromtxt(f"{julia_dir}/f_v5_full.txt",
                       delimiter=" ",
                       max_rows=131072)
 
-arr_c3d = arr_c[:,3].reshape(2, 256, 256)
-arr_j3d = arr_j[:,3].reshape(2, 256, 256)
+arr_c3d = arr_c[:,1].reshape(2, 256, 256)
+arr_j3d = arr_j[:,1].reshape(2, 256, 256)
 fig = plt.figure(constrained_layout=True,dpi = 300, figsize = (18,12))
-fig.suptitle('a[3] in relax function', fontsize = 22,fontweight = 'bold')
+fig.suptitle('f[1] in relax function', fontsize = 22,fontweight = 'bold')
 # create 2x1 subfigs
 subfigs = fig.subfigures(nrows=2, ncols=1, hspace=0.08)
 for row, subfig in enumerate(subfigs):
     diff = arr_j3d[row, :, :] - arr_c3d[row, :, :]
 
-    subfig.suptitle(f'Relaxation cycle {row}', fontsize = 15, fontweight = 'bold')
+    subfig.suptitle(f'Relaxation cycle {row}', fontsize=15, fontweight='bold')
 
     # create 1x3 subplots per subfig
     axs = subfig.subplots(nrows=1, ncols=3)
     for col, ax in enumerate(axs):
         print(col)
         if col == 0:
-            sns.heatmap(arr_c3d[row, :, :].transpose(),
-                        ax=ax,
-                        xticklabels=16,
-                        yticklabels=16)
-            ax.set_title("$a[3]_{c}$")
+            sns.heatmap(
+                arr_c3d[row, :, :].transpose(),
+                ax=ax,
+                xticklabels=16,
+                yticklabels=16,
+                center=(None if np.max(arr_c3d[row, :, :]) == 0 else 0),
+                cmap='RdBu')
+            ax.set_title("$f[1]_{c}$")
         elif col == 1:
-            sns.heatmap(diff.transpose(),
-                        ax=ax,
-                        xticklabels=16,
-                        yticklabels=16)
-            ax.set_title("$a[3]_{julia} - a[3]_{c}$")
+            sns.heatmap(
+                diff.transpose(),
+                ax=ax,
+                xticklabels=16,
+                yticklabels=16,
+                center = (None if np.max(diff) == 0 else 0), #necessary to fix a bug where all 0 matrix is red not white
+                cmap='RdBu')
+            ax.set_title("$f[1]_{julia} - f[1]_{c}$")
         elif col == 2:
             ax.hist(diff)
 
             ax.set_title("Distribution of errors (Julia - C)")
-plt.savefig(f"./julia_c_256_error/relax/a[3]_v5.png")
+plt.savefig(f"./julia_c_256_error/relax/f[1]_v5.png")
+plt.show()
+
+plt.close()
+
+# %%
+name = "mu_new_after_update"
+arr_c = np.genfromtxt(f"{c_dir}/{name}.txt", delimiter= " ", max_rows = 512)
+
+arr_j = np.genfromtxt(f"{julia_dir}/{name}.txt",
+                      delimiter=" ",
+                      max_rows=512)
+
+arr_c3d = arr_c.reshape(2, 256, 256)
+arr_j3d = arr_j.reshape(2, 256, 256)
+fig = plt.figure(constrained_layout=True,dpi = 300, figsize = (18,12))
+fig.suptitle(f'{name}', fontsize = 22,fontweight = 'bold')
+# create 2x1 subfigs
+subfigs = fig.subfigures(nrows=2, ncols=1, hspace=0.08)
+for row, subfig in enumerate(subfigs):
+    diff = arr_j3d[row, :, :] - arr_c3d[row, :, :]
+
+    subfig.suptitle(f'Relaxation cycle {row}', fontsize=15, fontweight='bold')
+
+    # create 1x3 subplots per subfig
+    axs = subfig.subplots(nrows=1, ncols=3)
+    for col, ax in enumerate(axs):
+        print(col)
+        if col == 0:
+            sns.heatmap(
+                arr_c3d[row, :, :].transpose(),
+                ax=ax,
+                xticklabels=16,
+                yticklabels=16,
+                center=(None if np.max(arr_c3d[row, :, :]) == 0 else 0),
+                cmap='RdBu')
+            ax.set_title(f"{name} in C")
+        elif col == 1:
+            sns.heatmap(
+                diff.transpose(),
+                ax=ax,
+                xticklabels=16,
+                yticklabels=16,
+                center = (None if np.max(diff) == 0 else 0), #necessary to fix a bug where all 0 matrix is red not white
+                cmap='RdBu')
+            ax.set_title(f"{name} (julia) - {name} (c)")
+        elif col == 2:
+            ax.hist(diff)
+
+            ax.set_title("Distribution of errors (Julia - C)")
+plt.savefig(f"./julia_c_256_error/relax/{name}.png")
 plt.show()
 
 plt.close()

@@ -223,18 +223,33 @@ passed for no reason] */
                 f[0] += mu_new[i][j + 1] / ht2;
                 f[1] -= Cahn * c_new[i][j + 1] / ht2;
             }
+            fphi_cnew = fopen("Test_256/c_new_before_update.txt", "a");
+            fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_cnew, "\n");
+            }
+            fclose(fphi_cnew);
+
+            fphi_d2f = fopen("Test_256/mu_new_before_update.txt", "a");
+            fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]);
+            if (j == nxt)
+            {
+                fprintf(fphi_d2f, "\n");
+            }
+            fclose(fphi_d2f);
             det = a[0] * a[3] - a[1] * a[2];                 /* Calculate determinant */
             c_new[i][j] = (a[3] * f[0] - a[1] * f[1]) / det; /* Solve for the next phi */
             mu_new[i][j] = (-a[2] * f[0] + a[0] * f[1]) / det;
 
             // - d2f(c_new[i][j])
-            fphi_f = fopen("Test_256/f_full.csv", "a");
-            fprintf(fphi_f, "%16.15f %16.15f \n", f[0], f[1]); /* Outputs error */
-            fclose(fphi_f);
+            // fphi_f = fopen("Test_256/f_full.csv", "a");
+            // fprintf(fphi_f, "%16.15f %16.15f \n", f[0], f[1]); /* Outputs error */
+            // fclose(fphi_f);
 
-            fphi_a = fopen("Test_256/a_full.csv", "a");
-            fprintf(fphi_a, "%16.15f %16.15f %16.15f %16.15f  \n", a[0], a[1], a[2], a[3]); /* Outputs error */
-            fclose(fphi_a);
+            // fphi_a = fopen("Test_256/a_full.csv", "a");
+            // fprintf(fphi_a, "%16.15f %16.15f %16.15f %16.15f  \n", a[0], a[1], a[2], a[3]); /* Outputs error */
+            // fclose(fphi_a);
 
             // fphi_cnew = fopen("Test_256/cnew.csv", "a");
             // fprintf(fphi_cnew, "%16.15f ", cnew_val); /* Outputs error */
@@ -251,6 +266,21 @@ passed for no reason] */
             //     fprintf(fphi_d2f, "\n");
             // }
             // fclose(fphi_d2f);
+            fphi_cnew = fopen("Test_256/c_new_after_update.txt", "a");
+            fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_cnew, "\n");
+            }
+            fclose(fphi_cnew);
+
+            fphi_d2f = fopen("Test_256/mu_new_after_update.txt", "a");
+            fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_d2f, "\n");
+            }
+            fclose(fphi_d2f);
         }
     } /* Solve for the next mu */
 }
