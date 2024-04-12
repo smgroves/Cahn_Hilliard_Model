@@ -66,9 +66,11 @@ print(np.max(diff))
 print(np.min(diff))
 plt.suptitle(f"Relax cycle")
 
-sns.heatmap(arr_c.transpose(), ax = ax1, cmap = 'rainbow')
+sns.heatmap(arr_c.transpose(), ax = ax1, center=(None if np.max(arr_c) == 0 else 0),
+                cmap='RdBu')
 ax1.set_title("d2f in C")
-sns.heatmap(diff.transpose(), ax = ax2, cmap = 'rainbow')
+sns.heatmap(diff.transpose(), ax = ax2, center=(None if np.max(diff) == 0 else 0),
+                cmap='RdBu')
 ax2.set_title("d2f$_{julia}$ - d2f$_{c}$")
 ax3.hist(diff)
 plt.xticks(rotation=90)
@@ -96,13 +98,15 @@ for i in range(2):
 plt.savefig(f"./julia_c_256_error/{i}_f[1]_v5.png")
 plt.show()
 plt.close()
+
+
 # %%
 #better way to plot than code above
 # import matplotlib
 
 # print(matplotlib.__version__)
-arr_c = np.genfromtxt(f"{c_dir}/f_full.csv", delimiter= " ", max_rows = 131072)
-arr_j = np.genfromtxt(f"{julia_dir}/f_v5_full.txt",
+arr_c = np.genfromtxt(f"{c_dir}/f_full_initial.csv", delimiter= " ", max_rows = 131072)
+arr_j = np.genfromtxt(f"{julia_dir}/f_full_initial.txt",
                       delimiter=" ",
                       max_rows=131072)
 
@@ -143,13 +147,13 @@ for row, subfig in enumerate(subfigs):
             ax.hist(diff)
 
             ax.set_title("Distribution of errors (Julia - C)")
-plt.savefig(f"./julia_c_256_error/relax/f[1]_v5.png")
+plt.savefig(f"./julia_c_256_error/relax/f[1]_initial.png")
 plt.show()
 
 plt.close()
 
 # %%
-name = "mu_new_after_update"
+name = "c_new_before_update"
 arr_c = np.genfromtxt(f"{c_dir}/{name}.txt", delimiter= " ", max_rows = 512)
 
 arr_j = np.genfromtxt(f"{julia_dir}/{name}.txt",
@@ -158,6 +162,9 @@ arr_j = np.genfromtxt(f"{julia_dir}/{name}.txt",
 
 arr_c3d = arr_c.reshape(2, 256, 256)
 arr_j3d = arr_j.reshape(2, 256, 256)
+# print([f"{i:16.15f}" for i in arr_j3d[1, 125:130,0]])
+# print([f"{i:16.15f}" for i in arr_c3d[1, 125:130,0]])
+
 fig = plt.figure(constrained_layout=True,dpi = 300, figsize = (18,12))
 fig.suptitle(f'{name}', fontsize = 22,fontweight = 'bold')
 # create 2x1 subfigs
@@ -190,12 +197,37 @@ for row, subfig in enumerate(subfigs):
                 cmap='RdBu')
             ax.set_title(f"{name} (julia) - {name} (c)")
         elif col == 2:
-            ax.hist(diff)
+            sns.heatmap(
+                arr_j3d[row, :, :].transpose(),
+                ax=ax,
+                xticklabels=16,
+                yticklabels=16,
+                center=(None if np.max(arr_j3d[row, :, :]) == 0 else 0),
+                cmap='RdBu')
+            ax.set_title(f"{name} in Julia")
 
-            ax.set_title("Distribution of errors (Julia - C)")
-plt.savefig(f"./julia_c_256_error/relax/{name}.png")
+# plt.savefig(f"./julia_c_256_error/relax/{name}.png")
 plt.show()
 
 plt.close()
 
+# %%
+# troubleshooting d2f function
+
+
+def print_problem(name, c = 'txt'):
+    arr_c = np.genfromtxt(f"{c_dir}/{name}.{c}", delimiter=" ", max_rows=512)
+
+    arr_j = np.genfromtxt(f"{julia_dir}/{name}.txt",
+                          delimiter=" ",
+                          max_rows=512)
+
+    arr_c3d = arr_c.reshape(2, 256, 256)
+    arr_j3d = arr_j.reshape(2, 256, 256)
+    print([f"{i:19.18f}" for i in arr_j3d[1, 124:144, 2]])
+    print([f"{i:16.15f}" for i in arr_c3d[1, 124:144, 2]])
+
+
+print_problem("c_new_before_update")
+print_problem("d2f", c = 'csv')
 # %%

@@ -180,6 +180,7 @@ passed for no reason] */
     int i, j, iter;
     FILE *fphi_a, *fphi_f, *fphi_d2f, *fphi_cnew;
     double ht2, x_fac, y_fac, a[4], f[2], det, d2f_val, cnew_val;
+
     ht2 = pow((xright - xleft) / (double)nxt, 2); /* Space step size squared [~THIS ASSUMES A SQUARE MESH GRID... NOTE THAT nyt IS NOT USED~] */
     for (iter = 1; iter <= c_relax; iter++)
     { /* For each relaxation cycle */
@@ -203,6 +204,25 @@ passed for no reason] */
             f[1] = sw[i][j] + df(c_new[i][j]) - d2f(c_new[i][j]) * c_new[i][j]; /* Third term of Equation 22 and third and fourth terms
      of Equation 23 in Mathematics 8:97 (2020) [~NOT CLEAR WHY THE SECOND TERM OF f[1] IS SO CONVOLUTED JUST TO RETURN -2*c_new[i][j]^2 */
             /* Update mu and phi according to the last terms of Equations 22 and 23 in Mathematics 8:97 (2020) [except on the very edges] */
+            // fphi_f = fopen("Test_256/f_full_initial.csv", "a");
+            // fprintf(fphi_f, "%16.15f %16.15f \n", f[0], f[1]);
+            // fclose(fphi_f);
+
+            // fphi_cnew = fopen("Test_256/su.csv", "a");
+            // fprintf(fphi_cnew, "%16.15f ", su[i][j]);
+            // if (j == nxt)
+            // {
+            //     fprintf(fphi_cnew, "\n");
+            // }
+            // fclose(fphi_cnew);
+
+            // fphi_cnew = fopen("Test_256/sw.csv", "a");
+            // fprintf(fphi_cnew, "%16.15f ", sw[i][j]); /* Outputs error */
+            // if (j == nxt)
+            // {
+            //     fprintf(fphi_cnew, "\n");
+            // }
+            // fclose(fphi_cnew);
             if (i > 1)
             {
                 f[0] += mu_new[i - 1][j] / ht2;
@@ -223,21 +243,21 @@ passed for no reason] */
                 f[0] += mu_new[i][j + 1] / ht2;
                 f[1] -= Cahn * c_new[i][j + 1] / ht2;
             }
-            fphi_cnew = fopen("Test_256/c_new_before_update.txt", "a");
-            fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
-            if (j == nxt)
-            {
-                fprintf(fphi_cnew, "\n");
-            }
-            fclose(fphi_cnew);
+            // fphi_cnew = fopen("Test_256/c_new_before_update.txt", "a");
+            // fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
+            // if (j == nxt)
+            // {
+            //     fprintf(fphi_cnew, "\n");
+            // }
+            // fclose(fphi_cnew);
 
-            fphi_d2f = fopen("Test_256/mu_new_before_update.txt", "a");
-            fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]);
-            if (j == nxt)
-            {
-                fprintf(fphi_d2f, "\n");
-            }
-            fclose(fphi_d2f);
+            // fphi_d2f = fopen("Test_256/mu_new_before_update.txt", "a");
+            // fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]);
+            // if (j == nxt)
+            // {
+            //     fprintf(fphi_d2f, "\n");
+            // }
+            // fclose(fphi_d2f);
             det = a[0] * a[3] - a[1] * a[2];                 /* Calculate determinant */
             c_new[i][j] = (a[3] * f[0] - a[1] * f[1]) / det; /* Solve for the next phi */
             mu_new[i][j] = (-a[2] * f[0] + a[0] * f[1]) / det;
@@ -266,21 +286,21 @@ passed for no reason] */
             //     fprintf(fphi_d2f, "\n");
             // }
             // fclose(fphi_d2f);
-            fphi_cnew = fopen("Test_256/c_new_after_update.txt", "a");
-            fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
-            if (j == nxt)
-            {
-                fprintf(fphi_cnew, "\n");
-            }
-            fclose(fphi_cnew);
+            // fphi_cnew = fopen("Test_256/c_new_after_update.txt", "a");
+            // fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
+            // if (j == nxt)
+            // {
+            //     fprintf(fphi_cnew, "\n");
+            // }
+            // fclose(fphi_cnew);
 
-            fphi_d2f = fopen("Test_256/mu_new_after_update.txt", "a");
-            fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]); /* Outputs error */
-            if (j == nxt)
-            {
-                fprintf(fphi_d2f, "\n");
-            }
-            fclose(fphi_d2f);
+            // fphi_d2f = fopen("Test_256/mu_new_after_update.txt", "a");
+            // fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]); /* Outputs error */
+            // if (j == nxt)
+            // {
+            //     fprintf(fphi_d2f, "\n");
+            // }
+            // fclose(fphi_d2f);
         }
     } /* Solve for the next mu */
 }
@@ -525,6 +545,8 @@ int main()
     h2 = pow(h, 2);
     gam = 4 * h / (2 * sqrt(2) * atanh(0.9));
     Cahn = pow(gam, 2);
+    double c = 0.898430778152558;
+    printf("%16.15f ", d2f(c));
     dt = 0.1 * h2; /* gam is gradient interfacial energy; Page 1 of Mathematics 8:97 (2020) */
     printf("nx=%d,ny=%d\n", nx, ny);
     printf("dt=%f\n", dt); /* Output model parameters */
