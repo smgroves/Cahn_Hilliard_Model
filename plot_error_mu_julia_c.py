@@ -8,7 +8,7 @@ c_dir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/C/Test_256"
 julia_dir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/Test_256"
 
 # %%
-
+#c_new in cahn
 version = "v4"
 arr_j = np.genfromtxt(f"{julia_dir}/c_new_{version}.csv", delimiter= " ")
 arr_j3d = arr_j.reshape(-1,256,256)
@@ -21,9 +21,13 @@ for i in range(8):
     diff = arr_j3d[i,:,:] - arr_c3d[i,:,:]
     plt.suptitle(f"VCycle Run #{i+1}")
 
-    sns.heatmap(arr_c3d[i,:,:].transpose(), ax = ax1, xticklabels = 16, yticklabels = 16)
+    sns.heatmap(arr_c3d[i,:,:].transpose(), ax = ax1, xticklabels = 16, yticklabels = 16,
+                center=(None if np.max(diff) == 0 else 0),
+                cmap='RdBu')
     ax1.set_title("$c-new_{c}$")
-    sns.heatmap(diff.transpose(), ax = ax2,xticklabels = 16, yticklabels = 16)
+    sns.heatmap(diff.transpose(), ax = ax2,xticklabels = 16, yticklabels = 16,
+                center=(None if np.max(diff) == 0 else 0),
+                cmap='RdBu')
     ax2.set_title("$c-new_{julia} - c-new_{c}$")
     ax3.hist(diff)
     ax3.set_title("Distribution of errors (Julia - C)")
@@ -32,26 +36,68 @@ for i in range(8):
     plt.show()
     plt.close()
 
-
 # %%
-arr_j = np.genfromtxt(f"{julia_dir}/wf_new_3.csv", delimiter= " ", max_rows = 256)
+#mu in cahn
+version = "v4"
+arr_j = np.genfromtxt(f"{julia_dir}/mu_7_{version}.csv", delimiter= " ")
+arr_j3d = arr_j.reshape(-1,256,256)
+
+arr_c = np.genfromtxt(f"{c_dir}/mu_7.csv", delimiter= " ")
+arr_c3d = arr_c.reshape(-1,256,256)
+
+for i in range(8):
+    f, (ax1, ax2, ax3) = plt.subplots(1, 3,  dpi = 200, figsize = (18,5))
+    diff = arr_j3d[i,:,:] - arr_c3d[i,:,:]
+    plt.suptitle(f"VCycle Run #{i+1}")
+
+    sns.heatmap(arr_c3d[i,:,:].transpose(), ax = ax1, xticklabels = 16, yticklabels = 16,
+                center=(None if np.max(diff) == 0 else 0),
+                cmap='RdBu')
+    ax1.set_title("$mu_{c}$")
+    sns.heatmap(diff.transpose(), ax = ax2,xticklabels = 16, yticklabels = 16,
+                center=(None if np.max(diff) == 0 else 0),
+                cmap='RdBu')
+    ax2.set_title("$mu_{julia} - mu_{c}$")
+    ax3.hist(diff)
+    ax3.set_title("Distribution of errors (Julia - C)")
+    # plt.tight_layout()
+    plt.savefig(f"./julia_c_256_error/{i}_mu_{version}.png")
+    plt.show()
+    plt.close()
+# %%
+#mu and c_new in vcycle (uf new and wf new)
+version = 'v4'
+arr_j = np.genfromtxt(f"{julia_dir}/uf_new_5_{version}.csv",
+                      delimiter=" ",
+                      max_rows=256,
+                      skip_header=(4 + 8 + 16 + 32 + 64 + 128))
+# arr_j = np.genfromtxt(f"{julia_dir}/uf_new_6_{version}.csv", delimiter= " ", max_rows = 256, skip_header=(2+4+8+16+32+64+128))
+# arr_j = np.genfromtxt(f"{julia_dir}/uf_new_1_{version}.csv",delimiter=" ",max_rows=256) for 1 2 and 3
+# arr_j = np.genfromtxt(f"{julia_dir}/uf_new_4_{version}.csv", delimiter= " ", max_rows = 256, skip_header=(4+8+16+32+64+128)) for 4 and 5
+
 # arr_j3d = arr_j.reshape(-1,256,256)
 
-arr_c = np.genfromtxt(f"{c_dir}/wf_new_3.csv", delimiter= " ", max_rows = 256)
+arr_c = np.genfromtxt(f"{c_dir}/uf_new_5.csv",
+                      delimiter=" ",
+                      max_rows=256,
+                      skip_header=(4 + 8 + 16 + 32 + 64 + 128))
+
 # arr_c3d = arr_c.reshape(-1,256,256)
 # for i in range(8):
 f, (ax1, ax2, ax3) = plt.subplots(1, 3,  dpi = 200, figsize = (18,5))
 diff = arr_j[:,:] - arr_c[:,:]
-plt.suptitle(f"VCycle Run #1 in ilevel loop")
+plt.suptitle(f"VCycle Run #1 after ilevel loop")
 
-sns.heatmap(arr_c[:,:].transpose(), ax = ax1, xticklabels = 16, yticklabels = 16)
-ax1.set_title("wf_new_3 in C")
-sns.heatmap(diff.transpose(), ax = ax2,xticklabels = 16, yticklabels = 16)
-ax2.set_title("wf_new_3$_{julia}$ - wf_new_3$_{c}$")
+sns.heatmap(arr_c[:,:].transpose(), ax = ax1, xticklabels = 16, yticklabels = 16,center=(None if np.max(arr_c) == 0 else 0),
+                cmap='RdBu')
+ax1.set_title("uf_new_5 in C")
+sns.heatmap(diff.transpose(), ax = ax2,xticklabels = 16, yticklabels = 16,center=(None if np.max(diff) == 0 else 0),
+                cmap='RdBu')
+ax2.set_title("uf_new_5$_{julia}$ - uf_new_5$_{c}$")
 ax3.hist(diff)
 ax3.set_title("Distribution of errors (Julia - C)")
 # plt.tight_layout()
-plt.savefig(f"./julia_c_256_error/wf_new_3.png")
+plt.savefig(f"./julia_c_256_error/uf_new_5.png")
 plt.show()
 plt.close()
 
@@ -229,5 +275,26 @@ def print_problem(name, c = 'txt'):
 
 
 print_problem("c_new_before_update")
-print_problem("d2f", c = 'csv')
+print_problem("d2f", c='csv')
+# %%
+#plot residuals
+version = "v4"
+jul_err = pd.read_csv(f"{julia_dir}/error2/res2_{version}.csv", header = None)
+c_err = pd.read_csv(f"{c_dir}/res2.csv", header = None, sep = ' ')
+errors = jul_err.iloc[0:8]
+errors.columns = ['err']
+errors['Code'] = "Julia"
+c_err = c_err.iloc[0:8].drop([1,2], axis = 1)
+print(c_err)
+c_err.columns = ['err']
+c_err['Code'] = "C"
+errors = pd.concat([errors, c_err])
+print(errors)
+sns.lineplot(x=errors.index, y=errors['err'], hue = errors['Code'])
+plt.yscale('log')
+plt.title("Residual for each vcycle iteration (C vs Julia)")
+plt.axhline(y=1e-6, linestyle = '--', c='lightgray')
+plt.xlabel("VCycle Iteration")
+plt.ylabel("Residual")
+plt.savefig("./julia_c_256_error/residual_plot.png")
 # %%

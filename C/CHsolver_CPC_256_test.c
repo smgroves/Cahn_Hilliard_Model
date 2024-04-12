@@ -373,14 +373,14 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
             int ilevel)
 {
     FILE *wf_new_1, *wf_new_2, *wf_new_3, *wf_new_4, *wf_new_5, *wf_new_6;
-    // wf_new_1 = fopen("Test_256/wf_new_1.csv", "a");
-    // print_mat(wf_new_1, wf_new, 1, nxf, 1, nyf);
-    // fclose(wf_new_1);
+    wf_new_1 = fopen("Test_256/uf_new_1.csv", "a");
+    print_mat(wf_new_1, uf_new, 1, nxf, 1, nyf);
+    fclose(wf_new_1);
     // /* FAS multigrid cycle */
     relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf); /* Relax the input data */
-    // wf_new_2 = fopen("Test_256/wf_new_2.csv", "a");
-    // print_mat(wf_new_2, wf_new, 1, nxf, 1, nyf);
-    // fclose(wf_new_2);
+    wf_new_2 = fopen("Test_256/uf_new_2.csv", "a");
+    print_mat(wf_new_2, uf_new, 1, nxf, 1, nyf);
+    fclose(wf_new_2);
     if (ilevel < n_level)
     { /* If the number of multigrid levels has not been reached */
         int nxc, nyc;
@@ -397,9 +397,9 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         wc_def = dmatrix(1, nxc, 1, nyc);
         restrictCH(uf_new, uc_new, wf_new, wc_new, nxc, nyc); /* Restrict the defect upon initialization */
 
-        // wf_new_3 = fopen("Test_256/wf_new_3.csv", "a");
-        // print_mat(wf_new_3, wf_new, 1, nxf, 1, nyf);
-        // fclose(wf_new_3);
+        wf_new_3 = fopen("Test_256/uf_new_3.csv", "a");
+        print_mat(wf_new_3, uf_new, 1, nxf, 1, nyf);
+        fclose(wf_new_3);
 
         defect(duc, dwc, uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc); /* Compute the defect */
         mat_copy2(uc_def, uc_new, wc_def, wc_new, 1, nxc, 1, nyc);                    /* Copy uc_new to uc_def and wc_new to wc_def */
@@ -408,15 +408,15 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         prolong_ch(uc_def, uf_def, wc_def, wf_def, nxc, nyc);                         /* Expand grid twofold; Step 7 of Page 7 of Mathematics 8:97 (2020) */
         mat_add2(uf_new, uf_new, uf_def, wf_new, wf_new, wf_def, 1, nxf, 1, nyf);     /* uf_new = uf_new + uf_def and wf_new = wf_new + wf_def; Step 8 of Page 7 of Mathematics 8:97 (2020) */
 
-        // wf_new_4 = fopen("Test_256/wf_new_4.csv", "a");
-        // print_mat(wf_new_4, wf_new, 1, nxf, 1, nyf);
-        // fclose(wf_new_4);
+        wf_new_4 = fopen("Test_256/uf_new_4.csv", "a");
+        print_mat(wf_new_4, uf_new, 1, nxf, 1, nyf);
+        fclose(wf_new_4);
 
         relax(uf_new, wf_new, su, sw, ilevel, nxf, nyf); /* Post-smoothing; Step 9 of Page 7 of Mathematics 8:97 (2020) */
 
-        // wf_new_5 = fopen("Test_256/wf_new_5.csv", "a");
-        // print_mat(wf_new_5, wf_new, 1, nxf, 1, nyf);
-        // fclose(wf_new_5);
+        wf_new_5 = fopen("Test_256/uf_new_5.csv", "a");
+        print_mat(wf_new_5, uf_new, 1, nxf, 1, nyf);
+        fclose(wf_new_5);
 
         free_dmatrix(duc, 1, nxc, 1, nyc);
         free_dmatrix(dwc, 1, nxc, 1, nyc); /* Free up pointers */
@@ -427,9 +427,9 @@ void vcycle(double **uf_new, double **wf_new, double **su, double **sw, int nxf,
         free_dmatrix(uc_def, 1, nxc, 1, nyc);
         free_dmatrix(wc_def, 1, nxc, 1, nyc);
     }
-    // wf_new_6 = fopen("Test_256/wf_new_6.csv", "a");
-    // print_mat(wf_new_6, wf_new, 1, nxf, 1, nyf);
-    // fclose(wf_new_6);
+    wf_new_6 = fopen("Test_256/uf_new_6.csv", "a");
+    print_mat(wf_new_6, uf_new, 1, nxf, 1, nyf);
+    fclose(wf_new_6);
 }
 
 double error2(double **c_old, double **c_new, double **mu, int nxt, int nyt)
