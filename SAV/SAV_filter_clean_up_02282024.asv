@@ -56,13 +56,13 @@
     para.phi0=phi0;
 
 % Plot initial
-    fig_init = figure;
-    contourf(x,y,psi0); colorbar; axis square
+    fig_initi = figure;
+    contourf(x,y,psi0); colorbar; axis square;
     %     % contourf(x,y,phi0); colorbar; axis square
     %     % contour(x,y,psi0,[0.3,0.3],'k',LineWidth=1.5); axis square
     set(gca,'FontSize',16);title('t = 0'); xlabel('x'); ylabel('y');
-    filename = sprintf('./MATLAB/Initial_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',R0,Nx,epsilon,para.T,dt);
-    saveas(fig_init, filename);
+    filename = sprintf('Initial_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',R0,Nx,epsilon,para.T,dt);
+    saveas(fig_E, filename);
 
 % Interface and energy parameters
     epsilon=gam/2^0; para.epsilon=epsilon;
@@ -72,7 +72,6 @@
 
 % Relaxation and Stabilization
     para.Beta=0; para.gamma0=0;
-
 
 % Time parameters
     para.dt=1e-1*h2; dt=para.dt;
@@ -88,11 +87,7 @@
 %% CN Solver (Phi collected every dtout results)
     tic;[phi,r,E,D,Phi,O]=CH2d_SAV_CN(para);toc;
     psi=(phi+1)/2; Psi=(Phi+1)/2;
-
-    fig_final = figure;
     figure; contourf(x,y,psi); colorbar; axis square
-    filename = sprintf('./MATLAB/Final_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',R0,Nx,epsilon,para.T,dt);
-    saveas(fig_final, filename);
 
 %% Post-processing
 % plotting for critical rqdius

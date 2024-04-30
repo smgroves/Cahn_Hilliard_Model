@@ -3,6 +3,12 @@ import Pkg
 using FFTW
 using Plots
 using LinearAlgebra
+# using Printf
+# using Pkg; Pkg.add("CSV")
+using CSV
+using Pkg;
+Pkg.add("Tables");
+using Tables
 # Pkg.add("PythonPlot")
 # using PythonPlot
 # pythonplot()
@@ -86,6 +92,17 @@ function meshgrid(x, y)
     Y = [j for i in 1:length(x), j in y]
     return X, Y
 end
+
+function print_mat(file, matrix)
+    open(file, "a", lock=false) do f
+        for i = axes(matrix, 1)
+            for j = axes(matrix, 2)
+                Printf.@printf(f, "%16.15f ", matrix[i, j])
+            end
+            println(f)
+        end
+    end
+end
 ##############################
 ######## Parameters ##########
 ##############################
@@ -93,7 +110,7 @@ end
 ## Space parameters
 global Lx = 1
 global Ly = Lx
-Nx = 2^4
+Nx = 2^7
 Ny = Nx
 global hx = Lx / Nx
 global hy = Ly / Ny
@@ -167,7 +184,7 @@ p = Plots.contour(x, y, real.(psi0),
     ylabel="Y",
     title="Initial Conditions",
     size=(600, 550),
-    palette=:viridis)
+    c=:viridis)
 
 Plots.display(p)
 
@@ -243,8 +260,8 @@ function CH2d_SAV_CN(para)
         bphi = bphi[1, 1] * hx * hy / (1 + dt / 4 * gamma)
 
         # Step 3
-        phi = dt / 4 * bphi .* AiLb + Aig
-        r = r_fun(phi, phi0, r0, b)
+        global phi = dt / 4 * bphi .* AiLb + Aig
+        global r = r_fun(phi, phi0, r0, b)
 
         # Update phi0, phi1, r1
         phi0 = phi
@@ -254,6 +271,7 @@ function CH2d_SAV_CN(para)
         if mod(nt, dtout) == 0
             ll = Int.(nt / dtout)
             tt = Nx*ll+1:Nx*(ll+1)
+            println(tt)
             Phi = cat(Phi, phi, dims=1)
         end
 
@@ -277,6 +295,9 @@ end
 # CN Solver (Phi collected every dtout results)
 # [phi, ~, E, ~, Phi, O] = 
 phi, r, E, D, Phi, O = CH2d_SAV_CN(para)
+
+
+
 psi = (phi .+ 1) ./ 2
 Psi = (Phi .+ 1) ./ 2
 
@@ -286,4 +307,11 @@ Plots.contour(x, y, real.(psi),
     ylabel="Y",
     title="Psi at time $T",
     size=(600, 550),
-    palette=:viridis)
+    c=:viridis)
+
+
+CSV.write("./SAV/Julia/Phi_julia.csv", Tables.table(Phi), writeheader=false)
+
+CSV.write("./SAV/Julia/D.csv", Tables.table(D), writeheader=false)
+
+CSV.write("./SAV/Julia/E.csv", Tables.table(epsilon .* E), writeheader=false)
