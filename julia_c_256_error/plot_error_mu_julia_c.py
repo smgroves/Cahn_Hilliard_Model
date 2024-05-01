@@ -9,11 +9,12 @@ julia_dir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/Test_256
 
 # %%
 #c_new in cahn
+suffix = "tan_IC"
 version = "v4"
-arr_j = np.genfromtxt(f"{julia_dir}/c_new_{version}.csv", delimiter= " ")
+arr_j = np.genfromtxt(f"{julia_dir}/c_new_{version}_{suffix}.csv", delimiter= " ")
 arr_j3d = arr_j.reshape(-1,256,256)
 
-arr_c = np.genfromtxt(f"{c_dir}/c_new.csv", delimiter= " ")
+arr_c = np.genfromtxt(f"{c_dir}/c_new_{suffix}.csv", delimiter= " ")
 arr_c3d = arr_c.reshape(-1,256,256)
 
 for i in range(8):
@@ -32,7 +33,7 @@ for i in range(8):
     ax3.hist(diff)
     ax3.set_title("Distribution of errors (Julia - C)")
     # plt.tight_layout()
-    plt.savefig(f"./julia_c_256_error/{i}_c_new_{version}.png")
+    plt.savefig(f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/tan_IC/{i}_c_new_{version}_{suffix}.png")
     plt.show()
     plt.close()
 
@@ -64,6 +65,7 @@ for i in range(8):
     plt.savefig(f"./julia_c_256_error/{i}_mu_{version}.png")
     plt.show()
     plt.close()
+    break
 # %%
 #mu and c_new in vcycle (uf new and wf new)
 version = 'v4'

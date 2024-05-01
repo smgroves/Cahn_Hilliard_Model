@@ -2,7 +2,7 @@
 
 % Space parameters
     Lx = 1; para.Lx=Lx; Ly=Lx; para.Ly=Ly;
-    Nx = 2^8; para.Nx=Nx; Ny=Nx; para.Ny=Nx;
+    Nx = 2^3; para.Nx=Nx; Ny=Nx; para.Ny=Nx;
     hx = Lx/Nx;
     hy = Ly/Ny;
     x  = hx*(0:Nx-1);           

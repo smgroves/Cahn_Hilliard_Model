@@ -1,5 +1,4 @@
 # Julia implementation of a Multigrid solver for the Cahn-Hilliard equation
-# use this version for printing out variables from relax and vcycle functions for troubleshooting Julia error
 # Author: Sarah Groves
 # December 17, 2023
 
