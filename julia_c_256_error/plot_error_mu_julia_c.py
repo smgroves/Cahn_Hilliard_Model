@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
 
 c_dir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/C/Test_256"
 julia_dir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/Test_256"
@@ -11,39 +12,49 @@ julia_dir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/Test_256
 #c_new in cahn
 suffix = "tan_IC"
 version = "v4"
-arr_j = np.genfromtxt(f"{julia_dir}/c_new_{version}_{suffix}.csv", delimiter= " ")
-arr_j3d = arr_j.reshape(-1,256,256)
 
-arr_c = np.genfromtxt(f"{c_dir}/c_new_{suffix}.csv", delimiter= " ")
-arr_c3d = arr_c.reshape(-1,256,256)
+def plot_c_new(julia_dir, c_dir, version, suffix, out_folder):
+    arr_j = np.genfromtxt(f"{julia_dir}/c_new_{version}__{suffix}.csv", delimiter= " ")
+    arr_j3d = arr_j.reshape(-1,256,256)
 
-for i in range(8):
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3,  dpi = 200, figsize = (18,5))
-    diff = arr_j3d[i,:,:] - arr_c3d[i,:,:]
-    plt.suptitle(f"VCycle Run #{i+1}")
+    arr_c = np.genfromtxt(f"{c_dir}/c_new_{suffix}.csv", delimiter= " ")
+    arr_c3d = arr_c.reshape(-1,256,256)
 
-    sns.heatmap(arr_c3d[i,:,:].transpose(), ax = ax1, xticklabels = 16, yticklabels = 16,
-                center=(None if np.max(diff) == 0 else 0),
-                cmap='RdBu')
-    ax1.set_title("$c-new_{c}$")
-    sns.heatmap(diff.transpose(), ax = ax2,xticklabels = 16, yticklabels = 16,
-                center=(None if np.max(diff) == 0 else 0),
-                cmap='RdBu')
-    ax2.set_title("$c-new_{julia} - c-new_{c}$")
-    ax3.hist(diff)
-    ax3.set_title("Distribution of errors (Julia - C)")
-    # plt.tight_layout()
-    plt.savefig(f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/tan_IC/{i}_c_new_{version}_{suffix}.png")
-    plt.show()
-    plt.close()
+    for i in range(8):
+        f, (ax1, ax2, ax3) = plt.subplots(1, 3,  dpi = 200, figsize = (18,5))
+        diff = arr_j3d[i,:,:] - arr_c3d[i,:,:]
+        plt.suptitle(f"VCycle Run #{i+1}")
+
+        sns.heatmap(arr_c3d[i,:,:].transpose(), ax = ax1, xticklabels = 16, yticklabels = 16,
+                    center=(None if np.max(diff) == 0 else 0),
+                    cmap='RdBu')
+        ax1.set_title("$c-new_{c}$")
+        sns.heatmap(diff.transpose(), ax = ax2,xticklabels = 16, yticklabels = 16,
+                    center=(None if np.max(diff) == 0 else 0),
+                    cmap='RdBu')
+        ax2.set_title("$c-new_{julia} - c-new_{c}$")
+        ax3.hist(diff)
+        ax3.set_title("Distribution of errors (Julia - C)")
+        # plt.tight_layout()
+        outdir = f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/{out_folder}"
+        if os.path.exists(outdir):
+            pass
+        else: os.mkdir(outdir)
+        plt.savefig(f"{outdir}/{i}_c_new_{version}_{suffix}.png")
+        plt.show()
+        plt.close()
+
+j = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/output_Julia_on_mac_MinJhe"
+c = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/output_C_on_mac_MinJhe"
+plot_c_new(j, c, version, suffix, out_folder = "MinJhe_Mac")
 
 # %%
 #mu in cahn
 version = "v4"
-arr_j = np.genfromtxt(f"{julia_dir}/mu_7_{version}.csv", delimiter= " ")
+arr_j = np.genfromtxt(f"{julia_dir}/mu_{version}_{suffix}.csv", delimiter= " ")
 arr_j3d = arr_j.reshape(-1,256,256)
 
-arr_c = np.genfromtxt(f"{c_dir}/mu_7.csv", delimiter= " ")
+arr_c = np.genfromtxt(f"{c_dir}/mu_{suffix}.csv", delimiter= " ")
 arr_c3d = arr_c.reshape(-1,256,256)
 
 for i in range(8):
@@ -62,10 +73,10 @@ for i in range(8):
     ax3.hist(diff)
     ax3.set_title("Distribution of errors (Julia - C)")
     # plt.tight_layout()
-    plt.savefig(f"./julia_c_256_error/{i}_mu_{version}.png")
+    plt.savefig(f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/tan_IC/{i}_mu_{version}_{suffix}.png")
     plt.show()
     plt.close()
-    break
+    
 # %%
 #mu and c_new in vcycle (uf new and wf new)
 version = 'v4'
@@ -281,8 +292,8 @@ print_problem("d2f", c='csv')
 # %%
 #plot residuals
 version = "v4"
-jul_err = pd.read_csv(f"{julia_dir}/error2/res2_{version}.csv", header = None)
-c_err = pd.read_csv(f"{c_dir}/res2.csv", header = None, sep = ' ')
+jul_err = pd.read_csv(f"{julia_dir}/error2/res2_{version}_{suffix}.csv", header = None)
+c_err = pd.read_csv(f"{c_dir}/res2_{suffix}.csv", header = None, sep = ' ')
 errors = jul_err.iloc[0:8]
 errors.columns = ['err']
 errors['Code'] = "Julia"
@@ -298,5 +309,5 @@ plt.title("Residual for each vcycle iteration (C vs Julia)")
 plt.axhline(y=1e-6, linestyle = '--', c='lightgray')
 plt.xlabel("VCycle Iteration")
 plt.ylabel("Residual")
-plt.savefig("./julia_c_256_error/residual_plot.png")
+plt.savefig(f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/tan_IC/residual_plot_{suffix}.png")
 # %%

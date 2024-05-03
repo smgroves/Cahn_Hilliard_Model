@@ -20,8 +20,8 @@ using Printf
 
 suffix = "_tan_IC"
 
-const nx = 8
-const ny = 8
+const nx = 256
+const ny = 256
 const n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
 const c_relax::Int = 2  # number of SMOOTH relaxation operations defined as a global variable
 const xleft = 0.0  # left x-coordinate defined as a global variable

@@ -125,7 +125,7 @@ from nrl –> nrh and ncl –> nch */
 void print_data(double **phi)
 { /* Prints the conserved scalar field phi as a space-delimited file */
     FILE *fphi;
-    fphi = fopen("out/phi_CPC_test256_tan_IC.txt", "a");
+    fphi = fopen("phi_CPC_test256_tan_IC.txt", "a");
     print_mat(fphi, phi, 0, nx + 1, 0, ny + 1);
     fclose(fphi); /* Appends to an existing file */
 }
@@ -205,25 +205,25 @@ passed for no reason] */
             f[1] = sw[i][j] + df(c_new[i][j]) - d2f(c_new[i][j]) * c_new[i][j]; /* Third term of Equation 22 and third and fourth terms
      of Equation 23 in Mathematics 8:97 (2020) [~NOT CLEAR WHY THE SECOND TERM OF f[1] IS SO CONVOLUTED JUST TO RETURN -2*c_new[i][j]^2 */
             /* Update mu and phi according to the last terms of Equations 22 and 23 in Mathematics 8:97 (2020) [except on the very edges] */
-            // fphi_f = fopen("Test_256/f_full_initial.csv", "a");
-            // fprintf(fphi_f, "%16.15f %16.15f \n", f[0], f[1]);
-            // fclose(fphi_f);
+            fphi_f = fopen("f_full_initial.csv", "a");
+            fprintf(fphi_f, "%16.15f %16.15f \n", f[0], f[1]);
+            fclose(fphi_f);
 
-            // fphi_cnew = fopen("Test_256/su.csv", "a");
-            // fprintf(fphi_cnew, "%16.15f ", su[i][j]);
-            // if (j == nxt)
-            // {
-            //     fprintf(fphi_cnew, "\n");
-            // }
-            // fclose(fphi_cnew);
+            fphi_cnew = fopen("su.csv", "a");
+            fprintf(fphi_cnew, "%16.15f ", su[i][j]);
+            if (j == nxt)
+            {
+                fprintf(fphi_cnew, "\n");
+            }
+            fclose(fphi_cnew);
 
-            // fphi_cnew = fopen("Test_256/sw.csv", "a");
-            // fprintf(fphi_cnew, "%16.15f ", sw[i][j]); /* Outputs error */
-            // if (j == nxt)
-            // {
-            //     fprintf(fphi_cnew, "\n");
-            // }
-            // fclose(fphi_cnew);
+            fphi_cnew = fopen("sw.csv", "a");
+            fprintf(fphi_cnew, "%16.15f ", sw[i][j]); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_cnew, "\n");
+            }
+            fclose(fphi_cnew);
             if (i > 1)
             {
                 f[0] += mu_new[i - 1][j] / ht2;
@@ -244,64 +244,64 @@ passed for no reason] */
                 f[0] += mu_new[i][j + 1] / ht2;
                 f[1] -= Cahn * c_new[i][j + 1] / ht2;
             }
-            // fphi_cnew = fopen("Test_256/c_new_before_update.txt", "a");
-            // fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
-            // if (j == nxt)
-            // {
-            //     fprintf(fphi_cnew, "\n");
-            // }
-            // fclose(fphi_cnew);
+            fphi_cnew = fopen("c_new_before_update.txt", "a");
+            fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_cnew, "\n");
+            }
+            fclose(fphi_cnew);
 
-            // fphi_d2f = fopen("Test_256/mu_new_before_update.txt", "a");
-            // fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]);
-            // if (j == nxt)
-            // {
-            //     fprintf(fphi_d2f, "\n");
-            // }
-            // fclose(fphi_d2f);
+            fphi_d2f = fopen("mu_new_before_update.txt", "a");
+            fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]);
+            if (j == nxt)
+            {
+                fprintf(fphi_d2f, "\n");
+            }
+            fclose(fphi_d2f);
             det = a[0] * a[3] - a[1] * a[2];                 /* Calculate determinant */
             c_new[i][j] = (a[3] * f[0] - a[1] * f[1]) / det; /* Solve for the next phi */
             mu_new[i][j] = (-a[2] * f[0] + a[0] * f[1]) / det;
 
-            // - d2f(c_new[i][j])
-            // fphi_f = fopen("Test_256/f_full.csv", "a");
-            // fprintf(fphi_f, "%16.15f %16.15f \n", f[0], f[1]); /* Outputs error */
-            // fclose(fphi_f);
+            -d2f(c_new[i][j]);
+            fphi_f = fopen("f_full.csv", "a");
+            fprintf(fphi_f, "%16.15f %16.15f \n", f[0], f[1]); /* Outputs error */
+            fclose(fphi_f);
 
-            // fphi_a = fopen("Test_256/a_full.csv", "a");
-            // fprintf(fphi_a, "%16.15f %16.15f %16.15f %16.15f  \n", a[0], a[1], a[2], a[3]); /* Outputs error */
-            // fclose(fphi_a);
+            fphi_a = fopen("a_full.csv", "a");
+            fprintf(fphi_a, "%16.15f %16.15f %16.15f %16.15f  \n", a[0], a[1], a[2], a[3]); /* Outputs error */
+            fclose(fphi_a);
 
-            // fphi_cnew = fopen("Test_256/cnew.csv", "a");
-            // fprintf(fphi_cnew, "%16.15f ", cnew_val); /* Outputs error */
-            // if (j == nxt)
-            // {
-            //     fprintf(fphi_cnew, "\n");
-            // }
-            // fclose(fphi_cnew);
+            fphi_cnew = fopen("cnew.csv", "a");
+            fprintf(fphi_cnew, "%16.15f ", cnew_val); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_cnew, "\n");
+            }
+            fclose(fphi_cnew);
 
-            // fphi_d2f = fopen("Test_256/d2f.csv", "a");
-            // fprintf(fphi_d2f, "%16.15f ", d2f_val); /* Outputs error */
-            // if (j == nxt)
-            // {
-            //     fprintf(fphi_d2f, "\n");
-            // }
-            // fclose(fphi_d2f);
-            // fphi_cnew = fopen("Test_256/c_new_after_update.txt", "a");
-            // fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
-            // if (j == nxt)
-            // {
-            //     fprintf(fphi_cnew, "\n");
-            // }
-            // fclose(fphi_cnew);
+            fphi_d2f = fopen("d2f.csv", "a");
+            fprintf(fphi_d2f, "%16.15f ", d2f_val); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_d2f, "\n");
+            }
+            fclose(fphi_d2f);
+            fphi_cnew = fopen("c_new_after_update.txt", "a");
+            fprintf(fphi_cnew, "%16.15f ", c_new[i][j]); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_cnew, "\n");
+            }
+            fclose(fphi_cnew);
 
-            // fphi_d2f = fopen("Test_256/mu_new_after_update.txt", "a");
-            // fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]); /* Outputs error */
-            // if (j == nxt)
-            // {
-            //     fprintf(fphi_d2f, "\n");
-            // }
-            // fclose(fphi_d2f);
+            fphi_d2f = fopen("mu_new_after_update.txt", "a");
+            fprintf(fphi_d2f, "%16.15f ", mu_new[i][j]); /* Outputs error */
+            if (j == nxt)
+            {
+                fprintf(fphi_d2f, "\n");
+            }
+            fclose(fphi_d2f);
         }
     } /* Solve for the next mu */
 }
@@ -597,17 +597,17 @@ void cahn(double **c_old, double **c_new)
         it_mg2++;
         vcycle(c_new, mu, sc, smu, nx, ny, 1); /* Update counter and run vcycle */
 
-        fphi_mu = fopen("Test_256/mu_tan_IC.csv", "a");
+        fphi_mu = fopen("mu_tan_IC.csv", "a");
         print_mat(fphi_mu, mu, 1, nx, 1, ny);
         fclose(fphi_mu);
 
-        fphi_c_new = fopen("Test_256/c_new_tan_IC.csv", "a");
+        fphi_c_new = fopen("c_new_tan_IC.csv", "a");
         print_mat(fphi_c_new, c_new, 1, nx, 1, ny);
         fclose(fphi_c_new);
 
         resid2 = error2(c_old, c_new, mu, nx, ny);          /* Calculate residual error */
         printf("error2 %16.15f %d \n", resid2, it_mg2 - 1); /* Outputs error */
-        fphi2 = fopen("Test_256/res2_tan_IC.csv", "a");
+        fphi2 = fopen("res2_tan_IC.csv", "a");
         fprintf(fphi2, "%16.15f %d \n", resid2, it_mg2 - 1);
         fclose(fphi2);
     } /* [~NOT CLEAR WHY THIS STEP IS IN THE WHILE LOOP~] */
@@ -652,7 +652,7 @@ int main()
     // initialization(oc);
     initialize_from_function(oc);
     mat_copy(nc, oc, 1, nx, 1, ny); /* Initialize oc and copy oc to nc */
-    fphi = fopen("out/phi_CPC_test256_tan_IC.txt", "w");
+    fphi = fopen("phi_CPC_test256_tan_IC.txt", "w");
     print_data(oc); /* Save initial conditions by opening a new writeable file and appending with print_data */
     fclose(fphi);
 

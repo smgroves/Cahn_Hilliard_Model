@@ -1,3 +1,5 @@
+*.gz
+*.zip
 *.m
 *.csv
 Code from Kevin/phi_CPC_big.m
@@ -24,3 +26,7 @@ outputs/phi_CPC_from_file_128x128_500s_5max.m
 outputs/phi_CPC_update.m
 C/phi_CPC_time.m
 outputs/julia/output_128_10000.txt
+julia_c_256_error/output_Julia_on_mac_MinJhe/a_v4__tan_IC.txt
+julia_c_256_error/output_Julia_on_mac_MinJhe/a_v5_full__tan_IC.txt
+julia_c_256_error/output_Julia_on_mac_MinJhe/f_full_initial__tan_IC.txt
+julia_c_256_error/output_Julia_on_mac_MinJhe/f_v5_full__tan_IC.txt
