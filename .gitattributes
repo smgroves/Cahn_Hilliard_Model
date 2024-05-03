@@ -3,6 +3,7 @@
 *.f linguist-detectable=false
 .vscode/** linguist-vendored
 C/dSYM/** linguist-vendored
+.ipynb linguist-documentation
 
 
 
