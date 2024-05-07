@@ -44,7 +44,7 @@ def plot_c_new(julia_dir, c_dir, version, suffix, out_folder):
         plt.show()
         plt.close()
 
-j = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/output_Julia_on_mac_MinJhe"
+j = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/output_Julia_on_mac_new_MinJhe"
 c = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia_c_256_error/output_C_on_mac_MinJhe"
 plot_c_new(j, c, version, suffix, out_folder = "MinJhe_Mac")
 
