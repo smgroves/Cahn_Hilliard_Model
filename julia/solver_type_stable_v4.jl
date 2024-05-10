@@ -23,8 +23,8 @@ using StaticArrays
 using Printf
 
 
-const nx = 64
-const ny = 64
+const nx = 128
+const ny = 128
 const n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
 const c_relax::Int = 2  # number of SMOOTH relaxation operations defined as a global variable
 const xleft = 0.0  # left x-coordinate defined as a global variable
@@ -393,7 +393,7 @@ function error2(c_old, c_new, mu, nxt, nyt; dt=dt)
     return res2
 end
 
-function initialization(nx, ny)
+function initialize_geometric_CPC(nx, ny)
     phi = zeros(Float64, nx, ny)
     CPC_width = 5
     cohesin_width = 1
@@ -508,7 +508,7 @@ function calculate_discrete_norm_energy(phi, phi0)
     return E / E0
 end
 
-function main(max_it, max_it_CH, tol, outdir, suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true)
+function main(max_it, max_it_CH, tol, outdir, ; suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true, initialize="function")
     if isdir(outdir)
         if !isempty(outdir)
             if overwrite == false
@@ -525,7 +525,15 @@ function main(max_it, max_it_CH, tol, outdir, suffix="", overwrite=true, print_p
     println("nx = $nx, ny = $ny, dt = $dt, Cahn = $Cahn, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
     mu = zeros(Float64, nx, ny)
     # oc = initialization(nx, ny)
-    oc = initialization_random(nx, ny)
+    if initialize == "random"
+        oc = initialization_random(nx, ny)
+    elseif initialize == "function"
+        oc = initialization_from_function(nx, ny)
+    elseif initialize == "geometric"
+        oc = initialize_geometric_CPC(nx, ny)
+    else
+        println("Warning: initialize must be one of [random, function, geometric].")
+    end
     nc = copy(oc)
     oc0 = copy(oc)
     if print_phi
@@ -557,8 +565,10 @@ function main(max_it, max_it_CH, tol, outdir, suffix="", overwrite=true, print_p
 end
 
 
-function write(max_it, max_it_CH, tol, outdir, suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true)
-    time_passed = @elapsed main(max_it, max_it_CH, tol, outdir, suffix, overwrite, print_phi, print_mass, print_e)
+function write(max_it, max_it_CH, tol, outdir; suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true,
+    initialize="function")
+    time_passed = @elapsed main(max_it, max_it_CH, tol, outdir, suffix, overwrite, print_phi, print_mass, print_e, initialize)
+    ny = nx
     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Job_specs_all_py_c_julia.csv", "a", lock=false) do f
         writedlm(f, [c_relax Cahn "Julia" dt max_it max_it_CH n_level ns nx ny time_passed tol], ",")
     end
