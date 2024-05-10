@@ -358,9 +358,9 @@ void readCSVIntoMatrix(double **phi, const char *filename)
     int rows = 128; // Number of rows in the matrix
     int cols = 128; // Number of columns in the matrix
 
-    for (int i = 0; i < rows; i++)
+    for (int i = 1; i < rows + 1; i++)
     {
-        for (int j = 0; j < cols; j++)
+        for (int j = 1; j < cols + 1; j++)
         {
             if (fscanf(file, "%lf,", &phi[i][j]) != 1)
             {

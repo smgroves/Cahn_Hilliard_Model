@@ -22,10 +22,9 @@ using BenchmarkTools
 using StaticArrays
 using Printf
 
-suffix = "tol_test"
 
-const nx = 128
-const ny = 128
+const nx = 64
+const ny = 64
 const n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
 const c_relax::Int = 2  # number of SMOOTH relaxation operations defined as a global variable
 const xleft = 0.0  # left x-coordinate defined as a global variable
@@ -41,7 +40,7 @@ const gam = 4 * h / (2 * sqrt(2) * atanh(0.9))
 const Cahn = gam^2  # ϵ^2 defined as a global variable
 const ns = 10
 global version = "v4" #undef -> 0
-global outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/julia/mass_cons/"
+const epsilon = gam / 2^0
 
 #dmatrix function: m = Array{Float64}(undef, 0, 0)
 
@@ -435,6 +434,9 @@ function initialization_from_function(nx, ny)
     return phi
 end
 
+function initialization_random(nx, ny)
+    return 0.1 .* (1 .- 2 .* rand(nx, ny))
+end
 
 function cahn(c_old, c_new, mu; nx=nx, ny=ny, dt=dt, max_it_CH=10000, tol=1e-10)
     it_mg2 = 0
@@ -474,50 +476,90 @@ function calculate_mass(phi)
     return ave_mass
 end
 
-function main(max_it, max_it_CH, tol)
+function f(phi)
+    fphi = (1 / 4) .* ((phi .^ 2) .- 1) .^ 2
+    return fphi
+end
+
+function calculate_discrete_energy(phi)
+    a = h2 * sum(f(phi))
+    sum_i = 0.0
+    for i in 1:(nx-1)
+        for j in 1:ny
+            sum_i += (phi[i+1, j] - phi[i, j])^2
+
+        end
+    end
+    b = (Cahn / 2) * sum_i
+    sum_j = 0.0
+    for i in 1:nx
+        for j in 1:(ny-1)
+            sum_j += (phi[i, j+1] - phi[i, j])^2
+        end
+    end
+    c = (Cahn / 2) * sum_j
+    E = a + b + c
+    return E
+end
+
+function calculate_discrete_norm_energy(phi, phi0)
+    E0 = calculate_discrete_energy(phi0)
+    E = calculate_discrete_energy(phi)
+    return E / E0
+end
+
+function main(max_it, max_it_CH, tol, outdir, suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true)
+    if isdir(outdir)
+        if !isempty(outdir)
+            if overwrite == false
+                println("Warning: Directory is not empty. Results may be appended to existing files.")
+            else
+                println("Warning: overwriting directory with new files")
+                rm(outdir, recursive=true)
+                mkdir(outdir)
+            end
+        end
+    else
+        mkdir(outdir)
+    end
     println("nx = $nx, ny = $ny, dt = $dt, Cahn = $Cahn, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
     mu = zeros(Float64, nx, ny)
     # oc = initialization(nx, ny)
-    oc = initialization_from_function(nx, ny)
+    oc = initialization_random(nx, ny)
     nc = copy(oc)
-    open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/phi_$(nx)_$(max_it)_$(tol).txt", "w", lock=false) do f
-        writedlm(f, oc, " ")
+    oc0 = copy(oc)
+    if print_phi
+        open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "w", lock=false) do f
+            writedlm(f, oc, " ")
+        end
     end
     for it in 1:max_it
         nc = cahn(oc, nc, mu, nx=nx, ny=ny, dt=dt, max_it_CH=max_it_CH, tol=tol)
 
-        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/ave_mass/ave_mass_$(nx)_$(max_it)_$(tol).txt", calculate_mass(oc))
-        oc_psi = (oc .+ 1) ./ 2
-        print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/ave_mass/ave_mass_psi_$(nx)_$(max_it)_$(tol).txt", calculate_mass(oc_psi))
+        if print_mass
+            print_mat("$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc))
+        end
+        # oc_psi = (oc .+ 1) ./ 2
+        # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/ave_mass/ave_mass_psi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc_psi))
+        if print_e
+            print_mat("$(outdir)/discrete_norm_e_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_discrete_norm_energy(oc, oc0))
+        end
         oc = copy(nc)
         if it % ns == 0
-            open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/ave_mass/phi_$(nx)_$(max_it)_$(tol).txt", "a", lock=false) do f
-                writedlm(f, oc, " ")
+            if print_phi
+                open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "a", lock=false) do f
+                    writedlm(f, oc, " ")
+                end
             end
-            # println(it)
+            println(it)
         end
     end
 end
 
 
-
-@time main(15000, 1000, 1e-5) #ignore first one with compile time
-@time main(15000, 1000, 1e-4) #ignore first one with compile time
-@time main(15000, 1000, 1e-3) #ignore first one with compile time
-@time main(15000, 1000, 1e-2) #ignore first one with compile time
-@time main(15000, 1000, 1e-1) #ignore first one with compile time
-@time main(15000, 1000, 1e-6) #ignore first one with compile time
-
-
-# @time main(1000, 10000)
-
-
-function write(max_it, max_it_CH)
-    time_passed = @elapsed main(max_it, max_it_CH, 1e-6)
+function write(max_it, max_it_CH, tol, outdir, suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true)
+    time_passed = @elapsed main(max_it, max_it_CH, tol, outdir, suffix, overwrite, print_phi, print_mass, print_e)
     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Job_specs_all_py_c_julia.csv", "a", lock=false) do f
         writedlm(f, [c_relax Cahn "Julia" dt max_it max_it_CH n_level ns nx ny time_passed tol], ",")
     end
 end
-
-# write(10, 10000)
-
