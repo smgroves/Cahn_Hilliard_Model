@@ -96,7 +96,7 @@ savefig(p, "$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).pdf")
 display(p)
 
 #%%
-# Plotting ave mass and energy for 15000 time steps of tangent IC, grid sizes 128 or 256
+# Plotting ave mass and energy for 15000 time steps of tangent IC, grid sizes 128 <<<<<
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/tan_IC_ave_mass_128"
 suffix = "tan_IC"
 nx = 128
@@ -108,7 +108,21 @@ max_it_CH = 10000
 @time main_v5(nx, max_it, max_it_CH, 0.00001, outdir, suffix=suffix, initialize="function", overwrite=false)
 @time main_v5(nx, max_it, max_it_CH, 0.000001, outdir, suffix=suffix, initialize="function", overwrite=false)
 
+
 #%%
+# Plotting ave mass and energy for 15000 time steps of tangent IC, grid sizes 256 <<<<<<
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/tan_IC_ave_mass_256"
+suffix = "tan_IC"
+nx = 256
+max_it = 15000
+max_it_CH = 10000
+@time main_v5(nx, max_it, max_it_CH, 0.01, outdir, suffix=suffix, initialize="function", overwrite=true)
+@time main_v5(nx, max_it, max_it_CH, 0.001, outdir, suffix=suffix, initialize="function", overwrite=false)
+@time main_v5(nx, max_it, max_it_CH, 0.0001, outdir, suffix=suffix, initialize="function", overwrite=false)
+@time main_v5(nx, max_it, max_it_CH, 0.00001, outdir, suffix=suffix, initialize="function", overwrite=false)
+
+#%%
+# Plotting ave mass and energy for 15000 time steps of geometric CPC, grid sizes 256 <<<<<<
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/CPC_256"
 suffix = "CPC-geometric"
 nx = 256
@@ -134,13 +148,27 @@ savefig(p, "$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).pdf")
 display(p)
 
 #%%
-# Plotting ave mass and energy for 15000 time steps of tangent IC, grid sizes 256
-outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/tan_IC_ave_mass_256"
-suffix = "tan_IC"
+# Plotting ave mass and energy for 15000 time steps of geometric CPC, grid sizes 256, M = 8 (to match C) <<<<<<
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/CPC_256_M=8"
+suffix = "CPC-geometric_M=8"
 nx = 256
 max_it = 15000
 max_it_CH = 10000
-@time main_v5(nx, max_it, max_it_CH, 0.01, outdir, suffix=suffix, initialize="function", overwrite=true)
-@time main_v5(nx, max_it, max_it_CH, 0.001, outdir, suffix=suffix, initialize="function", overwrite=false)
-@time main_v5(nx, max_it, max_it_CH, 0.0001, outdir, suffix=suffix, initialize="function", overwrite=false)
-@time main_v5(nx, max_it, max_it_CH, 0.00001, outdir, suffix=suffix, initialize="function", overwrite=false)
+@time main_v5(nx, max_it, max_it_CH, 0.00001, outdir, suffix=suffix, initialize="geometric", overwrite=true, M=8, ns=50)
+#%%
+tol = 0.00001
+v = readdlm("$(outdir)/discrete_norm_e_$(nx)_$(max_it)_$(tol)_$(suffix).txt")
+p = plot(1:max_it, v, title="Discrete normalized energy \n $(suffix)", linewidth=3)
+xlabel!("Time step")
+ylabel!("Discrete Energy")
+ylims!(0, maximum(v))
+savefig(p, "$(outdir)/discrete_norm_e_$(nx)_$(max_it)_$(tol)_$(suffix).pdf")
+display(p)
+
+v = readdlm("$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).txt")
+p = plot(1:max_it, v .- v[1], title="Average Mass \n $(suffix)", linewidth=3)
+xlabel!("Time step")
+ylabel!("Average Mass - Initial")
+# ylims!(v[1] - 0.000001, v[1] + 0.000001)
+savefig(p, "$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).pdf")
+display(p)

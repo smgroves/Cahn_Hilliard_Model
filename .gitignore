@@ -83,3 +83,4 @@ outputs/julia/phi_256_300_0.001.txt
 outputs/julia/phi_256_300_0.01.txt
 outputs/julia/phi_256_300_0.1.txt
 outputs/julia/phi_256_300_1.0e-5.txt
+outputs/julia/julia_vs_c_tests/output_128_10000.txt

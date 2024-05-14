@@ -493,16 +493,19 @@ function calculate_discrete_norm_energy(phi, phi0, h2, nx, ny, Cahn)
     return E / E0
 end
 
-function main_v5(nx, max_it, max_it_CH, tol, outdir, ; suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true, initialize="function")
+function main_v5(nx, max_it, max_it_CH, tol, outdir, ; suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true, initialize="function",
+    dt=0, M=4, ns=10)
     ny = nx
     n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
     # todo: check if these are needed; it appears that only ht2 (temp h^2) is used in the code
     h = xright / nx  # space step size defined as a global variable
     h2 = h^2 #space step size squared defined as a global variable
-    dt = 0.1 * h2  # ∆t defined as a global variable
-    gam = 4 * h / (2 * sqrt(2) * atanh(0.9))
+    if dt == 0
+        dt = 0.1 * h2  # ∆t defined as a global variable
+    end
+
+    gam = M * h / (2 * sqrt(2) * atanh(0.9))
     Cahn = gam^2  # ϵ^2 defined as a global variable
-    ns = 10
     version = "v4" #undef -> 0
     epsilon = gam / 2^0
     if isdir(outdir)
