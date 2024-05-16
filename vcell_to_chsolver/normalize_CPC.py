@@ -67,6 +67,8 @@ def rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = "",
     for file in os.listdir(os.path.join(in_dir,folder_name)):
         if "CPC" in file:
             if timeslice_id in file:
+                print(file)
+
                 name = file.split("0_")[-1].split(f"_{timeslice_id}.")[0]
                 data[name] = pd.read_csv(os.path.join(in_dir,folder_name,file), sep=",",
                                          skiprows = 10, header = None)
@@ -97,5 +99,16 @@ def rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = "",
     # arr_4fold = prolong(arr_2fold, arr_2fold.shape[0], arr_2fold.shape[1])
     # np.savetxt(os.path.join(outdir,folder_name,f"{model_name}_{simulation_name}_{timepoint}_{arr_4fold.shape[0]}x{arr_4fold.shape[1]}{suffix}.csv"), arr_4fold, delimiter=",")
 
-rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 100,
-                         timestep = 10, rescaling_factor = 10, suffix = "100s_10max_")
+# rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 100,
+                        #  timestep = 10, rescaling_factor = 10, suffix = "100s_10max_")
+
+folder_name ="SimID_270418727_0__exported"
+model_name = "03_25_24_CPC_relaxed_RefModel_128x64"
+simulation_name = "03_25_24_relaxed_RefModel"
+outdir = '/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/'
+rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 200,
+                         timestep = 10, rescaling_factor = 3, suffix = "200s_3max")
+# rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 200,
+#                          timestep = 10, rescaling_factor = 10, suffix = "200s_10max")
+# rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 200,
+#                          timestep = 10, rescaling_factor = 5, suffix = "200s_5max")

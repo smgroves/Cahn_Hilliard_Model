@@ -423,6 +423,17 @@ function initialization_random(nx, ny)
     return 0.1 .* (1 .- 2 .* rand(nx, ny))
 end
 
+function initialization_from_file(file, nx, ny, delim=',', transpose_matrix=true)
+    phi = readdlm(file, delim, Float64)
+    if size(phi) != (nx, ny)
+        print("Warning: phi from file is wrong size: $(size(phi)) Expected: $(nx), $(ny)")
+    end
+    if transpose_matrix
+        phi = transpose(phi)
+    end
+    return phi
+end
+
 function cahn(c_old, c_new, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level)
     it_mg2 = 0
     resid2 = 1
@@ -494,7 +505,7 @@ function calculate_discrete_norm_energy(phi, phi0, h2, nx, ny, Cahn)
 end
 
 function main_v5(nx, max_it, max_it_CH, tol, outdir, ; suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true, initialize="function",
-    dt=0, M=4, ns=10)
+    dt=0, M=4, ns=50, gam=0, initial_file="", delim=',')
     ny = nx
     n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
     # todo: check if these are needed; it appears that only ht2 (temp h^2) is used in the code
@@ -504,9 +515,11 @@ function main_v5(nx, max_it, max_it_CH, tol, outdir, ; suffix="", overwrite=true
         dt = 0.1 * h2  # ∆t defined as a global variable
     end
 
-    gam = M * h / (2 * sqrt(2) * atanh(0.9))
+    if gam == 0
+        gam = M * h / (2 * sqrt(2) * atanh(0.9))
+    end
     Cahn = gam^2  # ϵ^2 defined as a global variable
-    version = "v4" #undef -> 0
+    version = "v5" #undef -> 0
     epsilon = gam / 2^0
     if isdir(outdir)
         if !isempty(outdir)
@@ -521,7 +534,7 @@ function main_v5(nx, max_it, max_it_CH, tol, outdir, ; suffix="", overwrite=true
     else
         mkdir(outdir)
     end
-    println("nx = $nx, ny = $ny, dt = $dt, Cahn = $Cahn, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
+    println("nx = $nx, ny = $ny, dt = $dt, epsilon = $gam, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
     mu = zeros(Float64, nx, ny)
     # oc = initialization(nx, ny)
     if initialize == "random"
@@ -530,8 +543,10 @@ function main_v5(nx, max_it, max_it_CH, tol, outdir, ; suffix="", overwrite=true
         oc = initialization_from_function(nx, ny, h)
     elseif initialize == "geometric"
         oc = initialize_geometric_CPC(nx, ny)
+    elseif initialize == "file"
+        oc = initialization_from_file(initial_file, nx, ny, delim)
     else
-        println("Warning: initialize must be one of [random, function, geometric].")
+        println("Warning: initialize must be one of [random, function, geometric, file].")
     end
     nc = copy(oc)
     oc0 = copy(oc)

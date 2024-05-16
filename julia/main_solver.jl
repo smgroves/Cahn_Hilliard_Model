@@ -172,3 +172,104 @@ ylabel!("Average Mass - Initial")
 # ylims!(v[1] - 0.000001, v[1] + 0.000001)
 savefig(p, "$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).pdf")
 display(p)
+
+#%%
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/VCell_100s_10max_gam0.008"
+initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_100_128x128100s_10max.csv"
+suffix = "100s_10max_gam0.008"
+nx = 128
+max_it = 10000
+max_it_CH = 10000
+tol = 1.0e-5
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="file", initial_file=initial_file)
+
+#%%
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/VCell_100s_10max_gam0.015"
+initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_100_128x128100s_10max.csv"
+suffix = "100s_10max_gam0.015"
+nx = 128
+max_it = 10000
+max_it_CH = 10000
+tol = 1.0e-5
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="file", initial_file=initial_file, M=8)
+
+#%%
+# Scanning condensate concentration cmax from VCell (cmax --> 1 in phi)
+secs = "100"
+maxes = ["3" "5" "7" "8"]
+for max in maxes
+    gam_ = 0.015
+    suffix = "$(secs)s_$(max)max_gam$(gam_)"
+    outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/VCell_$(suffix)"
+    initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_100_128x128$(secs)s_$(max)max.csv"
+    nx = 128
+    max_it = 10000
+    max_it_CH = 10000
+    tol = 1.0e-5
+    @time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="file", initial_file=initial_file, M=8)
+end
+#%%
+secs = "100"
+max = "5"
+gam_ = 0.015
+suffix = "$(secs)s_$(max)max_gam$(gam_)_4000dt"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/VCell_$(suffix)"
+initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_100_128x128$(secs)s_$(max)max.csv"
+nx = 128
+max_it = 40000
+max_it_CH = 10000
+tol = 1.0e-5
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="file", initial_file=initial_file, M=8, ns=100)
+#%%
+secs = "100"
+maxes = ["3" "5" "7"]
+for max in maxes
+    gam_ = 0.008
+    suffix = "$(secs)s_$(max)max_gam$(gam_)"
+    outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/VCell_$(suffix)"
+    initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_100_128x128$(secs)s_$(max)max.csv"
+    nx = 128
+    max_it = 15000
+    max_it_CH = 10000
+    tol = 1.0e-5
+    @time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="file", initial_file=initial_file, M=4)
+end
+#%%
+#Compare to Min-Jhe's outputs: epsilon scan
+suffix = "tan_IC_gam_0.008"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/$(suffix)"
+nx = 128
+max_it = 15000
+max_it_CH = 10000
+tol = 1.0e-5
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="function", overwrite=false, M=4)
+
+suffix = "tan_IC_gam_0.015"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/$(suffix)"
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="function", overwrite=false, M=8)
+
+suffix = "tan_IC_gam_0.03"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/$(suffix)"
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="function", overwrite=false, M=16)
+
+#%%
+# Updated CPC VCell simulations
+secs = ["100" "200"]
+maxes = ["5" "7" "10"]
+for max in maxes
+    for sec in secs
+        gam_ = 0.015
+        suffix = "$(sec)s_$(max)max_gam$(gam_)"
+        outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/03_25_24_VCell_$(suffix)"
+        initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/03_25_24_CPC_relaxed_RefModel_128x64_03_25_24_relaxed_RefModel_100_128x128$(sec)s_$(max)max.csv"
+        nx = 128
+        max_it = 15000
+        max_it_CH = 10000
+        tol = 1.0e-5
+        @time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="file", initial_file=initial_file, M=8)
+    end
+end
