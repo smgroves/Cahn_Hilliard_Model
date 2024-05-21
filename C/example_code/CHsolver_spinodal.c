@@ -3,8 +3,8 @@
 #include <stdlib.h>
 /* #include <malloc.h> <malloc.h> is apparently in <stdlib.h> and is Linux specific */
 #include <time.h>
-#define gnx 256                           /* Number of grid points in x- direction defined as a global variable */
-#define gny 256                           /* Number of grid points in y- direction defined as a global variable */
+#define gnx 32                            /* Number of grid points in x- direction defined as a global variable */
+#define gny 32                            /* Number of grid points in y- direction defined as a global variable */
 #define PI 4.0 * atan(1.0)                /* Defines π as a global variable */
 #define iloop for (i = 1; i <= gnx; i++)  /* Increments i from 1 to gnx */
 #define jloop for (j = 1; j <= gny; j++)  /* Increments j from 1 to gny */
@@ -124,7 +124,7 @@ from nrl –> nrh and ncl –> nch */
 void print_data(double **phi)
 { /* Prints the conserved scalar field phi as a space-delimited file */
     FILE *fphi;
-    fphi = fopen("phi_spinodal.m", "a");
+    fphi = fopen("phi_spinodal_small.txt", "a");
     print_mat(fphi, phi, 1, nx, 1, ny);
     fclose(fphi); /* Appends to an existing file */
 }
@@ -376,9 +376,9 @@ void cahn(double **c_old, double **c_new)
         vcycle(c_new, mu, sc, smu, nx, ny, 1);              /* Update counter and run vcycle */
         resid2 = error2(c_old, c_new, mu, nx, ny);          /* Calculate residual error */
         printf("error2 %16.15f %d \n", resid2, it_mg2 - 1); /* Outputs error */
-        fphi2 = fopen("phi2.m", "a");
-        fprintf(fphi2, "%16.15f %d \n", resid2, it_mg2 - 1);
-        fclose(fphi2);
+        // fphi2 = fopen("phi2.m", "a");
+        // fprintf(fphi2, "%16.15f %d \n", resid2, it_mg2 - 1);
+        // fclose(fphi2);
     } /* [~NOT CLEAR WHY THIS STEP IS IN THE WHILE LOOP~] */
 }
 
@@ -395,7 +395,7 @@ int main()
     xright = 1.0;
     yleft = 0.0;
     yright = 1.0;
-    max_it = 500;
+    max_it = 1000;
     ns = 10; /* Set x-y dimenison, max iterations, and number of steps before printing results */
     h = xright / (double)nx;
     h2 = pow(h, 2);
@@ -418,7 +418,7 @@ int main()
     zero_matrix(mu, 1, nx, 1, ny);
     initialization(oc);
     mat_copy(nc, oc, 1, nx, 1, ny); /* Initialize oc and copy oc to nc */
-    fphi = fopen("phi_spinodal.m", "w");
+    fphi = fopen("phi_spinodal_small.txt", "w");
     fclose(fphi);
     print_data(oc); /* Save initial conditions by opening a new writeable file and appending with print_data */
     for (it = 1; it <= max_it; it++)

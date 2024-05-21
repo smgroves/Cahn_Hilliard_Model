@@ -2,10 +2,10 @@
 
 % Space parameters
     Lx = 1; para.Lx=Lx; Ly=Lx; para.Ly=Ly;
-    Nx = 2^3; para.Nx=Nx; Ny=Nx; para.Ny=Nx;
+    Nx = 2^7; para.Nx=Nx; Ny=Nx; para.Ny=Nx;
     hx = Lx/Nx;
     hy = Ly/Ny;
-    x  = hx*(0:Nx-1);           
+    x  = hx*(0:Nx-1);
     y  = hy*(0:Ny-1);
     [xx,yy] = meshgrid(x,y); 
 
@@ -15,9 +15,11 @@
 % Sarah's para
     h=hx;
     h2=h^2;
-    gam = 8 * h / (2 * sqrt(2) * atanh(0.9)); % gam is our epsilon
+    gam = 16 * h / (2 * sqrt(2) * atanh(0.9)); % gam is our epsilon
     max_it=15000;
 
+    folder = "epsilon_0.03_hyperbolic_tan_IC";
+    mkdir(append('./MATLAB_output/', folder));
 % Initial data - by importing
     % phi0 = readmatrix('128_100_phi.csv'); % corresponds to C simulation
    
@@ -40,7 +42,7 @@
 
 % Initial data - by function
     R = sqrt((xx-0.5).^2 + (yy-0.5).^2);
-    R0 = 0.1;
+    R0 = 0.15;
     eps_c = 0.01; 
     psi0 = 0.5 * (1 + tanh((R0 - R)/(2*eps_c)));
 
@@ -54,15 +56,6 @@
 
     phi0=2*psi0-1;    % psi0=(phi0+1)/2;
     para.phi0=phi0;
-
-% Plot initial
-    fig_init = figure;
-    contourf(x,y,psi0); colorbar; axis square
-    %     % contourf(x,y,phi0); colorbar; axis square
-    %     % contour(x,y,psi0,[0.3,0.3],'k',LineWidth=1.5); axis square
-    set(gca,'FontSize',16);title('t = 0'); xlabel('x'); ylabel('y');
-    filename = sprintf('./MATLAB/Initial_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',R0,Nx,epsilon,para.T,dt);
-    saveas(fig_init, filename);
 
 % Interface and energy parameters
     epsilon=gam/2^0; para.epsilon=epsilon;
@@ -85,13 +78,22 @@
     % l=500;
     % para.T=l*dtout*dt; T=para.T;
 
+% Plot initial
+    fig_init = figure;
+    contourf(x,y,psi0); colorbar; axis square
+    %     % contourf(x,y,phi0); colorbar; axis square
+    %     % contour(x,y,psi0,[0.3,0.3],'k',LineWidth=1.5); axis square
+    set(gca,'FontSize',16);title('t = 0'); xlabel('x'); ylabel('y');
+    filename = sprintf('./SAV/MATLAB_output/%s/Initial_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',folder,R0,Nx,epsilon,para.T,dt);
+    saveas(fig_init, filename);
+
 %% CN Solver (Phi collected every dtout results)
     tic;[phi,r,E,D,Phi,O]=CH2d_SAV_CN(para);toc;
     psi=(phi+1)/2; Psi=(Phi+1)/2;
 
     fig_final = figure;
     figure; contourf(x,y,psi); colorbar; axis square
-    filename = sprintf('./MATLAB/Final_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',R0,Nx,epsilon,para.T,dt);
+    filename = sprintf('./SAV/MATLAB_output/%s/Final_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',folder,R0,Nx,epsilon,para.T,dt);
     saveas(fig_final, filename);
 
 %% Post-processing
@@ -136,7 +138,7 @@
     title(['Modified energy, \epsilon=',num2str(epsilon),', dt=',num2str(dt)])
     xlabel('t');ylabel('E');
     % hold on;
-    filename = sprintf('Modified_energy_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',R0,Nx,epsilon,para.T,dt);
+    filename = sprintf('./SAV/MATLAB_output/%s/Modified_energy_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',folder,R0,Nx,epsilon,para.T,dt);
     saveas(fig_E, filename);
 
 %% Plot the error
@@ -146,7 +148,7 @@
             'LineWidth',1.5);set(gca,'FontSize',16);
         title('Relative error of r from E1')
         xlabel('t');ylabel('(r-sqrt(E1))/sqrt(E1)');
-    filename = sprintf('Error_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',R0,Nx,epsilon,para.T,dt);
+    filename = sprintf('./SAV/MATLAB_output/%s/Error_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',folder,R0,Nx,epsilon,para.T,dt);
     saveas(fig_Err, filename);
 % %% Plot the Imaginary magnitude of fft2(phi)
     % fig_im = figure;
@@ -158,12 +160,12 @@
     % filename = sprintf('fft2_im_R0_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.png',R0,Nx,epsilon,para.T,dt);
     % saveas(fig_im, filename);
 %% Video
-    v = VideoWriter('C_Cond_10.mp4','MPEG-4'); % Create a VideoWriter object.
+    v = VideoWriter(sprintf('./SAV/MATLAB_output/%s/psi_%.2d_N_%d_eps_%.3d_T_%.2d_dt_%.2e.mp4',folder,R0,Nx,epsilon,para.T,dt),'MPEG-4'); % Create a VideoWriter object.
     v.FrameRate = 10; % Set to 10 frames per second
     open(v); % Open the video file for writing.
 
     psi0=(phi0+1)/2;
-    fig = figure;
+    fig = figure('visible','off');
     contourf(x,y,psi0); axis square; colorbar; % Your plotting code here
     % clim([0 0.35]);
     % mesh(xx,yy,phi0,'FaceColor','interp','EdgeColor','interp');colorbar; zlim([-1,1]);% Your plotting code here

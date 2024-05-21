@@ -258,14 +258,14 @@ outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/$(s
 
 #%%
 # Updated CPC VCell simulations
-secs = ["100" "200"]
-maxes = ["5" "7" "10"]
+secs = ["100"]
+maxes = ["10"]
 for max in maxes
     for sec in secs
         gam_ = 0.015
         suffix = "$(sec)s_$(max)max_gam$(gam_)"
         outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/03_25_24_VCell_$(suffix)"
-        initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/03_25_24_CPC_relaxed_RefModel_128x64_03_25_24_relaxed_RefModel_100_128x128$(sec)s_$(max)max.csv"
+        initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/03_25_24_CPC_relaxed_RefModel_128x64_03_25_24_relaxed_RefModel_$(sec)_128x128$(sec)s_$(max)max.csv"
         nx = 128
         max_it = 15000
         max_it_CH = 10000
@@ -273,3 +273,16 @@ for max in maxes
         @time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="file", initial_file=initial_file, M=8)
     end
 end
+#%%
+# Updated CPC VCell simulations
+sec = "200"
+max = "5"
+gam_ = 0.015
+suffix = "$(sec)s_$(max)max_gam$(gam_)"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/03_25_24_VCell_$(suffix)"
+initial_file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/03_25_24_CPC_relaxed_RefModel_128x64_03_25_24_relaxed_RefModel_$(sec)_128x128$(sec)s_$(max)max.csv"
+nx = 128
+max_it = 40000
+max_it_CH = 10000
+tol = 1.0e-5
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="file", initial_file=initial_file, M=8)

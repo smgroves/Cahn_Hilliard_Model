@@ -80,11 +80,10 @@ def rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = "",
     sum_data_array = np.array(sum_data)
     sum_data_array = sum_data_array/rescaling_factor
 
-    #pad the sides of the array with zeros so it is square
+    # #pad the sides of the array with zeros so it is square
     width = sum_data_array.shape[0]-sum_data_array.shape[1]
 
     sum_data_array = (np.pad(sum_data_array, ((0, 0), (int(width/2), int(width/2))), pad_with, padder=0))
-
     nrows= sum_data_array.shape[0]
     ncols= sum_data_array.shape[1]
     sum_data_array = 2*sum_data_array - 1
@@ -107,8 +106,8 @@ model_name = "03_25_24_CPC_relaxed_RefModel_128x64"
 simulation_name = "03_25_24_relaxed_RefModel"
 outdir = '/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/'
 rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 200,
-                         timestep = 10, rescaling_factor = 3, suffix = "200s_3max")
-# rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 200,
-#                          timestep = 10, rescaling_factor = 10, suffix = "200s_10max")
-# rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 200,
-#                          timestep = 10, rescaling_factor = 5, suffix = "200s_5max")
+                         timestep = 10, rescaling_factor = 5, suffix = "200s_5max")
+rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 200,
+                         timestep = 10, rescaling_factor = 10, suffix = "200s_10max")
+rescale_vcell_output_neg1_pos1(folder_name, in_dir, outdir, model_name = model_name, simulation_name = simulation_name, timepoint = 200,
+                         timestep = 10, rescaling_factor = 7, suffix = "200s_7max")
