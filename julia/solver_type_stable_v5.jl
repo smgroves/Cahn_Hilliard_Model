@@ -420,7 +420,7 @@ function initialization_from_function(nx, ny, h)
 end
 
 function initialization_random(nx, ny)
-    return 0.1 .* (1 .- 2 .* rand(nx, ny))
+    return (1 .- 2 .* rand(nx, ny))
 end
 
 function initialization_from_file(file, nx, ny, delim=',', transpose_matrix=true)

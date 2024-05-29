@@ -365,7 +365,7 @@ def cahn(c_old, c_new, mu, nx = nx, ny = ny, dt = dt, max_it_CH = 10000, tol = 1
     return c_new
 
 if __name__ == "__main__":
-    for max_it in [1, 1000, 10000]:
+    for max_it in [10000]:
         for max_it_CH in [1000,10000,100000]:
             brcd = random.randint(0,1000)
             start = time.time()
