@@ -21,8 +21,10 @@ using LinearAlgebra
 using BenchmarkTools
 using StaticArrays
 using Printf
+import Random
+Random.seed!(1234) #note that when using a random seed, you must RESTART the REPL or run in a new instance for the runs to be the same. 
 
-
+global version = "v5" #undef -> 0
 const c_relax::Int = 2  # number of SMOOTH relaxation operations defined as a global variable
 const xleft = 0.0  # left x-coordinate defined as a global variable
 const xright = 1.0  # right x-coordinate defined as a global variable
@@ -296,7 +298,7 @@ function prolong_ch(uc, vc, nxc, nyc)
 end
 
 function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft, dt, Cahn, n_level)
-    # print_mat("$(outdir)uf_new_1_$(version)_$(suffix).csv", uf_new)
+    # print_mat("$(outdir)/uf_new_1_$(version)_$(suffix).csv", uf_new)
     # open("$(outdir)a_v4_full_$(suffix).txt", "a", lock=false) do file
     #     Printf.@printf(file, "First relax %d %d \n", ilevel, nxf)
     # end
@@ -305,15 +307,17 @@ function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft
     # end
     uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax, xright,
         xleft, dt, Cahn)
-    # print_mat("$(outdir)uf_new_2_$(version)_$(suffix).csv", uf_new)
+    # print_mat("$(outdir)/uf_new_2_$(version)_$(suffix).csv", uf_new)
 
     if ilevel < n_level
         nxc = trunc(Int64, nxf / 2)
         nyc = trunc(Int64, nyf / 2)
         uc_new, wc_new = restrict_ch(uf_new, wf_new, nxc, nyc)
-        # print_mat("$(outdir)uf_new_3_$(version)_$(suffix).csv", uf_new)
+        # print_mat("$(outdir)/uf_new_3_$(version)_$(suffix).csv", uf_new)
 
         duc, dwc = defect(uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc, dt, Cahn)
+        print_mat("$(outdir)/duc.csv", duc)
+        print_mat("$(outdir)/duw.csv", duw)
 
         uc_def = copy(uc_new)
         wc_def = copy(wc_new)
@@ -327,7 +331,7 @@ function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft
 
         uf_new = uf_new + uf_def
         wf_new = wf_new + wf_def
-        # print_mat("$(outdir)uf_new_4_$(version)_$(suffix).csv", uf_new)
+        # print_mat("$(outdir)/uf_new_4_$(version)_$(suffix).csv", uf_new)
         # open("$(outdir)mu_new_after_relax0_$(suffix).txt", "a", lock=false) do file
         # Printf.@printf(file, "Second relax %d %d \n", ilevel, nxf)
         # end
@@ -336,11 +340,11 @@ function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft
         # end
         uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax, xright,
             xleft, dt, Cahn)
-        # print_mat("$(outdir)uf_new_5_$(version)_$(suffix).csv", uf_new)
+        # print_mat("$(outdir)/uf_new_5_$(version)_$(suffix).csv", uf_new)
 
     end
 
-    # print_mat("$(outdir)uf_new_6_$(version)_$(suffix).csv", uf_new)
+    # print_mat("$(outdir)/uf_new_6_$(version)_$(suffix).csv", uf_new)
 
     return uf_new, wf_new
 end
@@ -421,6 +425,10 @@ end
 
 function initialization_random(nx, ny)
     return (1 .- 2 .* rand(nx, ny))
+end
+
+function initialization_spinodal(nx, ny)
+    return (rand([-1.0, 1.0], nx, ny))
 end
 
 function initialization_from_file(file, nx, ny, delim=',', transpose_matrix=true)
@@ -506,74 +514,91 @@ end
 
 function main_v5(nx, max_it, max_it_CH, tol, outdir, ; suffix="", overwrite=true, print_phi=true, print_mass=true, print_e=true, initialize="function",
     dt=0, M=4, ns=50, gam=0, initial_file="", delim=',')
-    ny = nx
-    n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
-    # todo: check if these are needed; it appears that only ht2 (temp h^2) is used in the code
-    h = xright / nx  # space step size defined as a global variable
-    h2 = h^2 #space step size squared defined as a global variable
-    if dt == 0
-        dt = 0.1 * h2  # ∆t defined as a global variable
-    end
+    while true
+        ny = nx
+        n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
+        # todo: check if these are needed; it appears that only ht2 (temp h^2) is used in the code
+        h = xright / nx  # space step size defined as a global variable
+        h2 = h^2 #space step size squared defined as a global variable
+        if dt == 0
+            dt = 0.1 * h2  # ∆t defined as a global variable
+        end
 
-    if gam == 0
-        gam = M * h / (2 * sqrt(2) * atanh(0.9))
-    end
-    Cahn = gam^2  # ϵ^2 defined as a global variable
-    version = "v5" #undef -> 0
-    epsilon = gam / 2^0
-    if isdir(outdir)
-        if !isempty(outdir)
-            if overwrite == false
-                println("Warning: Directory is not empty. Results may be appended to existing files.")
-            else
-                println("Warning: overwriting directory with new files")
-                rm(outdir, recursive=true)
-                mkdir(outdir)
-            end
+        if gam == 0
+            gam = M * h / (2 * sqrt(2) * atanh(0.9))
         end
-    else
-        mkdir(outdir)
-    end
-    println("nx = $nx, ny = $ny, dt = $dt, epsilon = $gam, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
-    mu = zeros(Float64, nx, ny)
-    # oc = initialization(nx, ny)
-    if initialize == "random"
-        oc = initialization_random(nx, ny)
-    elseif initialize == "function"
-        oc = initialization_from_function(nx, ny, h)
-    elseif initialize == "geometric"
-        oc = initialize_geometric_CPC(nx, ny)
-    elseif initialize == "file"
-        oc = initialization_from_file(initial_file, nx, ny, delim)
-    else
-        println("Warning: initialize must be one of [random, function, geometric, file].")
-    end
-    nc = copy(oc)
-    oc0 = copy(oc)
-    if print_phi
-        open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "w", lock=false) do f
-            writedlm(f, oc, " ")
-        end
-    end
-    for it in 1:max_it
-        nc = cahn(oc, nc, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level)
-
-        if print_mass
-            print_mat("$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc, h2, nx, ny))
-        end
-        # oc_psi = (oc .+ 1) ./ 2
-        # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/ave_mass/ave_mass_psi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc_psi))
-        if print_e
-            print_mat("$(outdir)/discrete_norm_e_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_discrete_norm_energy(oc, oc0, h2, nx, ny, Cahn))
-        end
-        oc = copy(nc)
-        if it % ns == 0
-            if print_phi
-                open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "a", lock=false) do f
-                    writedlm(f, oc, " ")
+        Cahn = gam^2  # ϵ^2 defined as a global variable
+        epsilon = gam / 2^0
+        if isdir(outdir)
+            if !isempty(outdir)
+                if overwrite == false
+                    println("Warning: Directory is not empty. Results may be appended to existing files. Are you sure you want to continue? (Y/N)")
+                    input = readline()
+                    if input == "Y" || input == "y"
+                        println("Appending to any existing files.")
+                    else
+                        println("End.")
+                        break
+                    end
+                else
+                    println("Warning: overwriting directory with new files. Are you sure you want to continue? (Y/N)")
+                    input = readline()
+                    if input == "Y" || input == "y"
+                        rm(outdir, recursive=true)
+                        mkdir(outdir)
+                    else
+                        println("End.")
+                        break
+                    end
                 end
             end
-            println(it)
+        else
+            mkdir(outdir)
         end
+        println("nx = $nx, ny = $ny, dt = $dt, epsilon = $gam, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
+        mu = zeros(Float64, nx, ny)
+        # oc = initialization(nx, ny)
+        if initialize == "random"
+            oc = initialization_random(nx, ny)
+        elseif initialize == "function"
+            oc = initialization_from_function(nx, ny, h)
+        elseif initialize == "geometric"
+            oc = initialize_geometric_CPC(nx, ny)
+        elseif initialize == "file"
+            oc = initialization_from_file(initial_file, nx, ny, delim)
+        elseif initialize == "spinodal"
+            oc = initialization_spinodal(nx, ny)
+        else
+            println("Warning: initialize must be one of [random, function, geometric, file].")
+        end
+        nc = copy(oc)
+        oc0 = copy(oc)
+        if print_phi
+            open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "w", lock=false) do f
+                writedlm(f, oc, " ")
+            end
+        end
+        for it in 1:max_it
+            nc = cahn(oc, nc, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level)
+
+            if print_mass
+                print_mat("$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc, h2, nx, ny))
+            end
+            # oc_psi = (oc .+ 1) ./ 2
+            # print_mat("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/ave_mass/ave_mass_psi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc_psi))
+            if print_e
+                print_mat("$(outdir)/discrete_norm_e_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_discrete_norm_energy(oc, oc0, h2, nx, ny, Cahn))
+            end
+            oc = copy(nc)
+            if it % ns == 0
+                if print_phi
+                    open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "a", lock=false) do f
+                        writedlm(f, oc, " ")
+                    end
+                end
+                println(it)
+            end
+        end
+        break
     end
 end

@@ -1,8 +1,11 @@
+import Random
+Random.seed!(1234)
 ################ solve v4 #####################
 # version 4 includes global variables (const). 
 using Plots
 using DelimitedFiles
 
+#%%
 include("solver_type_stable_v4.jl")
 # To execute code blocks in VS code, use shortcut  shift opt enter
 
@@ -293,12 +296,78 @@ tol = 1.0e-5
 using Plots
 using DelimitedFiles
 include("solver_type_stable_v5.jl")
-#%%
 
-outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_spinodal_decomp"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_randomized_-1_1"
 suffix = "SD"
 nx = 32
 max_it = 10
 max_it_CH = 10000
 tol = 1.0e-5
 @time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="random", ns=1)
+
+
+#%%
+using Plots
+using DelimitedFiles
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_randomized_-1_1"
+suffix = "SD_ns1"
+nx = 32
+max_it = 10000
+max_it_CH = 10000
+tol = 1.0e-5
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="random", ns=1, overwrite=false)
+
+#%%
+using Plots
+using DelimitedFiles
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_randomized_-1_1"
+suffix = "SD_ns1"
+nx = 32
+max_it = 10000
+max_it_CH = 10000
+tol = 1.0e-6
+@time main_v5(nx, max_it, max_it_CH, tol, outdir, suffix=suffix, initialize="random", ns=1, overwrite=false)
+
+#%%
+using Plots
+using DelimitedFiles
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_randomized_-1_1"
+suffix = ""
+nx = 32
+max_it = 1
+max_it_CH = 10000
+tol = 1.0e-5
+@time main_v5(nx, max_it, max_it_CH, tol, outdir,
+    suffix=suffix,
+    initialize="random",
+    ns=1,
+    overwrite=false,
+    print_mass=false,
+    print_e=false)
+
+#%%
+using Plots
+using DelimitedFiles
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_spinodal_decomp"
+suffix = ""
+nx = 128
+max_it = 10000
+max_it_CH = 10000
+tol = 1.0e-6
+@time main_v5(nx, max_it, max_it_CH, tol, outdir,
+    suffix=suffix,
+    initialize="spinodal",
+    ns=1,
+    overwrite=false,
+    print_mass=false,
+    print_e=false)
+
+
