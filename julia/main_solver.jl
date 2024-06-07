@@ -371,3 +371,62 @@ tol = 1.0e-6
     print_e=false)
 
 
+#%%
+using Plots
+using DelimitedFiles
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_spinodal_decomp"
+suffix = ""
+nx = 128
+max_it = 1
+max_it_CH = 10000
+tol = 1.0e-6
+@time main_v5(nx, max_it, max_it_CH, tol, outdir,
+    suffix=suffix,
+    initialize="spinodal",
+    ns=1,
+    overwrite=false,
+    print_mass=false,
+    print_e=false)
+
+#%%
+using Plots
+using DelimitedFiles
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_spinodal_decomp"
+suffix = ""
+nx = 32
+max_it = 10000
+max_it_CH = 10000
+tol = 1.0e-6
+@time main_v5(nx, max_it, max_it_CH, tol, outdir,
+    suffix=suffix,
+    initialize="spinodal",
+    ns=1,
+    overwrite=false,
+    print_mass=false,
+    print_e=false)
+
+#%%
+using Plots
+using DelimitedFiles
+include("solver_type_stable_v5.jl")
+
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_spinodal_decomp"
+suffix = ""
+nx = 32
+max_it = 1
+max_it_CH = 10000
+tol = 1.0e-6
+@time main_v5(nx, max_it, max_it_CH, tol, outdir,
+    suffix=suffix,
+    initialize="spinodal",
+    ns=1,
+    overwrite=false,
+    print_mass=false,
+    print_e=false)
+
+
+

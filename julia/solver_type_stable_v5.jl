@@ -298,7 +298,7 @@ function prolong_ch(uc, vc, nxc, nyc)
 end
 
 function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft, dt, Cahn, n_level)
-    # print_mat("$(outdir)/uf_new_1_$(version)_$(suffix).csv", uf_new)
+    print_mat("$(outdir)/uf_new_1_$(version)_$(suffix).csv", uf_new)
     # open("$(outdir)a_v4_full_$(suffix).txt", "a", lock=false) do file
     #     Printf.@printf(file, "First relax %d %d \n", ilevel, nxf)
     # end
@@ -307,31 +307,36 @@ function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft
     # end
     uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax, xright,
         xleft, dt, Cahn)
-    # print_mat("$(outdir)/uf_new_2_$(version)_$(suffix).csv", uf_new)
+    print_mat("$(outdir)/uf_new_2_$(version)_$(suffix).csv", uf_new)
 
     if ilevel < n_level
         nxc = trunc(Int64, nxf / 2)
         nyc = trunc(Int64, nyf / 2)
         uc_new, wc_new = restrict_ch(uf_new, wf_new, nxc, nyc)
-        # print_mat("$(outdir)/uf_new_3_$(version)_$(suffix).csv", uf_new)
+        print_mat("$(outdir)/uf_new_3_$(version)_$(suffix).csv", uf_new)
 
         duc, dwc = defect(uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc, dt, Cahn)
         print_mat("$(outdir)/duc.csv", duc)
-        print_mat("$(outdir)/duw.csv", duw)
+        print_mat("$(outdir)/dwc.csv", dwc)
 
         uc_def = copy(uc_new)
         wc_def = copy(wc_new)
 
         uc_def, wc_def = vcycle(uc_def, wc_def, duc, dwc, nxc, nyc, ilevel + 1, c_relax, xright, xleft, dt, Cahn, n_level)
 
+
         uc_def = uc_def - uc_new
+        print_mat("$(outdir)/coarse_grid_correction_u.csv", uc_def)
         wc_def = wc_def - wc_new
+        print_mat("$(outdir)/coarse_grid_correction_w.csv", wc_def)
 
         uf_def, wf_def = prolong_ch(uc_def, wc_def, nxc, nyc)
+        print_mat("$(outdir)/coarse_grid_correction_interpolated_u.csv", uf_def)
+        print_mat("$(outdir)/coarse_grid_correction_interpolated_w.csv", wf_def)
 
         uf_new = uf_new + uf_def
         wf_new = wf_new + wf_def
-        # print_mat("$(outdir)/uf_new_4_$(version)_$(suffix).csv", uf_new)
+        print_mat("$(outdir)/uf_new_4_$(version)_$(suffix).csv", uf_new)
         # open("$(outdir)mu_new_after_relax0_$(suffix).txt", "a", lock=false) do file
         # Printf.@printf(file, "Second relax %d %d \n", ilevel, nxf)
         # end
@@ -340,11 +345,11 @@ function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft
         # end
         uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax, xright,
             xleft, dt, Cahn)
-        # print_mat("$(outdir)/uf_new_5_$(version)_$(suffix).csv", uf_new)
+        print_mat("$(outdir)/uf_new_5_$(version)_$(suffix).csv", uf_new)
 
     end
 
-    # print_mat("$(outdir)/uf_new_6_$(version)_$(suffix).csv", uf_new)
+    print_mat("$(outdir)/uf_new_6_$(version)_$(suffix).csv", uf_new)
 
     return uf_new, wf_new
 end
