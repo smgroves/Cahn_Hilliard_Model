@@ -1,7 +1,8 @@
+outputs/C/*
+C/out/*
 **/phi*.txt
 *.gz
 *.zip
-*.m
 *.csv
 Code from Kevin/phi_CPC_big.m
 .DS_Store
