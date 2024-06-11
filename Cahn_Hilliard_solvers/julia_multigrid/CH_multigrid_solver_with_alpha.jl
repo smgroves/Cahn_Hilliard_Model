@@ -271,14 +271,15 @@ function meshgrid(x, y)
     return X, Y
 end
 
-function initialization_from_function(nx, ny, h, R0=0.1)
+function initialization_from_function(nx, ny, h; R0=0.1, gam=0.01)
     phi = zeros(Float64, nx, ny)
     x = h .* (0:nx-1)
     y = h .* (0:ny-1)
     xx, yy = meshgrid(x, y)
     R = @.sqrt((xx - 0.5)^2 + (yy - 0.5)^2)
-    eps_c = 0.01
-    psi0 = 0.5 * (1 .+ @.tanh((R0 .- R) / (2 * eps_c)))
+    eps_c = gam
+    delta = eps_c * sqrt(2)
+    psi0 = 0.5 * (1 .+ @.tanh((R0 .- R) / (2 * delta)))
     phi = 2 .* psi0 .- 1    # psi0=(phi0+1)/2
     return phi
 end
@@ -302,11 +303,11 @@ function initialization_from_file(file, nx, ny; delim=',', transpose_matrix=fals
     return phi
 end
 
-function initialization(nx, ny; method="spinodal", initial_file="", delim=",", h=1 / 128, R0=0.1)
+function initialization(nx, ny; method="spinodal", initial_file="", delim=",", h=1 / 128, R0=0.1, gam=0.01)
     if method == "random"
         oc = initialization_random(nx, ny)
     elseif method == "droplet"
-        oc = initialization_from_function(nx, ny, h, R0)
+        oc = initialization_from_function(nx, ny, h, R0=R0, gam=gam)
     elseif method == "geometric"
         oc = initialize_geometric_CPC(nx, ny)
     elseif method == "file"
