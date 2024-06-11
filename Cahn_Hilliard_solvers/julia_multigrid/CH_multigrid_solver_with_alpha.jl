@@ -74,7 +74,7 @@ function source(c_old, nx, ny, dt)
     return src_c, src_mu
 end
 
-function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, dt, Cahn)
+function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, dt, Cahn, alpha)
     ht2 = ((xright - xleft) / nxt)^2
     # a = MVector{4,Float64}(undef)
     # f = MVector{2,Float64}(undef)
@@ -96,14 +96,14 @@ function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, dt, Cahn
                 a[1] = 1 / dt
                 a[2] = (x_fac + y_fac) / ht2
                 #a[2] = -(x_fac + y_fac) * Cahn / ht2 - d2f(c_new[i][j]);
-                a[3] = -(x_fac + y_fac) * Cahn / ht2 - 3 * (c_new[i, j])^2
+                a[3] = -(x_fac + y_fac) * Cahn / ht2 - 3 * (c_new[i, j])^2 - 2 * alpha * (c_new[i, j]) ## ADDED
                 cnew_val = (c_new[i, j])
                 d2f = -3 * (c_new[i, j])^2
 
                 a[4] = 1.0
 
                 f[1] = su[i, j]
-                f[2] = sw[i, j] - 2 * (c_new[i, j])^3
+                f[2] = sw[i, j] - 2 * (c_new[i, j])^3 + alpha * (c_new[i, j])^2 + alpha ## ADDED
 
                 if i > 1
                     f[1] += mu_new[i-1, j] / ht2
@@ -143,7 +143,7 @@ function restrict_ch(uf, vf, nxc, nyc)
     return uc, vc
 end
 
-function nonL(c_new, mu_new, nxt, nyt, dt, Cahn)
+function nonL(c_new, mu_new, nxt, nyt, dt, Cahn, alpha)
     ru = zeros(Float64, nxt, nyt)
     rw = zeros(Float64, nxt, nyt)
     lap_c = laplace(c_new, nxt, nyt)
@@ -151,7 +151,7 @@ function nonL(c_new, mu_new, nxt, nyt, dt, Cahn)
     for i in 1:nxt
         for j in 1:nyt
             ru[i, j] = c_new[i, j] / dt - lap_mu[i, j]
-            rw[i, j] = mu_new[i, j] / dt - c_new[i, j]^3 + Cahn * lap_c[i, j]
+            rw[i, j] = mu_new[i, j] / dt - c_new[i, j]^3 + Cahn * lap_c[i, j] + alpha * (c_new[i, j])^2 - alpha
         end
     end
     return ru, rw
@@ -159,9 +159,9 @@ end
 
 # df(c) function: c.^3
 # d2f(c) function: 3*c.^2
-function defect(uf_new, wf_new, suf, swf, nxf, nyf, uc_new, wc_new, nxc, nyc, dt, Cahn)
-    ruc, rwc = nonL(uc_new, wc_new, nxc, nyc, dt, Cahn)
-    ruf, rwf = nonL(uf_new, wf_new, nxf, nyf, dt, Cahn)
+function defect(uf_new, wf_new, suf, swf, nxf, nyf, uc_new, wc_new, nxc, nyc, dt, Cahn, alpha)
+    ruc, rwc = nonL(uc_new, wc_new, nxc, nyc, dt, Cahn, alpha)
+    ruf, rwf = nonL(uf_new, wf_new, nxf, nyf, dt, Cahn, alpha)
     ruf = suf - ruf
     rwf = swf - rwf
     rruf, rrwf = restrict_ch(ruf, rwf, nxc, nyc)
@@ -188,19 +188,19 @@ function prolong_ch(uc, vc, nxc, nyc)
     return uf, vf
 end
 
-function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft, dt, Cahn, n_level)
+function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft, dt, Cahn, n_level, alpha)
     uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax, xright,
-        xleft, dt, Cahn)
+        xleft, dt, Cahn, alpha)
     if ilevel < n_level
         nxc = trunc(Int64, nxf / 2)
         nyc = trunc(Int64, nyf / 2)
         uc_new, wc_new = restrict_ch(uf_new, wf_new, nxc, nyc)
-        duc, dwc = defect(uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc, dt, Cahn)
+        duc, dwc = defect(uf_new, wf_new, su, sw, nxf, nyf, uc_new, wc_new, nxc, nyc, dt, Cahn, alpha)
 
         uc_def = copy(uc_new)
         wc_def = copy(wc_new)
 
-        uc_def, wc_def = vcycle(uc_def, wc_def, duc, dwc, nxc, nyc, ilevel + 1, c_relax, xright, xleft, dt, Cahn, n_level)
+        uc_def, wc_def = vcycle(uc_def, wc_def, duc, dwc, nxc, nyc, ilevel + 1, c_relax, xright, xleft, dt, Cahn, n_level, alpha)
 
 
         uc_def = uc_def - uc_new
@@ -212,7 +212,7 @@ function vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel, c_relax, xright, xleft
         wf_new = wf_new + wf_def
 
         uf_new, wf_new = relax(uf_new, wf_new, su, sw, nxf, nyf, c_relax, xright,
-            xleft, dt, Cahn)
+            xleft, dt, Cahn, alpha)
 
     end
     return uf_new, wf_new
@@ -243,10 +243,10 @@ function error2(c_old, c_new, mu, nxt, nyt, dt)
     return res2
 end
 
-function initialize_geometric_CPC(nx, ny)
+function initialize_geometric_CPC(nx, ny, CPC_width=20, cohesin_width=4)
     phi = zeros(Float64, nx, ny)
-    CPC_width = 20
-    cohesin_width = 4
+    # CPC_width = 20
+    # cohesin_width = 4
     for i in 1:nx
         for j in 1:ny
             if i > round(nx / 2) - CPC_width && i < round(nx / 2) + CPC_width
@@ -271,13 +271,12 @@ function meshgrid(x, y)
     return X, Y
 end
 
-function initialization_from_function(nx, ny, h)
+function initialization_from_function(nx, ny, h, R0=0.1)
     phi = zeros(Float64, nx, ny)
     x = h .* (0:nx-1)
     y = h .* (0:ny-1)
     xx, yy = meshgrid(x, y)
     R = @.sqrt((xx - 0.5)^2 + (yy - 0.5)^2)
-    R0 = 1
     eps_c = 0.01
     psi0 = 0.5 * (1 .+ @.tanh((R0 .- R) / (2 * eps_c)))
     phi = 2 .* psi0 .- 1    # psi0=(phi0+1)/2
@@ -292,7 +291,7 @@ function initialization_spinodal(nx, ny)
     return (rand([-1.0, 1.0], nx, ny))
 end
 
-function initialization_from_file(file, nx, ny, delim=',', transpose_matrix=true)
+function initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
     phi = readdlm(file, delim, Float64)
     if size(phi) != (nx, ny)
         print("Warning: phi from file is wrong size: $(size(phi)) Expected: $(nx), $(ny)")
@@ -303,16 +302,34 @@ function initialization_from_file(file, nx, ny, delim=',', transpose_matrix=true
     return phi
 end
 
-function cahn(c_old, c_new, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level)
+function initialization(nx, ny; method="spinodal", initial_file="", delim=",", h=1 / 128, R0=0.1)
+    if method == "random"
+        oc = initialization_random(nx, ny)
+    elseif method == "droplet"
+        oc = initialization_from_function(nx, ny, h, R0)
+    elseif method == "geometric"
+        oc = initialize_geometric_CPC(nx, ny)
+    elseif method == "file"
+        oc = initialization_from_file(initial_file, nx, ny, delim=delim)
+    elseif method == "spinodal"
+        oc = initialization_spinodal(nx, ny)
+    else
+        println("Warning: initialize must be one of [random, droplet, geometric, file, spinodal].")
+    end
+    return oc
+end
+
+function cahn(c_old, c_new, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level, alpha; suffix="")
     it_mg2 = 0
     resid2 = 1
     sc, smu = source(c_old, nx, ny, dt)
 
     while resid2 > tol && it_mg2 < max_it_CH
 
-        c_new, mu = vcycle(c_new, mu, sc, smu, nx, ny, 1, c_relax, xright, xleft, dt, Cahn, n_level)
+        c_new, mu = vcycle(c_new, mu, sc, smu, nx, ny, 1, c_relax, xright, xleft, dt, Cahn, n_level, alpha)
 
         resid2 = error2(c_old, c_new, mu, nx, ny, dt)
+        print_mat("$(outdir)/residual_$(nx)_$(tol)_$(suffix).txt", resid2)
         it_mg2 += 1
     end
 
@@ -367,24 +384,7 @@ function calculate_discrete_norm_energy(phi, phi0, h2, nx, ny, Cahn)
     return E / E0
 end
 
-function initialization(nx, ny; method="spinodal", initial_file="", delim=",")
-    if method == "random"
-        oc = initialization_random(nx, ny)
-    elseif method == "droplet"
-        oc = initialization_from_function(nx, ny, h)
-    elseif method == "geometric"
-        oc = initialize_geometric_CPC(nx, ny)
-    elseif method == "file"
-        oc = initialization_from_file(initial_file, nx, ny, delim)
-    elseif method == "spinodal"
-        oc = initialization_spinodal(nx, ny)
-    else
-        println("Warning: initialize must be one of [random, droplet, geometric, file, spinodal].")
-    end
-    return oc
-end
-
-function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", overwrite=true, print_phi=true, print_mass=false, print_e=false, dt=2.5e-5, M=8, ns=10, gam=0)
+function main_w_alpha(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", overwrite=true, print_phi=true, print_mass=false, print_e=false, dt=2.5e-5, M=8, ns=10, gam=0.0, alpha=0.0, check_dir=true)
     while true
         ny = nx
         n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
@@ -403,34 +403,38 @@ function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", over
         if isdir(outdir)
             if !isempty(outdir)
                 if overwrite == false
-                    println("Warning: Directory is not empty. Results may be appended to existing files. Are you sure you want to continue? (Y/N)")
-                    input = readline()
-                    if input == "Y" || input == "y"
-                        println("Appending to any existing files.")
-                    else
-                        println("End.")
-                        break
+                    if check_dir == true
+                        println("Warning: Directory is not empty. Results may be appended to existing files. Are you sure you want to continue? (Y/N)")
+                        input = readline()
+                        if input == "Y" || input == "y"
+                            println("Appending to any existing files.")
+                        else
+                            println("End.")
+                            break
+                        end
                     end
                 else
-                    println("Warning: overwriting directory with new files. Are you sure you want to continue? (Y/N)")
-                    input = readline()
-                    if input == "Y" || input == "y"
-                        rm(outdir, recursive=true)
-                        mkdir(outdir)
-                    else
-                        println("End.")
-                        break
+                    if check_dir == true
+                        println("Warning: overwriting directory with new files. Are you sure you want to continue? (Y/N)")
+                        input = readline()
+                        if input == "Y" || input == "y"
+                            rm(outdir, recursive=true)
+                            mkdir(outdir)
+                        else
+                            println("End.")
+                            break
+                        end
                     end
                 end
             end
         else
-            mkdir(outdir)
+            mkpath(outdir)
         end
 
         #check if oc is in the range -1 to 1; if not, rescale to 0 to 1 and then shift with 2x - 1
         if minimum(oc) >= 0
             type = "psi"
-            oc = oc ./ maximum
+            oc = (oc .- minimum(oc)) ./ (maximum(oc) - minimum(oc))
             oc = 2 .* oc .- 1    # psi0=(phi0+1)/2 
         else #if minimum(oc)>=-1 && maximum(oc)<=1
             type = "phi"
@@ -438,6 +442,7 @@ function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", over
             # println("Warning: cannot interpret initial data. Data should be in range [-1,1] or only positive values.")
             # break
         end
+        println(type)
 
         #initialization
         println("nx = $nx, ny = $ny, dt = $dt, epsilon = $gam, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
@@ -459,7 +464,7 @@ function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", over
 
         #run cahn hilliard
         for it in 1:max_it
-            nc = cahn(oc, nc, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level)
+            nc = cahn(oc, nc, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level, alpha, suffix=suffix)
 
             if print_mass
                 print_mat("$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc, h2, nx, ny))
@@ -470,18 +475,19 @@ function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", over
             oc = copy(nc)
             if it % ns == 0
                 if print_phi
+                    println(it)
+
                     if type == "phi"
-                        open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "w", lock=false) do f
+                        open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "a", lock=false) do f
                             writedlm(f, oc, " ")
                         end
                     elseif type == "psi"
-                        open("$(outdir)/psi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "w", lock=false) do f
+                        open("$(outdir)/psi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "a", lock=false) do f
                             psi = (oc .+ 1) ./ 2
                             writedlm(f, psi, " ")
                         end
                     end
                 end
-                println(it)
             end
         end
         break
