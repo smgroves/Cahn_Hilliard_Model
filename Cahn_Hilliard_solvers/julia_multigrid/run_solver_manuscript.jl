@@ -21,11 +21,11 @@ M = 8
 gam = M * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
 dts = [0.25 * dt_0, 0.5 * dt_0, dt_0, 2 * dt_0, 4 * dt_0]
 total_time = 1
-max_it = Int.(total_time / dt)
 phi = initialization(nx, nx, method="droplet", h=1 / 128, gam=gam)
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/droplet_2"
 for dt in dts
     println(dt)
+    max_it = Int.(total_time / dt)
     main(phi, nx, tol, outdir, dt=dt, gam=gam, max_it=max_it, print_mass=true, print_e=true, overwrite=false, print_r=true, suffix="_dt_$dt", check_dir=false)
 end
 
@@ -41,19 +41,12 @@ gam = M * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
 dts = [0.25 * dt_0, 0.5 * dt_0, dt_0, 2 * dt_0, 4 * dt_0]
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_2"
 total_time = 0.02
-max_it = Int.(total_time / dt)
 phi = initialization_from_file("$outdir/phi_128_initial.txt", nx, nx, delim=' ')
 for dt in dts
     println(dt)
+    max_it = Int.(total_time / dt)
     main(phi, nx, tol, outdir, dt=dt, gam=gam, max_it=max_it, print_mass=true, print_e=true, overwrite=false, print_r=true, suffix="dt_$dt", check_dir=false)
 end
-
-
-###################################
-# Critical radius - epsilon scan
-###################################
-
-### COPY FROM RIVANNA WHEN DONE
 
 #%%
 ################################
