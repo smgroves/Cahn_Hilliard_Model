@@ -243,7 +243,7 @@ function error2(c_old, c_new, mu, nxt, nyt, dt)
     return res2
 end
 
-function initialize_geometric_CPC(nx, ny, CPC_width=20, cohesin_width=4)
+function initialize_geometric_CPC(nx, ny; CPC_width=20, cohesin_width=4)
     phi = zeros(Float64, nx, ny)
     # CPC_width = 20
     # cohesin_width = 4
@@ -265,19 +265,44 @@ function initialize_geometric_CPC(nx, ny, CPC_width=20, cohesin_width=4)
     return phi
 end
 
+function initialize_round_CPC(nx, ny; CPC_width=10, cohesin_width=4)
+    # Create an empty matrix filled with -1
+    phi = fill(-1.0, nx, ny)
+
+    # Define the center of the matrix
+    center = (nx) / 2
+
+    # Loop through each element of the matrix
+    for i in 1:nx
+        for j in 1:ny
+            # Calculate the distance from the center
+            distance = norm([i - center, j - center])
+
+            # Check if the distance is less than or equal to CPC_width
+            if distance <= CPC_width
+                phi[i, j] = 1.0
+            elseif i > round((nx) / 2) - cohesin_width && i < round((nx) / 2) + cohesin_width
+                phi[i, j] = 1.0
+            end
+        end
+    end
+    return phi
+end
+
+
 function meshgrid(x, y)
     X = [i for i in x, j in 1:length(y)]
     Y = [j for i in 1:length(x), j in y]
     return X, Y
 end
 
-function initialization_from_function(nx, ny, h; R0=0.1, gam=0.01)
+function initialization_from_function(nx, ny, h; R0=0.1, epsilon=0.01)
     phi = zeros(Float64, nx, ny)
     x = h .* (0:nx-1)
     y = h .* (0:ny-1)
     xx, yy = meshgrid(x, y)
     R = @.sqrt((xx - 0.5)^2 + (yy - 0.5)^2)
-    eps_c = gam
+    eps_c = epsilon
     delta = eps_c * sqrt(2)
     psi0 = 0.5 * (1 .+ @.tanh((R0 .- R) / (2 * delta)))
     phi = 2 .* psi0 .- 1    # psi0=(phi0+1)/2
@@ -303,13 +328,13 @@ function initialization_from_file(file, nx, ny; delim=',', transpose_matrix=fals
     return phi
 end
 
-function initialization(nx, ny; method="spinodal", initial_file="", delim=",", h=1 / 128, R0=0.1, gam=0.01)
+function initialization(nx, ny; method="spinodal", initial_file="", delim=",", h=1 / 128, R0=0.1, epsilon=0.01, cohesin_width=4, CPC_width=20)
     if method == "random"
         oc = initialization_random(nx, ny)
     elseif method == "droplet"
-        oc = initialization_from_function(nx, ny, h, R0=R0, gam=gam)
+        oc = initialization_from_function(nx, ny, h, R0=R0, epsilon=epsilon)
     elseif method == "geometric"
-        oc = initialize_geometric_CPC(nx, ny)
+        oc = initialize_geometric_CPC(nx, ny, CPC_width=CPC_width, cohesin_width=cohesin_width)
     elseif method == "file"
         oc = initialization_from_file(initial_file, nx, ny, delim=delim)
     elseif method == "spinodal"
@@ -387,7 +412,7 @@ function calculate_discrete_norm_energy(phi, phi0, h2, nx, ny, Cahn)
     return E / E0
 end
 
-function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", overwrite=true, print_phi=true, print_mass=false, print_e=false, print_r=true, dt=2.5e-5, M=8, ns=10, gam=0.0, check_dir=true)
+function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", overwrite=true, print_phi=true, print_mass=false, print_e=false, print_r=true, dt=2.5e-5, m=8, ns=10, epsilon=0.0, check_dir=true)
     while true
         ny = nx
         n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too
@@ -397,10 +422,10 @@ function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", over
             dt = 0.1 * h2  # ∆t defined as a global variable
         end
 
-        if gam == 0
-            gam = M * h / (2 * sqrt(2) * atanh(0.9))
+        if epsilon == 0
+            epsilon = m * h / (2 * sqrt(2) * atanh(0.9))
         end
-        Cahn = gam^2  # ϵ^2 defined as a global variable
+        Cahn = epsilon^2  # ϵ^2 defined as a global variable
 
         #make directory
         if isdir(outdir)
@@ -448,7 +473,7 @@ function main(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", over
         println(type)
 
         #initialization
-        println("nx = $nx, ny = $ny, dt = $dt, epsilon = $gam, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
+        println("nx = $nx, ny = $ny, dt = $dt, epsilon = $epsilon, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
         mu = zeros(Float64, nx, ny)
         nc = copy(oc)
         oc0 = copy(oc)
