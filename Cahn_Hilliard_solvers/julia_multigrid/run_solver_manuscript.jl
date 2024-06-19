@@ -69,17 +69,17 @@ dt = 2.5e-5
 m = 8
 epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
 max_it_CH = 10000
-max_it = 10000
+max_it = 10
 
 ns = 10
 # alphas = [-0.4, -0.2, 0.0, 0.2, 0.4]
-alphas = [-0.001, 0.001, -0.4]
-phi = initialization(nx, nx, method="droplet", h=1 / 128)
+alphas = [0.4]
+phi = initialization(nx, nx, method="droplet", h=1 / 128, gam=epsilon)
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius_alpha"
 for alpha in alphas
     time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, max_it=max_it, dt=dt, gam=epsilon, print_mass=true, print_e=true, overwrite=false, suffix="_alpha_$alpha", check_dir=false, alpha=alpha)
     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
-        writedlm(f, ["critical radius" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+        writedlm(f, ["critical radius alpha" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
     end
 end
 
