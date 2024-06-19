@@ -28,7 +28,7 @@ for dt in dts
     max_it = Int.(total_time / dt)
     date_time = now()
     max_it_CH = 10000
-    time_passed = @elapsed main(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, print_r=false, suffix="_dt_$dt", check_dir=false)
+    time_passed = @elapsed multigrid_solver(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, print_r=false, suffix="_dt_$dt", check_dir=false)
     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
         writedlm(f, [date_time "droplet_R0_0.2" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
     end
@@ -51,7 +51,7 @@ for dt in dts
     println(dt)
     max_it = Int.(total_time / dt)
     date_time = now()
-    time_passed = @elapsed main(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=true, print_e=true, overwrite=false, print_r=true, suffix="dt_$dt", check_dir=false)
+    time_passed = @elapsed multigrid_solver(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=true, print_e=true, overwrite=false, print_r=true, suffix="dt_$dt", check_dir=false)
     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
         writedlm(f, [date_time "droplet_R0_0.2" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
     end
@@ -73,11 +73,11 @@ max_it = 10000
 
 ns = 10
 # alphas = [-0.4, -0.2, 0.0, 0.2, 0.4]
-alphas = [0.0]
+alphas = [-0.001, 0.001, -0.4]
 phi = initialization(nx, nx, method="droplet", h=1 / 128)
-outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius_alpha"
 for alpha in alphas
-    time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=true, print_e=true, overwrite=false, suffix="_alpha_$alpha", check_dir=false, alpha=alpha)
+    time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, max_it=max_it, dt=dt, gam=epsilon, print_mass=true, print_e=true, overwrite=false, suffix="_alpha_$alpha", check_dir=false, alpha=alpha)
     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
         writedlm(f, ["critical radius" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
     end
@@ -106,8 +106,36 @@ for CPC_width in [15, 20, 25, 30]
     phi = initialize_round_CPC(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width)
     # phi = initialize_geometric_CPC(nx, ny; CPC_width=20, cohesin_width=4)
     outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry"
-    time_passed = @elapsed main(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, print_r=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)", check_dir=false)
+    time_passed = @elapsed multigrid_solver(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, print_r=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)", check_dir=false)
     open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
         writedlm(f, ["CPC_geometry" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
     end
+end
+
+#%%
+################################
+# CPC geometry: compare grid sizes
+################################
+include("./CH_multigrid_solver.jl")
+
+nx = 128
+ny = 128
+tol = 1e-5
+dt = 0.1 * (1 / 256)^2
+m = 8
+epsilon = m * (1 / 256) / (2 * sqrt(2) * atanh(0.9))
+max_it_CH = 10000
+# total_time = 0.03
+# max_it = Int.(round(total_time / dt))
+max_it = 19660
+ns = 10
+CPC_width = 5
+# experiments = .173 um = .108 of width 
+cohesin_width = 2
+phi = initialize_round_CPC(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width)
+# phi = initialize_geometric_CPC(nx, ny; CPC_width=20, cohesin_width=4)
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry"
+time_passed = @elapsed multigrid_solver(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, print_r=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)", check_dir=false)
+open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+    writedlm(f, ["CPC_geometry" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
 end

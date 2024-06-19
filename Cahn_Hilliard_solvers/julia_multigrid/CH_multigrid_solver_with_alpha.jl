@@ -277,10 +277,12 @@ function initialization_from_function(nx, ny, h; R0=0.1, gam=0.01)
     y = h .* (0:ny-1)
     xx, yy = meshgrid(x, y)
     R = @.sqrt((xx - 0.5)^2 + (yy - 0.5)^2)
-    eps_c = gam
-    delta = eps_c * sqrt(2)
-    psi0 = 0.5 * (1 .+ @.tanh((R0 .- R) / (2 * delta)))
-    phi = 2 .* psi0 .- 1    # psi0=(phi0+1)/2
+    # eps_c = gam
+    # delta = eps_c * sqrt(2)
+    # psi0 = 0.5 * (1 .+ @.tanh((R0 .- R) / (2 * delta)))
+    # phi = 2 .* psi0 .- 1    # psi0=(phi0+1)/2
+    phi = @.tanh((R0 .- R) / (sqrt(2) * gam))
+
     return phi
 end
 
