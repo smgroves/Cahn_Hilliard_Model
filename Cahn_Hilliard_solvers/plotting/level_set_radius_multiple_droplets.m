@@ -202,7 +202,7 @@ for t = first:first+total_length
         legend show;
 
         sprintf('%s/radii_at_t_%s.pdf', outdir, timepoint)
-        print(gcf,sprintf('%s/radii_at_t_%f.pdf', outdir, timepoint),"-dpdf",'-fillpage')
+        print(gcf,sprintf('%s/radii_at_t_%f.png', outdir, timepoint),"-dpng")
         
         hold off;
     end
@@ -223,7 +223,7 @@ legend show;
 sprintf('%s/radii_over_time.pdf', outdir)
 set(gcf, 'PaperSize', [11, 20])
 orient(gcf,'landscape')
-print(gcf,sprintf('%s/radii_over_time.pdf', outdir),"-dpdf",'-fillpage')
+print(gcf,sprintf('%s/radii_over_time.png', outdir),"-dpng")
 hold off;
 
 figure('visible', 'off');
@@ -238,7 +238,7 @@ ylim([0, 256]);
 title(sprintf('Centers of Each Droplet \n %s', name));
 
 sprintf('%s/droplet_centers.pdf', outdir)
-print(gcf,sprintf('%s/droplet_centers.pdf', outdir),"-dpdf",'-fillpage')
+print(gcf,sprintf('%s/droplet_centers.png', outdir),"-dpng")
 hold off;
 
 

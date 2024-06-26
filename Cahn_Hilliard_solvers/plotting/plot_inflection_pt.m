@@ -3,9 +3,9 @@ alpha = "-0.2";
 indir =sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/alpha_%s", alpha);
 % epsilon ="0.015009";
 
-for epsilon = ["0.015009", "0.030019", '0.060037'] 
-    plot_inflection(epsilon, indir);
-end
+% for epsilon = ['0.060037'] 
+    plot_inflection('0.060037', indir);
+% end
 
 function [] = plot_inflection(epsilon, indir)
     path = sprintf("%s/radius_0.5_level_set_epsilon_%s_alpha_-0.2.txt", indir, epsilon);
