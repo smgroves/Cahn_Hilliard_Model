@@ -1,3 +1,5 @@
+Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/*
+*.mat
 outputs/C/*
 C/out/*
 **/phi*.txt

@@ -1,13 +1,13 @@
 % indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_spinodal_decomp";
 % name = "phi_32_10000_1.0e-6_";
 
-function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate)
+function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plot_type,color)
     %if you want a faster video, set frame_rate to something like 4
 
     % close all hidden
     % warning off
     const_colorbar = true;
-    plot_type = "heatmap";
+    % plot_type = "contourf";
     phi = readmatrix(sprintf('%s/%s.txt', indir, name),'FileType','text');
     % phi = readmatrix("/Users/smgroves/Documents/GitHub/jlCHSolver/output.txt");
     phidims = size(phi);
@@ -28,16 +28,17 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate)
     clim([-1, 1]);
     % for i = 1:10
     for i = 1:phidims(3)
+
         if mod(i-1,frame_rate) == 0
             curr_t=(i-1)*dtout*dt;
         
             fig = figure('visible','off');
             if plot_type == "surf"
-                surf(phi(:,:,i),'EdgeColor','none');colorbar;
+                surf(phi(:,:,i),'EdgeColor','none');colorbar;axis square;
                 view(2);
         
             elseif plot_type == "contourf"
-                contourf(phi(:,:,i)); colorbar; axis square;
+                contourf((phi(:,:,i))); colorbar; axis square;
                 view(2);
         
             elseif plot_type == "surf3d"
@@ -48,7 +49,7 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate)
                 view(90,0)
                 ylim([0,2])
             elseif plot_type == "heatmap"
-                h=heatmap(phi(:,:,i), 'CellLabelColor','none', 'GridVisible','off'); 
+                h=heatmap(phi(:,:,i), 'CellLabelColor','none', 'GridVisible','off'); axis square;
             end
 
             % contour(:,:,i); colorbar; axis square;
@@ -66,7 +67,9 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate)
             else
                 axis([1 size(phi,1) 1 size(phi,2)]);
             end
-            colormap(redblue(100));
+            if color == "red"
+                colormap(redblue(100));
+            end
             % Set the color axis limits for the current frame
             set(gca,'FontSize',16);title(['t = ',num2str(curr_t)]); xlabel('x'); ylabel('y');
             if const_colorbar == true

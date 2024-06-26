@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-indir ="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/"
+indir ="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output"
 #%%
 tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_0.015009.txt",header = 0, index_col=None)
 print(tmp.shape)
@@ -34,8 +34,38 @@ plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 plt.title("Epsilon = 0.060037")
 plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.060037.pdf")
 # plt.show()
-# # %%
-# from scipy.ndimage import gaussian_filter1d
+#%%
+## Reuse this one
+alpha = "-0.5"
+
+for epsilon in ["0.045028"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
+    folder=f"critical_radius/"
+    tmp = pd.read_csv(f"{indir}/{folder}/radius_0.5_level_set_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
+                    on_bad_lines='skip')
+    print(tmp.shape)
+    sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize = 'small')
+    plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
+    plt.tight_layout()
+    plt.savefig(f"{indir}/{folder}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}.pdf")
+    plt.close()
+#%%
+epsilon = "0.030019"
+radius = 0.0148
+tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_{epsilon}.txt",header = 0, index_col=None)
+tmp_old = pd.read_csv(f"{indir}/from_Rivanna_old/radius_0.5_level_set_epsilon_{epsilon}.txt",header = 0, index_col=None)
+tmp = tmp.loc[tmp['R0']==0.148].dropna()
+tmp_old = tmp_old.loc[tmp_old['R0']==0.148].dropna()
+plt.plot(tmp['time'].values,tmp['radius'].values, label = 'new IC')
+plt.plot(tmp_old['time'].values,tmp_old['radius'].values, label = 'old IC')
+plt.legend()
+plt.title("R0 = 0.148 for epsilon 0.033019")
+plt.xlabel("Time")
+plt.ylabel("Radius")
+plt.savefig(f"{indir}/r0_{radius}_new_old_IC.pdf")
+
+# %%
+#from scipy.ndimage import gaussian_filter1d
 
 # data = tmp.loc[tmp['R0']==0.133].dropna()['radius'].values
 # data = data/np.max(data)
