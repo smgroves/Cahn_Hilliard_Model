@@ -1,14 +1,14 @@
 % Define paths to the datasets and corresponding t0 values
-alpha = "-0.2";
+alpha = "-0.5";
 indir =sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/alpha_%s", alpha);
 % epsilon ="0.015009";
 
 % for epsilon = ['0.060037'] 
-    plot_inflection('0.060037', indir);
+    plot_inflection('0.045028', indir);
 % end
 
 function [] = plot_inflection(epsilon, indir)
-    path = sprintf("%s/radius_0.5_level_set_epsilon_%s_alpha_-0.2.txt", indir, epsilon);
+    path = sprintf("%s/radius_0.5_level_set_epsilon_%s_alpha_-0.5.txt", indir, epsilon);
     all_data = readtable(path);
     % Predefine colors for each dataset for consistency in plotting
     colors = {'b', 'r', 'g', 'c', 'm', 'y', 'k',"#d142f5","#f542b6","#f59e42","#42f5d7","#42b3f5"};

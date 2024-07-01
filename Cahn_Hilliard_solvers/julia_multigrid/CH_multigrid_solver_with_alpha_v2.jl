@@ -265,6 +265,31 @@ function initialize_geometric_CPC(nx, ny, CPC_width=20, cohesin_width=4)
     return phi
 end
 
+
+function initialize_round_CPC(nx, ny; CPC_width=10, cohesin_width=4)
+    # Create an empty matrix filled with -1
+    phi = fill(-1.0, nx, ny)
+
+    # Define the center of the matrix
+    center = (nx) / 2
+
+    # Loop through each element of the matrix
+    for i in 1:nx
+        for j in 1:ny
+            # Calculate the distance from the center
+            distance = norm([i - center, j - center])
+
+            # Check if the distance is less than or equal to CPC_width
+            if distance <= CPC_width
+                phi[i, j] = 1.0
+            elseif i > round((nx) / 2) - cohesin_width && i < round((nx) / 2) + cohesin_width
+                phi[i, j] = 1.0
+            end
+        end
+    end
+    return phi
+end
+
 function meshgrid(x, y)
     X = [i for i in x, j in 1:length(y)]
     Y = [j for i in 1:length(x), j in y]

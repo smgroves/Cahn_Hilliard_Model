@@ -359,7 +359,7 @@ end
 ################################
 # CPC geometry : compare to SAV
 ################################
-include("./CH_multigrid_solver.jl")
+include("./CH_multigrid_solver_with_alpha_v2.jl")
 
 tol = 1e-5
 dt = 2.5e-5
@@ -370,16 +370,45 @@ total_time = 0.025
 max_it = Int.(round(total_time / dt))
 # max_it = 19660
 ns = 10
-for nx in [128, 256, 512]
-    ny = nx
-    factor = Int.(nx / 128)
-    cohesin_width = 2 * factor
-    CPC_width = 5 * factor
-    phi = initialize_round_CPC(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width)
-    # phi = initialize_geometric_CPC(nx, ny; CPC_width=20, cohesin_width=4)
-    outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry"
-    time_passed = @elapsed multigrid_solver(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, print_r=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)", check_dir=false)
-    open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
-        writedlm(f, ["CPC_geometry" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
-    end
+nx = 256
+ny = nx
+factor = Int.(nx / 128)
+cohesin_width = 2 * factor
+CPC_width = 5 * factor
+phi = initialize_round_CPC(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width)
+# phi = initialize_geometric_CPC(nx, ny; CPC_width=20, cohesin_width=4)
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry"
+alpha = -0.5
+time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+    writedlm(f, ["CPC_geometry_alpha_-0.5" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+end
+
+#%%
+################################
+# CPC geometry : compare to SAV
+################################
+include("./CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+m = 8
+epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
+max_it_CH = 10000
+total_time = 0.025
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+factor = Int.(nx / 128)
+cohesin_width = 2 * factor
+CPC_width = 5 * factor
+phi = initialize_round_CPC(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width)
+# phi = initialize_geometric_CPC(nx, ny; CPC_width=20, cohesin_width=4)
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry"
+alpha = -0.5
+time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+    writedlm(f, ["CPC_geometry_alpha_-0.5" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
 end

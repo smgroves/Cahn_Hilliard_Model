@@ -36,7 +36,7 @@ plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.060037.pdf")
 # plt.show()
 #%%
 ## Reuse this one
-alpha = "-0.5"
+alpha = "-0.2"
 
 for epsilon in ["0.045028"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
     folder=f"critical_radius/"
@@ -109,5 +109,72 @@ plt.annotate(f"Eps($R_c$= .108)={np.round(eps,6)}", xy = (eps, 0.108),
              va="center", ha="left",arrowprops=dict(arrowstyle="-|>"))
 plt.title("Epsilon versus critical radius for single droplet")
 plt.savefig(f"{indir}/epsilon_vs.critical_radius.pdf")
+
+# %%
+#############################################
+# Troubleshooting the problems with e= 0.045
+#############################################
+alpha = "-0.5"
+
+epsilon = "0.045028"
+folder=f"critical_radius/"
+tmp = pd.read_csv(f"{indir}/{folder}/radius_0.5_level_set_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
+                on_bad_lines='warn')
+print(tmp.shape)
+## USE WARN TO DELETE THOSE ROWS
+
+#%%
+g = sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
+g.set_xticks([tmp["time"].min(), tmp["time"].max()])
+g.set_yticks([tmp["radius"].min(), tmp["radius"].max()])
+
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize = 'small')
+plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
+plt.tight_layout()
+plt.savefig(f"{indir}/{folder}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}.pdf")
+plt.close()
+# %%
+for i,r in tmp.iterrows():
+    try:
+        f = float(r["time"])
+    except:
+        print(i)
+        print(r)
+
+##### OUTPUT FOR TIME
+# 34654 X
+# radius       NaN
+# time      5..061
+# R0           NaN
+# Name: 34654, dtype: object
+# 35695 X
+# radius          NaN
+# time      6.717.061
+# R0              NaN
+# Name: 35695, dtype: object
+
+###### OUTPUT FOR RADIUS
+# 34134 X
+# radius     NaaN
+# time       0.62
+# R0        0.061
+# Name: 34134, dtype: object
+# 34907 X
+# radius    Na3725
+# time        0.06
+# R0           NaN
+# Name: 34907, dtype: object
+# 38034 X
+# radius    N5.67
+# time      0.061
+# R0          NaN
+# Name: 38034, dtype: object
+
+###### OUTPUT FOR R0
+# 36737 X
+# radius        NaN
+# time       8.0625
+# R0        0.0.061
+# Name: 36737, dtype: object
 
 # %%
