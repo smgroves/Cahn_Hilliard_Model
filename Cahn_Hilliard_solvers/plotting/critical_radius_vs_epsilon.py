@@ -1,3 +1,5 @@
+### Plotting for each individual alpha and epsilon. This will plot the radius over time to figure out what the critical radius for each epsilon is. 
+# After this, use the plot_inflection_pt.m code to find the inflection points, and record these in critical_radii_epsilon.csv.
 #%%
 import pandas as pd
 import numpy as np

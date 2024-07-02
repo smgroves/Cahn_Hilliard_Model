@@ -117,10 +117,28 @@
 # /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue');quit;"
 # echo "Done."
 
-indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry"
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_-0.5"
+dtout=10
+frame_rate=4
+dt=2.5e-5
+name="phi_256_2000_1.0e-5__CPC_28_cohesin_16_eps_0.14_alpha_-0.5"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue');quit;"
+echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_-0.5"
 dtout=10
 frame_rate=1
 dt=2.5e-5
-name="phi_256_1000_1.0e-5__CPC_10_cohesin_4_eps_0.015009369912862116_alpha_-0.5"
-/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'contourf', 'blue');quit;"
+for c in 16 20 
+do
+    for CPC in 10 20 24 28 32
+    do
+        name="phi_256_2000_1.0e-5__CPC_${CPC}_cohesin_${c}_eps_0.08_alpha_-0.5"
+        echo $name
+        /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'contourf', 'blue');quit;"
+    done
+done
 echo "Done."
+
+#4 12 16 20
+# 10 20 24 28 32 next do 4 and 32, then do numbers above for c
