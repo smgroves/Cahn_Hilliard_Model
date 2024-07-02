@@ -6,7 +6,8 @@ do
     do
         echo $cohesin
         echo $CPC
-        /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "level_set_radius_multiple_droplets($CPC, $cohesin, $epsilon, '$indir');quit;"
+        /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "level_set_radius_multiple_droplets($CPC, $cohesin, $epsilon, '$indir', false);quit;"
     done
 done
+
 

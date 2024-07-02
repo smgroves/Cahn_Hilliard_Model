@@ -1,7 +1,7 @@
 % Code transparency: part of this code was generated with ChatGPT4o.
 % June 25, 2025
 % Sarah Maddox Groves
-function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir)
+function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, plottimepoint)
     % indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_-0.5";
     Nx = 2^8;Ny=2^8;
 
@@ -63,7 +63,7 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir)
             centerX = mean(dropletContour(1, :));
             centerY = mean(dropletContour(2, :));
             distances = sqrt((dropletContour(1, :) - centerX).^2 + (dropletContour(2, :) - centerY).^2);
-            radius = mean(distances);
+            radius = mean(distances)/Nx;
             
             % Store droplet information
             droplet = struct('center', [centerX, centerY], 'radius', radius, 'id', 0);
@@ -100,7 +100,6 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir)
             try
                 % Match droplets to the previous time point
                 previousDroplets = [dropletData(t-1).droplets];
-                sprintf("previous droplets id %f",previousDroplets.id)
 
                 for i = 1:length(currentDroplets)
                 
@@ -139,81 +138,82 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir)
                 break %if the droplet dissolves, this will throw an error, so stop iterating over timepoints
             end
         end
-        if ismember(timepoint, [0, 0.004, 0.0075, 0.008, 0.01, 0.025, 0.04, 0.05])
-            data_at_t = data(:, :,t);
-        
-            % Create contour plot
-            hx = 1;
-            hy = 1;
-            x  = hx*(0:Nx-1);           
-            y  = hy*(0:Ny-1);
-            [xx,yy] = meshgrid(x,y); 
-            figure('visible', 'off');
-            contour(data_at_t, [0, 0], 'LineWidth', 2, "Color", '#808080'); axis square;
-            xlim([0, 256]);
-            ylim([0, 256]);
-            hold on;
-        
-            % Extract contours at the 0 level
-            contourMatrix = contourc(data_at_t, [0, 0]);
-        
-            % Parse the contour matrix
-            startIdx = 1;
-            droplets = struct();
-        
-            while startIdx < size(contourMatrix, 2)
-                numPoints = contourMatrix(2, startIdx);
-                dropletContour = contourMatrix(:, startIdx+1:startIdx+numPoints);
-        
-                % Store droplet contour
-                droplets(end+1).contour = dropletContour;
-        
-                % Calculate the radius as the average distance from the center
-                centerX = mean(dropletContour(1, :));
-                centerY = mean(dropletContour(2, :));
-                distances = sqrt((dropletContour(1, :) - centerX).^2 + (dropletContour(2, :) - centerY).^2);
-                droplets(end).radius = mean(distances);
-                color = 'k';
-                label = 'Unknown';
-                % match colors
-                for i = 1:length(trackedDroplets)
-                    if abs(centerX-dropletData(t).droplets(i).center(1)) < 0.5 && abs(centerY-dropletData(t).droplets(i).center(2)) < 0.5
-                        color = colors{dropletData(t).droplets(i).id};
-                        label = sprintf('Data %d', dropletData(t).droplets(i).id);
-                        break
+        if false
+            if ismember(timepoint, [0, 0.004, 0.0075, 0.008, 0.01, 0.025, 0.04, 0.05])
+                data_at_t = data(:, :,t);
+            
+                % Create contour plot
+                hx = 1;
+                hy = 1;
+                x  = hx*(0:Nx-1);           
+                y  = hy*(0:Ny-1);
+                [xx,yy] = meshgrid(x,y); 
+                figure('visible', 'off');
+                contour(data_at_t, [0, 0], 'LineWidth', 2, "Color", '#808080'); axis square;
+                xlim([0, 256]);
+                ylim([0, 256]);
+                hold on;
+            
+                % Extract contours at the 0 level
+                contourMatrix = contourc(data_at_t, [0, 0]);
+            
+                % Parse the contour matrix
+                startIdx = 1;
+                droplets = struct();
+            
+                while startIdx < size(contourMatrix, 2)
+                    numPoints = contourMatrix(2, startIdx);
+                    dropletContour = contourMatrix(:, startIdx+1:startIdx+numPoints);
+            
+                    % Store droplet contour
+                    droplets(end+1).contour = dropletContour;
+            
+                    % Calculate the radius as the average distance from the center
+                    centerX = mean(dropletContour(1, :));
+                    centerY = mean(dropletContour(2, :));
+                    distances = sqrt((dropletContour(1, :) - centerX).^2 + (dropletContour(2, :) - centerY).^2);
+                    droplets(end).radius = mean(distances);
+                    color = 'k';
+                    label = 'Unknown';
+                    % match colors
+                    for i = 1:length(trackedDroplets)
+                        if abs(centerX-dropletData(t).droplets(i).center(1)) < 0.5 && abs(centerY-dropletData(t).droplets(i).center(2)) < 0.5
+                            color = colors{dropletData(t).droplets(i).id};
+                            label = sprintf('Data %d', dropletData(t).droplets(i).id);
+                            break
+                        end
                     end
+                    % Plot the center and radius
+                    plot(centerX, centerY, 'r+', 'MarkerSize', 10, 'LineWidth', 2,'Color', color, "DisplayName", label); axis square;
+                    viscircles([centerX, centerY], droplets(end).radius, 'EdgeColor', color); axis square;
+            
+                    % Move to the next contour
+                    startIdx = startIdx + numPoints + 1;
                 end
-                % Plot the center and radius
-                plot(centerX, centerY, 'r+', 'MarkerSize', 10, 'LineWidth', 2,'Color', color, "DisplayName", label); axis square;
-                viscircles([centerX, centerY], droplets(end).radius, 'EdgeColor', color); axis square;
-        
-                % Move to the next contour
-                startIdx = startIdx + numPoints + 1;
+                
+                % for i = 1:length(currentDroplets)
+                %     plot(dropletData(t).droplets(i).center(1), dropletData(t).droplets(i).center(2), 'x', 'MarkerSize', 10, 'LineWidth', 2,"Color", colors{dropletData(t).droplets(i).id},"DisplayName", sprintf("Current Droplet %d", dropletData(t).droplets(i).id)); axis square;
+                % 
+                % end
+
+
+                title(sprintf('Timepoint %f \n %s', timepoint, name));
+            
+                % Display results
+                % for i = 1:length(droplets)
+                %     try
+                %         fprintf('Droplet %d: Center = (%.2f, %.2f), Radius = %.6f\n', ...
+                %         i, mean(droplets(i).contour(1, :)), mean(droplets(i).contour(2, :)), droplets(i).radius);
+                %     end
+                % end
+                legend show;
+
+                sprintf('%s/radii_at_t_%s.pdf', outdir, timepoint)
+                print(gcf,sprintf('%s/radii_at_t_%f.png', outdir, timepoint),"-dpng")
+                
+                hold off;
             end
-            
-            % for i = 1:length(currentDroplets)
-            %     plot(dropletData(t).droplets(i).center(1), dropletData(t).droplets(i).center(2), 'x', 'MarkerSize', 10, 'LineWidth', 2,"Color", colors{dropletData(t).droplets(i).id},"DisplayName", sprintf("Current Droplet %d", dropletData(t).droplets(i).id)); axis square;
-            % 
-            % end
-
-
-            title(sprintf('Timepoint %f \n %s', timepoint, name));
-        
-            % Display results
-            % for i = 1:length(droplets)
-            %     try
-            %         fprintf('Droplet %d: Center = (%.2f, %.2f), Radius = %.6f\n', ...
-            %         i, mean(droplets(i).contour(1, :)), mean(droplets(i).contour(2, :)), droplets(i).radius);
-            %     end
-            % end
-            legend show;
-
-            sprintf('%s/radii_at_t_%s.pdf', outdir, timepoint)
-            print(gcf,sprintf('%s/radii_at_t_%f.png', outdir, timepoint),"-dpng")
-            
-            hold off;
         end
-
     end
 
     % Plot the radius of each droplet over time
@@ -225,6 +225,7 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir)
     xlabel('Time');
     ylabel('Radius');
     xlim([0, total_time]);
+    ylim([0,inf]);
     title(sprintf('Radius of Each Droplet Over Time \n %s', name));
     legend show;
     % sprintf('%s/radii_over_time.pdf', outdir)
@@ -233,20 +234,22 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir)
     print(gcf,sprintf('%s/radii_over_time.png', outdir),"-dpng")
     hold off;
 
-    figure('visible', 'off');
-    hold on;
-    for i=1:length(trackedDroplets)
-        plot(trackedDroplets(i).center(1), trackedDroplets(i).center(2), 'r+', 'MarkerSize', 10, 'LineWidth', 2, ...
-            'Color', colors{i},"DisplayName",sprintf('Data %d', i));
-    end
-    legend show;
-    xlim([0, 256]);
-    ylim([0, 256]);
-    title(sprintf('Centers of Each Droplet \n %s', name));
+    save(sprintf('%s/trackedDroplets.mat', outdir), "trackedDroplets")
 
-    % sprintf('%s/droplet_centers.pdf', outdir)
-    print(gcf,sprintf('%s/droplet_centers.png', outdir),"-dpng")
-    hold off;
+    % figure('visible', 'off');
+    % hold on;
+    % for i=1:length(trackedDroplets)
+    %     plot(trackedDroplets(i).center(1), trackedDroplets(i).center(2), 'r+', 'MarkerSize', 10, 'LineWidth', 2, ...
+    %         'Color', colors{i},"DisplayName",sprintf('Data %d', i));
+    % end
+    % legend show;
+    % xlim([0, 256]);
+    % ylim([0, 256]);
+    % title(sprintf('Centers of Each Droplet \n %s', name));
+
+    % % sprintf('%s/droplet_centers.pdf', outdir)
+    % print(gcf,sprintf('%s/droplet_centers.png', outdir),"-dpng")
+    % hold off;
 
 
     % %%%%%%%%%%%%%%%%%%%%%%%%%%
