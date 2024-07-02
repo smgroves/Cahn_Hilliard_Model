@@ -1,5 +1,5 @@
 indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_-0.5"
-epsilon=0.08
+epsilon=0.14
 for cohesin in 4 12 16 20 
 do
    for CPC in 10 20 24 28 32

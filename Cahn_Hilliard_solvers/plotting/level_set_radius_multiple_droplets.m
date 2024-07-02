@@ -138,7 +138,7 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, p
                 break %if the droplet dissolves, this will throw an error, so stop iterating over timepoints
             end
         end
-        if false
+        if true
             if ismember(timepoint, [0, 0.004, 0.0075, 0.008, 0.01, 0.025, 0.04, 0.05])
                 data_at_t = data(:, :,t);
             
@@ -236,20 +236,20 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, p
 
     save(sprintf('%s/trackedDroplets.mat', outdir), "trackedDroplets")
 
-    % figure('visible', 'off');
-    % hold on;
-    % for i=1:length(trackedDroplets)
-    %     plot(trackedDroplets(i).center(1), trackedDroplets(i).center(2), 'r+', 'MarkerSize', 10, 'LineWidth', 2, ...
-    %         'Color', colors{i},"DisplayName",sprintf('Data %d', i));
-    % end
-    % legend show;
-    % xlim([0, 256]);
-    % ylim([0, 256]);
-    % title(sprintf('Centers of Each Droplet \n %s', name));
+    figure('visible', 'off');
+    hold on;
+    for i=1:length(trackedDroplets)
+        plot(trackedDroplets(i).center(1), trackedDroplets(i).center(2), 'r+', 'MarkerSize', 10, 'LineWidth', 2, ...
+            'Color', colors{i},"DisplayName",sprintf('Data %d', i));
+    end
+    legend show;
+    xlim([0, 256]);
+    ylim([0, 256]);
+    title(sprintf('Centers of Each Droplet \n %s', name));
 
-    % % sprintf('%s/droplet_centers.pdf', outdir)
-    % print(gcf,sprintf('%s/droplet_centers.png', outdir),"-dpng")
-    % hold off;
+    % sprintf('%s/droplet_centers.pdf', outdir)
+    print(gcf,sprintf('%s/droplet_centers.png', outdir),"-dpng")
+    hold off;
 
 
     % %%%%%%%%%%%%%%%%%%%%%%%%%%
