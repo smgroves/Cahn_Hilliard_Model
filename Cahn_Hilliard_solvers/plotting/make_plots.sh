@@ -129,12 +129,12 @@ indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solver
 dtout=10
 frame_rate=1
 dt=2.5e-5
-for c in 4 12 16 20 
+for c in 12 16 
 do
-    for CPC in 10 20 24 28 32
+    for CPC in 36 40 44 48 52
     do
-        name="phi_256_2000_1.0e-5__CPC_${CPC}_cohesin_${c}_eps_0.14_alpha_-0.5"
-        echo $name
+        name="phi_256_2000_1.0e-5__CPC_${CPC}_cohesin_${c}_eps_0.08_alpha_-0.5"
+        echo $name 
         /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'contourf', 'blue');quit;"
     done
 done
@@ -142,3 +142,5 @@ echo "Done."
 
 #4 12 16 20
 # 10 20 24 28 32 next do 4 and 32, then do numbers above for c
+
+# 10 20 24 28 32

@@ -454,3 +454,87 @@ for epsilon in [0.08, 0.14]
         end
     end
 end
+
+#%%
+###############################################
+# CPC geometry : alpha = -0.5, epsilon scan
+###############################################
+include("./CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+# epsilon = 0.14
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+factor = Int.(nx / 128)
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_-0.5"
+
+for epsilon in [0.14]
+    for c in [2, 6, 8] #number of grid points in 128 case
+        for CPC in [18, 20, 22, 24, 26]
+            println("c=$(c), CPC=$(CPC), epsilon=$(epsilon)")
+            if (c == 8) & (CPC == 14)
+                println("Already completed")
+            elseif (c == 2) & (CPC == 5) & (epsilon == 0.08)
+                println("Already completed")
+            else
+                cohesin_width = c * factor #changed from 2
+                CPC_width = CPC * factor #changed from 5
+                phi = initialize_round_CPC(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width)
+                # phi = initialize_geometric_CPC(nx, ny; CPC_width=20, cohesin_width=4)
+                alpha = -0.5
+                time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+                open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+                    writedlm(f, ["CPC_geometry_alpha_-0.5" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+                end
+            end
+        end
+    end
+end
+
+#%%
+###############################################
+# CPC geometry : alpha = -0.5, epsilon scan
+###############################################
+include("./CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+# epsilon = 0.14
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+factor = Int.(nx / 128)
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+
+for epsilon in [0.04]
+    for c in [2, 6, 8, 10] #number of grid points in 128 case
+        for CPC in [5, 10, 12, 14, 16, 18, 20]
+            println("c=$(c), CPC=$(CPC), epsilon=$(epsilon)")
+            # if (c == 8) & (CPC == 14)
+            #     println("Already completed")
+            # elseif (c == 2) & (CPC == 5) & (epsilon == 0.08)
+            #     println("Already completed")
+            # else
+            cohesin_width = c * factor #changed from 2
+            CPC_width = CPC * factor #changed from 5
+            phi = initialize_round_CPC(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width)
+            # phi = initialize_geometric_CPC(nx, ny; CPC_width=20, cohesin_width=4)
+            alpha = 0
+            time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+            open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+                writedlm(f, ["CPC_geometry_alpha_0" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+                # end
+            end
+        end
+    end
+end
