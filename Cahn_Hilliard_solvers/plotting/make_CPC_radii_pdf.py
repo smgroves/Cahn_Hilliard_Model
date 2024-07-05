@@ -159,7 +159,7 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/"
 paths = glob(f"{indir}/CPC_radii/*/")
 image_paths = []
-epsilon = "0.08"
+epsilon = "0.04"
 for p in paths:
     print(p)
     eps_match = re.search(r'eps_(\d*\.?\d*)', p)
