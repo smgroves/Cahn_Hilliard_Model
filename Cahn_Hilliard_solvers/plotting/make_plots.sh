@@ -149,6 +149,14 @@ indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solver
 dtout=10
 frame_rate=4
 dt=2.5e-5
-name="phi_256_2000_1.0e-5__CPC_28_cohesin_16_eps_0.04_alpha_0"
+name="phi_256_2000_1.0e-5__CPC_0.173_cohesin_0.1_eps_0.0031_alpha_0"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue');quit;"
+echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_-0.5"
+dtout=10
+frame_rate=4
+dt=2.5e-5
+name="phi_256_2000_1.0e-5__CPC_0.173_cohesin_0.2_eps_0.04_alpha_-0.5"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue');quit;"
 echo "Done."

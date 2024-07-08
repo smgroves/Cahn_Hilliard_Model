@@ -1,6 +1,7 @@
 # Julia implementation of a Multigrid solver for the Cahn-Hilliard equation
 # Author: Sarah Groves
 # June 7, 2024
+#doesn't work
 
 using DataFrames
 using DelimitedFiles

@@ -23,7 +23,7 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, a
     phi = shiftdim(phi,2); %Shift dimensions to move frames to the third dimension
     data = phi;
 
-    outdir = sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/CPC_radii/%s",name);
+    outdir = sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/%s",name);
     mkdir(outdir)
 
 

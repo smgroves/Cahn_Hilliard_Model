@@ -265,6 +265,32 @@ function initialize_geometric_CPC(nx, ny, CPC_width=20, cohesin_width=4)
     return phi
 end
 
+function initialize_round_CPC_um(nx, ny; CPC_width=0.173, cohesin_width=0.2, domain_width=3.2)
+    CPC_radius_grid_points = nx * CPC_width / domain_width
+    cohesin_width_grid_points = nx * cohesin_width / domain_width
+    cohesin_half_width = cohesin_width_grid_points / 2
+    # Create an empty matrix filled with -1
+    phi = fill(-1.0, nx, ny)
+
+    # Define the center of the matrix
+    center = (nx) / 2
+
+    # Loop through each element of the matrix
+    for i in 1:nx
+        for j in 1:ny
+            # Calculate the distance from the center
+            distance = norm([i - center, j - center])
+
+            # Check if the distance is less than or equal to CPC_width
+            if distance <= CPC_radius_grid_points
+                phi[i, j] = 1.0
+            elseif i > round((nx) / 2) - cohesin_half_width && i < round((nx) / 2) + cohesin_half_width
+                phi[i, j] = 1.0
+            end
+        end
+    end
+    return phi
+end
 
 function initialize_round_CPC(nx, ny; CPC_width=10, cohesin_width=4)
     # Create an empty matrix filled with -1

@@ -73,10 +73,11 @@ def add_images_to_pdf_grid(image_paths, pdf_path, images_per_row=2):
 
 def extract_variables(image_path):
     # Extract CPC and cohesin numbers using regex
-    cpc_match = re.search(r'CPC_(\d+)', image_path)
-    cohesin_match = re.search(r'cohesin_(\d+)', image_path)
-    cpc = int(cpc_match.group(1)) if cpc_match else 0
-    cohesin = int(cohesin_match.group(1)) if cohesin_match else 0
+    cpc_match = re.search(r'CPC_(\d*\.?\d*)', image_path) #updated for um
+    cohesin_match = re.search(r'cohesin_(\d*\.?\d*)', image_path) #updated for um
+
+    cpc = float(cpc_match.group(1)) if cpc_match else 0
+    cohesin = float(cohesin_match.group(1)) if cohesin_match else 0
     return cpc, cohesin
 def draw_rotated_text(c, text, x, y, angle):
     c.saveState()
@@ -111,21 +112,21 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
     cohesin_to_y = {cohesin: page_height - margin - (i * (img_width + padding)) for i, cohesin in enumerate(unique_cohesin)}
 
     # Add labels for CPC columns
-    c.drawString(page_width/2 -20, page_height - 10, f'CPC radius')
+    c.drawString(page_width/2 -50, page_height - 13, f'CPC radius in um [grid points]')
 
     for cpc, x in cpc_to_x.items():
-        c.drawString(x + img_width / 2, page_height - 25, f'{cpc/256}')
+        c.drawString(x + img_width / 2-5, page_height - 25, f'{cpc} [{round(256*cpc/3.2,3)}]')
 
 
     # Add labels for cohesin rows
-    draw_rotated_text(c, "(Full) cohesin width", margin -15, (page_height - margin) / 2 - 15, 90)
+    draw_rotated_text(c, "(Full) cohesin width (um)", margin -20, (page_height - margin) / 2 - 15, 90)
 
     for cohesin, y in cohesin_to_y.items():
         # c.drawString(margin / 2, y - img_width / 2, f'cohesin {cohesin}')
         c.saveState()
-        c.translate(25, y - img_width / 2 +10)
+        c.translate(25, y - img_width / 2 +5)
         c.rotate(90)
-        c.drawString(0, 0, f'{(cohesin*2)/256}')
+        c.drawString(0, 0, f'{(cohesin)}')
         c.restoreState()
         # Draw x-axis (CPC values)
     # c.setStrokeColorRGB(0, 0, 0)
@@ -157,9 +158,9 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
     c.save()
 
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/"
-paths = glob(f"{indir}/CPC_radii/*/")
+paths = glob(f"{indir}/radii_over_time_level_set_plots/alpha_-0.2/*/")
 image_paths = []
-epsilon = "0.04"
+epsilon = "0.0125"
 for p in paths:
     print(p)
     eps_match = re.search(r'eps_(\d*\.?\d*)', p)
@@ -168,7 +169,7 @@ for p in paths:
         png = f"{p}radii_over_time.png"
         image_paths.append(png)
 print(image_paths)
-pdf_path = f"{indir}/radii_over_time_{epsilon}.pdf"
+pdf_path = f"{indir}/radii_over_time_pdfs/radii_over_time_eps_{epsilon}_alpha_-0.2.pdf"
 # add_images_to_pdf(image_paths, pdf_path)
 
 add_images_to_pdf_sorted_grid(image_paths, pdf_path)

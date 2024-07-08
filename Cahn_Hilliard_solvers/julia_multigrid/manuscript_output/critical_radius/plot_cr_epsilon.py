@@ -157,6 +157,7 @@ plt.savefig(f"{y}_vs_epsilon.png")
 plt.show()
 
 #%%
+df = pd.read_csv("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv", header = 0, index_col=None)
 
 alpha = 0.2
 tmp = df.loc[df['alpha']==alpha]
@@ -181,9 +182,9 @@ poly1d_fn_max = np.poly1d(coef_max)
 # poly1d_fn is now a function which takes in x and returns an estimate for y
 f, ax = plt.subplots()
 plt.plot(xs,ys, 'o',label = "Minimum (inflection points)")
-plt.plot( [0.015009, 0.09, 0.15], poly1d_fn([0.015009, 0.09, 0.15]), '-', c = '#1f77b4')
+plt.plot( [0, 0.09, 0.15], poly1d_fn([0, 0.09, 0.15]), '-', c = '#1f77b4')
 plt.plot(xs_max,ys_max, 'o', label = "Maximum ($R_{eq}$ minimum)")
-plt.plot( [0.015009, 0.09, 0.15], poly1d_fn_max([0.015009, 0.09, 0.15]), '-', c = '#ff7f0e')
+plt.plot( [0, 0.09, 0.15], poly1d_fn_max([0, 0.09, 0.15]), '-', c = '#ff7f0e')
 plt.text(0.99,0.25, f"y = {round(coef[0],3)}x+ {round(coef[1],3)}",
          horizontalalignment='right',
       verticalalignment='center',
@@ -192,7 +193,7 @@ plt.text(.99,0.3, f"y = {round(coef_max[0],3)}x+ {round(coef_max[1],3)}",
          horizontalalignment='right',
       verticalalignment='center',
       transform = ax.transAxes, c = '#ff7f0e')
-plt.axhline(y = 0.108, label = "Experimental CPC $R_{critical}$", c = 'k', linestyle = "--")
+plt.axhline(y = 0.054, label = "Experimental CPC $R_{critical}$", c = 'k', linestyle = "--")
 plt.legend(loc ="lower right")
 
 plt.title(f"Critical radius vs. epsilon, alpha = {alpha}")
