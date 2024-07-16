@@ -633,3 +633,281 @@ for epsilon in [0.0031]
         end
     end
 end
+
+#%%
+###############################################
+# CPC geometry : change domain to [0,2]x[0,2]
+# length scale: 1 grid point = 25 nm (not 12.5)
+# domain width = 6.4um
+# epsilon is halved from normal length scale
+###############################################
+include("./CH_multigrid_solver_with_alpha_change_domain.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_domain_0_2"
+
+for epsilon in [0.00375, 0.0075, 0.015009]
+    for cohesin_width in [0.1, 0.2] #in um: radius of CPC droplet
+        for CPC_width in [0.125, 0.173, 0.22] #in um: total width of cohesin stripe, experimental = 0.173
+            println("cohesin=$(cohesin_width), CPC=$(CPC_width), epsilon=$(epsilon)")
+            phi = initialize_round_CPC_um(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width, domain_width=6.4)
+            alpha = 0
+            time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)_alpha_$(alpha)_domain_0_2", check_dir=false, alpha=alpha)
+            open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+                writedlm(f, ["CPC_geometry_alpha_0" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+                # end
+            end
+        end
+    end
+end
+
+
+#%%
+###############################################
+# CPC geometry : VCell IC
+###############################################
+using Glob
+datadir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/post_transition/256"
+ic_files = glob("*8.4max.csv", datadir)
+include("./CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+
+for file in ic_files
+    # if file == "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/03_25_24_CPC_relaxed_RefModel_128x64_03_25_24_relaxed_RefModel_100_256x256_100s_8.4max.csv"
+    #     println("already run")
+    # else
+    for epsilon in [0.00375, 0.006, 0.0075, 0.015009, 0.030019]
+        for alpha in [-0.5, -0.2, 0, 0.2] #in um: radius of CPC droplet
+            phi = initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
+            s = split(last(split(file, "/")), ".csv")[1]
+            outdir_prefix = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC"
+            outdir = "$(outdir_prefix)/$(s)"
+            println(outdir)
+            time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+            open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+                writedlm(f, ["CPC_geometry_alpha_0" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+                # end
+            end
+        end
+    end
+end
+# end
+
+#%%
+###############################################
+# CPC geometry : VCell IC
+###############################################
+using Glob
+datadir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/pre_transition_relaxed/"
+ic_files = glob("*8.4max.csv", datadir)
+include("./CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+
+for file in ic_files
+    # if file == "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/03_25_24_CPC_relaxed_RefModel_128x64_03_25_24_relaxed_RefModel_100_256x256_100s_8.4max.csv"
+    #     println("already run")
+    # else
+    for epsilon in [0.00375, 0.006, 0.0075, 0.015009, 0.030019]
+        for alpha in [-0.5, -0.2, 0, 0.2] #in um: radius of CPC droplet
+            phi = initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
+            s = split(last(split(file, "/")), ".csv")[1]
+            outdir_prefix = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC"
+            outdir = "$(outdir_prefix)/$(s)"
+            println(outdir)
+            time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+            open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+                writedlm(f, ["CPC_geometry_alpha_0" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+                # end
+            end
+        end
+    end
+end
+# end
+
+#%%
+###############################################
+# CPC geometry : VCell IC after 70s relaxed
+###############################################
+using Glob
+datadir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/post_transition_70s/"
+ic_files = glob("*8.4max.csv", datadir)
+include("./CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+
+for file in ic_files
+    # if file == "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/03_25_24_CPC_relaxed_RefModel_128x64_03_25_24_relaxed_RefModel_100_256x256_100s_8.4max.csv"
+    #     println("already run")
+    # else
+    for epsilon in [0.00375, 0.006, 0.0075, 0.0125, 0.015009, 0.030019, 0.04]
+        for alpha in [-0.5, -0.2, 0, 0.2] #in um: radius of CPC droplet
+            phi = initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
+            s = split(last(split(file, "/")), ".csv")[1]
+            outdir_prefix = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC"
+            outdir = "$(outdir_prefix)/$(s)"
+            println(outdir)
+            time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+            open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+                writedlm(f, ["CPC_geometry_VCell 70s" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+                # end
+            end
+        end
+    end
+end
+# end
+
+#%%
+
+include("./Cahn_Hilliard_solvers/julia_multigrid/CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+
+file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/pre_transition_relaxed/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_70_256x256_70s_8.4max.csv"
+for epsilon in [0.00375, 0.006, 0.0075, 0.0125, 0.015009, 0.030019, 0.04]
+    for alpha in [-0.5, -0.2, 0, 0.2] #in um: radius of CPC droplet
+        phi = initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
+        s = split(last(split(file, "/")), ".csv")[1]
+        outdir_prefix = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC"
+        outdir = "$(outdir_prefix)/$(s)"
+        println(outdir)
+        time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+        open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+            writedlm(f, ["CPC_geometry_VCell 70s" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+            # end
+        end
+    end
+end
+
+#%%
+
+include("./CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+
+file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/post_transition_70s/10_24_23_CPC_tensed_RefModel_128x64_post_transition_07_14_24_500s_post_transition_base_0_256x256_0s_8.4max.csv"
+for epsilon in [0.00375, 0.006, 0.0075, 0.0125, 0.015009, 0.030019, 0.04]
+    for alpha in [-0.5, -0.2, 0, 0.2] #in um: radius of CPC droplet
+        phi = initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
+        s = split(last(split(file, "/")), ".csv")[1]
+        outdir_prefix = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC"
+        outdir = "$(outdir_prefix)/$(s)"
+        println(outdir)
+        time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+        open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+            writedlm(f, ["CPC_geometry_VCell 70s" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+            # end
+        end
+    end
+end
+
+#%%
+
+include("./Cahn_Hilliard_solvers/julia_multigrid/CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+
+file = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/pre_transition_relaxed/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_transactiv_70_256x256_70s_8.4max.csv"
+for epsilon in [0.00375, 0.006, 0.0075, 0.0125, 0.015009, 0.030019, 0.04]
+    for alpha in [-0.5, -0.2, 0, 0.2] #in um: radius of CPC droplet
+        phi = initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
+        s = split(last(split(file, "/")), ".csv")[1]
+        outdir_prefix = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC"
+        outdir = "$(outdir_prefix)/$(s)"
+        println(outdir)
+        time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+        open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+            writedlm(f, ["CPC_geometry_VCell 70s" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+            # end
+        end
+    end
+end
+
+#%%
+
+include("./CH_multigrid_solver_with_alpha_v2.jl")
+
+tol = 1e-5
+dt = 2.5e-5
+max_it_CH = 10000
+total_time = 0.05
+max_it = Int.(round(total_time / dt))
+# max_it = 19660
+ns = 10
+nx = 256
+ny = nx
+indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/data/"
+files = [#"$(indir)/pre_transition_relaxed/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_70_256x256_70s_8.4max.csv",
+    "$(indir)/post_transition_70s/10_24_23_CPC_tensed_RefModel_128x64_post_transition_07_14_24_500s_post_transition_base_20Pac_0_256x256_0s_8.4max.csv"]
+for file in files
+    for epsilon in [0.016, 0.018, 0.02, 0.025]
+        alpha = -0.2
+        phi = initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
+        s = split(last(split(file, "/")), ".csv")[1]
+        outdir_prefix = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC"
+        outdir = "$(outdir_prefix)/$(s)"
+        println(outdir)
+        time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_eps_$(epsilon)_alpha_$(alpha)", check_dir=false, alpha=alpha)
+        open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+            writedlm(f, ["CPC_geometry_VCell 70s" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+            # end
+        end
+    end
+end

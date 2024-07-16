@@ -33,6 +33,7 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
             curr_t=(i-1)*dtout*dt;
         
             fig = figure('visible','off');
+            % phi(:,:,i) = transpose(phi(:,:,i));
             if plot_type == "surf"
                 surf(phi(:,:,i),'EdgeColor','none');colorbar;axis square;
                 view(2);

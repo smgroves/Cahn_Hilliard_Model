@@ -38,18 +38,18 @@ plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.060037.pdf")
 # plt.show()
 #%%
 ## Reuse this one
-alpha = "-0.2"
+alpha = "0.0"
 
-for epsilon in ["0.045028"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
+for epsilon in ["0.0075047","0.0037523","0.022514"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
     folder=f"critical_radius/"
-    tmp = pd.read_csv(f"{indir}/{folder}/radius_0.5_level_set_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
+    tmp = pd.read_csv(f"{indir}/{folder}/alpha_{alpha}/radius_0.5_level_set_256_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
                     on_bad_lines='skip')
     print(tmp.shape)
     sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize = 'small')
     plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
     plt.tight_layout()
-    plt.savefig(f"{indir}/{folder}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}.pdf")
+    plt.savefig(f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_256_{epsilon}_alpha_{alpha}.pdf")
     plt.close()
 #%%
 epsilon = "0.030019"

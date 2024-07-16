@@ -373,7 +373,7 @@ function initialization(nx, ny; method="spinodal", initial_file="", delim=",", h
     return oc
 end
 
-function cahn(c_old, c_new, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level, alpha; suffix="")
+function cahn(c_old, c_new, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level, alpha; suffix="", outdir="")
     it_mg2 = 0
     resid2 = 1
     sc, smu = source(c_old, nx, ny, dt)
@@ -518,7 +518,7 @@ function main_w_alpha(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix=
 
         #run cahn hilliard
         for it in 1:max_it
-            nc = cahn(oc, nc, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level, alpha, suffix=suffix)
+            nc = cahn(oc, nc, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level, alpha, suffix=suffix, outdir=outdir)
 
             if print_mass
                 print_mat("$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc, h2, nx, ny))

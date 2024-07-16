@@ -153,13 +153,13 @@ print(df.head())
 y = "critical equilibrium radius (max)"
 sns.lineplot(data = df, y = y, x = "epsilon",  marker='o', hue = 'alpha')
 plt.title(f"Critical radius vs. epsilon \n {y}, alpha = -0.5")
-plt.savefig(f"{y}_vs_epsilon.png")
+# plt.savefig(f"{y}_vs_epsilon.png")
 plt.show()
 
 #%%
 df = pd.read_csv("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv", header = 0, index_col=None)
 
-alpha = 0.2
+alpha = 0
 tmp = df.loc[df['alpha']==alpha]
 # plt.figure()
 # plt.plot(tmp['epsilon'], tmp['critical equilibrium radius (min)'], label = "Min (inflection point)", marker = "o")
@@ -169,35 +169,36 @@ tmp = df.loc[df['alpha']==alpha]
 # plt.xlabel("Epsilon")
 # plt.ylabel("Critical Radius")
 # plt.show()
-xs = np.array(tmp['epsilon'])
-ys = np.array(tmp['critical equilibrium radius (min)'])
+xs = np.array(tmp['epsilon'][0:2])
+ys = np.array(tmp['critical equilibrium radius (min)'][0:2])
 coef = np.polyfit(xs,ys,1)
 poly1d_fn = np.poly1d(coef) 
 
-xs_max = np.array(tmp['epsilon'].values)
-ys_max = np.array(tmp['critical equilibrium radius (max)'].values)
-coef_max = np.polyfit(xs_max,ys_max,1)
-poly1d_fn_max = np.poly1d(coef_max) 
+# xs_max = np.array(tmp['epsilon'].values)
+# ys_max = np.array(tmp['critical equilibrium radius (max)'].values)
+# coef_max = np.polyfit(xs_max,ys_max,1)
+# poly1d_fn_max = np.poly1d(coef_max) 
 
 # poly1d_fn is now a function which takes in x and returns an estimate for y
 f, ax = plt.subplots()
 plt.plot(xs,ys, 'o',label = "Minimum (inflection points)")
-plt.plot( [0, 0.09, 0.15], poly1d_fn([0, 0.09, 0.15]), '-', c = '#1f77b4')
-plt.plot(xs_max,ys_max, 'o', label = "Maximum ($R_{eq}$ minimum)")
-plt.plot( [0, 0.09, 0.15], poly1d_fn_max([0, 0.09, 0.15]), '-', c = '#ff7f0e')
+plt.plot( [0, 0.09], poly1d_fn([0, 0.09]), '-', c = '#1f77b4')
+# plt.plot(xs_max,ys_max, 'o', label = "Maximum ($R_{eq}$ minimum)")
+# plt.plot( [0, 0.09, 0.15], poly1d_fn_max([0, 0.09, 0.15]), '-', c = '#ff7f0e')
 plt.text(0.99,0.25, f"y = {round(coef[0],3)}x+ {round(coef[1],3)}",
          horizontalalignment='right',
       verticalalignment='center',
       transform = ax.transAxes, c = '#1f77b4')
-plt.text(.99,0.3, f"y = {round(coef_max[0],3)}x+ {round(coef_max[1],3)}",
-         horizontalalignment='right',
-      verticalalignment='center',
-      transform = ax.transAxes, c = '#ff7f0e')
+# plt.text(.99,0.3, f"y = {round(coef_max[0],3)}x+ {round(coef_max[1],3)}",
+#          horizontalalignment='right',
+#       verticalalignment='center',
+#       transform = ax.transAxes, c = '#ff7f0e')
 plt.axhline(y = 0.054, label = "Experimental CPC $R_{critical}$", c = 'k', linestyle = "--")
 plt.legend(loc ="lower right")
 
 plt.title(f"Critical radius vs. epsilon, alpha = {alpha}")
 plt.xlabel("Epsilon")
 plt.ylabel("Critical Radius")
-plt.savefig(f"Critical equilibrium radius (min and max)_vs_epsilon_alpha_{alpha}.png")
+plt.show()
+# plt.savefig(f"Critical equilibrium radius (min)_vs_epsilon_alpha_{alpha}.png")
 # %%
