@@ -142,7 +142,7 @@ sim="10_24_23_CPC_tensed_RefModel_128x64_post_transition_07_14_24_500s_post_tran
 indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC/$sim"
 dtout=10
 dt=2.5e-5
-for eps in 0.016 0.018 0.02 0.025
+for eps in 0.024 0.023
 do
     for alpha in -0.2
     do
