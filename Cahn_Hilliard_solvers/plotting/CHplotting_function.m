@@ -10,7 +10,7 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
     % plot_type = "contourf";
     phi = readmatrix(sprintf('%s/%s.txt', indir, name),'FileType','text');
     % phi = readmatrix("/Users/smgroves/Documents/GitHub/jlCHSolver/output.txt");
-    phidims = size(phi);
+    phidims = size(phi)
     phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured
     phidims(1) = phidims(2); %Determine size of square grid
     phi = reshape(phi,phidims(1),phidims(3),phidims(2)); %Reshape multidimensional array
@@ -33,7 +33,7 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
             curr_t=(i-1)*dtout*dt;
         
             fig = figure('visible','off');
-            % phi(:,:,i) = transpose(phi(:,:,i));
+            phi(:,:,i) = transpose(phi(:,:,i));
             if plot_type == "surf"
                 surf(phi(:,:,i),'EdgeColor','none');colorbar;axis square;
                 view(2);

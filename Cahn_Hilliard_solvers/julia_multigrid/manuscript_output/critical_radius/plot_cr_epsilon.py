@@ -169,8 +169,8 @@ tmp = df.loc[df['alpha']==alpha]
 # plt.xlabel("Epsilon")
 # plt.ylabel("Critical Radius")
 # plt.show()
-xs = np.array(tmp['epsilon'][0:2])
-ys = np.array(tmp['critical equilibrium radius (min)'][0:2])
+xs = np.array(tmp['epsilon'])#[0:2])
+ys = np.array(tmp['critical equilibrium radius (min)'])#[0:2])
 coef = np.polyfit(xs,ys,1)
 poly1d_fn = np.poly1d(coef) 
 
@@ -181,7 +181,7 @@ poly1d_fn = np.poly1d(coef)
 
 # poly1d_fn is now a function which takes in x and returns an estimate for y
 f, ax = plt.subplots()
-plt.plot(xs,ys, 'o',label = "Minimum (inflection points)")
+plt.plot(xs,ys, 'o')#,label = "Minimum (inflection points)")
 plt.plot( [0, 0.09], poly1d_fn([0, 0.09]), '-', c = '#1f77b4')
 # plt.plot(xs_max,ys_max, 'o', label = "Maximum ($R_{eq}$ minimum)")
 # plt.plot( [0, 0.09, 0.15], poly1d_fn_max([0, 0.09, 0.15]), '-', c = '#ff7f0e')
@@ -201,4 +201,43 @@ plt.xlabel("Epsilon")
 plt.ylabel("Critical Radius")
 plt.show()
 # plt.savefig(f"Critical equilibrium radius (min)_vs_epsilon_alpha_{alpha}.png")
+#%%
+import scipy.optimize
+
+def monoExp(x, m, t, b):
+#     return m * np.exp(t * x) + b
+      #b(1).*(b(2).*xdata./(b(3) + xdata) + xdata);
+      return m*(t*x/(b+x)+x)## HYPERBOLIC FIT
+      # return 
+# perform the fit
+p0 = (0,0,0) # start with values near those we expect
+params, cv = scipy.optimize.curve_fit(monoExp, xs, ys, p0)
+print(params)
+m, t, b = params
+sampleRate = 20_000 # Hz
+tauSec = (1 / t) / sampleRate
+
+# determine quality of the fit
+squaredDiffs = np.square(ys - monoExp(xs, m, t, b))
+squaredDiffsFromMean = np.square(ys - np.mean(ys))
+rSquared = 1 - np.sum(squaredDiffs) / np.sum(squaredDiffsFromMean)
+print(f"R² = {rSquared}")
+
+# plot the results
+fig = plt.figure(figsize = (5,4))
+plt.text(0.75,0.024, f"R² = {round(rSquared,3)}",
+         horizontalalignment='right',
+      verticalalignment='center',
+      transform = ax.transAxes)
+plt.plot(xs, ys, '.', label="Data")
+plt.plot(np.linspace(0, 0.09), monoExp(np.linspace(0, 0.09), m, t, b), '--', label="Fit")
+print(monoExp(0.0125, m, t, b))
+plt.title("Hyperbolic-to-Linear Fit of \n Critical Radius vs Epsilon")
+plt.xlabel("Epsilon")
+plt.ylabel("Critical Radius")
+plt.legend()
+plt.savefig(f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin.png")
+plt.close()
+plt.show()
+
 # %%
