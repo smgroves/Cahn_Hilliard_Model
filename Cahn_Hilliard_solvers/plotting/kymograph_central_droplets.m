@@ -16,6 +16,7 @@ function [] = kymograph_central_droplets(indir, outdir, name, dt, dtout, transpo
     phi = reshape(phi,phidims(1),phidims(3),phidims(2)); %Reshape multidimensional array
 
     fig = figure('visible','off');
+
     x = (round(Nx/2));
     if transposed
         % if transposed, then the order is already correct for [x vs time]
@@ -27,9 +28,11 @@ function [] = kymograph_central_droplets(indir, outdir, name, dt, dtout, transpo
     end
     clim([-1, 1]);
     colormap(redblue(100));
+    % colormap(h,parula);
+
     XLabels = 1:phidims(3);
     CustomXLabels = string((XLabels-1)*dt*dtout);
-    CustomXLabels(mod(XLabels,10) ~= 0) = " ";
+    CustomXLabels(mod(XLabels,100) ~= 0) = " ";
     h.XDisplayLabels = CustomXLabels;
     h.XLabel = "Time";
 
@@ -39,7 +42,8 @@ function [] = kymograph_central_droplets(indir, outdir, name, dt, dtout, transpo
     h.YDisplayLabels = CustomYLabels;
     h.YLabel = sprintf("Y (Central axis at x = %d)",x );
     h.Title = name;
-    print(gcf,sprintf('%s/kymograph_x_%d.png', outdir, x),"-dpng")
+
+    print(gcf,sprintf('%s/kymograph_x_%d_redblue.png', outdir, x),"-dpng")
 end
 
 function c = redblue(m)

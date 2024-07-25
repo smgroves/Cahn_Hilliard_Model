@@ -28,3 +28,21 @@ do
         /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "level_set_radius_multiple_droplets($CPC, $cohesin, $epsilon, '$indir', '0');quit;"
     done
 done
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+epsilon=0.0096
+for cohesin in 0.1 
+do
+   for CPC in 0.125 
+    do
+        echo $cohesin
+        echo $CPC
+        echo $epsilon
+        /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "level_set_radius_multiple_droplets($CPC, $cohesin, '$epsilon', '$indir', '0', 512, 0.000001525878906, 0.03);quit;"
+    done
+done
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "level_set_radius_multiple_droplets(20, 8, '0.007504684956431058', '$indir', '0', 512, 0.00000152595, 0.03);quit;"

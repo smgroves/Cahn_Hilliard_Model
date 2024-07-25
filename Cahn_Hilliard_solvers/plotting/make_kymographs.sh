@@ -84,6 +84,7 @@ done
 
 
 for time in 0 10 20 50
+
 do
     sim="10_24_23_CPC_tensed_RefModel_128x64_post_transition_07_14_24_500s_post_transition_base_20Pac_${time}_256x256_${time}s_8.4max"
     indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC/$sim"
@@ -153,4 +154,51 @@ do
         /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets('$indir', '$outdir','$name', $dt, $dtout, true);quit;"
     done
 done
+echo "Done."
+
+
+
+
+# for SASCO presentation
+sim="10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_100_256x256_100s_8.4max"
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC/$sim"
+dtout=10
+dt=2.5e-6
+name="phi_256_8000_1.0e-5__eps_0.030019_alpha_-0.2"
+echo $name 
+outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$sim/$name"
+echo $outdir
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets('$indir', '$outdir','$name', $dt, $dtout, true);quit;"
+echo "Done."
+
+sim="10_24_23_CPC_tensed_RefModel_128x64_post_transition_10_25_23_400s_post_transition_base_20Pac_0_256x256_0s_8.4max"
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC/$sim"
+dtout=10
+dt=2.5e-6
+name="phi_256_8000_1.0e-5__eps_0.030019_alpha_-0.2"
+echo $name 
+outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$sim/$name"
+echo $outdir
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets('$indir', '$outdir','$name', $dt, $dtout, true);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+dtout=10
+dt=0.000001525878906
+name="phi_512_19661_1.0e-5__CPC_0.125_cohesin_0.1_eps_0.0096_alpha_0"
+echo $name 
+outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$name"
+echo $outdir
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets('$indir', '$outdir','$name', $dt, $dtout, false);quit;"
+echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+dtout=10
+dt=0.000001525878906
+name="phi_512_19660_1.0e-5__CPC_20_cohesin_8_eps_0.007504684956431058"
+echo $name 
+outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$name"
+echo $outdir
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets('$indir', '$outdir','$name', $dt, $dtout, false);quit;"
 echo "Done."

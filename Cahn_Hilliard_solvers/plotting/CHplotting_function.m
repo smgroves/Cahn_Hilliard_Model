@@ -1,7 +1,7 @@
 % indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/outputs/julia/figure_2_spinodal_decomp";
 % name = "phi_32_10000_1.0e-6_";
 
-function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plot_type,color)
+function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plot_type,color, cutoff)
     %if you want a faster video, set frame_rate to something like 4
 
     % close all hidden
@@ -27,7 +27,10 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
     % Set consistent color axis limits for the entire movie
     clim([-1, 1]);
     % for i = 1:10
-    for i = 1:phidims(3)
+    if cutoff == 0
+        cutoff = phidims(3);
+    end
+    for i = 1:cutoff
 
         if mod(i-1,frame_rate) == 0
             curr_t=(i-1)*dtout*dt;

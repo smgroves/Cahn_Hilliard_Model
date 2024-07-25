@@ -1,20 +1,22 @@
 % Code transparency: part of this code was generated with ChatGPT4o.
 % June 25, 2025
 % Sarah Maddox Groves
-function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, alpha)
+function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, alpha, Nx,dt, total_time)
     % indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_-0.5";
-    Nx = 2^8;Ny=2^8;
-
-    total_time=.05;
-    dt_name="2.5e-5";
+    % Nx = 2^8;Ny=2^8;
+    Ny = Nx;
+    % total_time=.05;
+    % dt_name="2.5e-5";
     % CPC=28;
-    dt = str2double(dt_name);
+    % dt = str2double(dt_name);
     ns = 10;
     dt_in_movie = dt*ns;
-    timesteps=total_time/dt;
+    timesteps=round(total_time/dt);
     % cohesin=16;
     % epsilon=0.14;
-    name=sprintf('phi_256_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s_alpha_%s',string(timesteps),string(CPC), string(cohesin), string(epsilon), string(alpha))
+    name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s',Nx,string(timesteps),string(CPC), string(cohesin), epsilon)
+
+    % name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s_alpha_%s',Nx,string(timesteps),string(CPC), string(cohesin), string(epsilon), string(alpha))
     phi = readmatrix(sprintf('%s/%s.txt', indir, name),'FileType','text');
     phidims = size(phi);
     phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured
@@ -138,7 +140,7 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, a
                 break %if the droplet dissolves, this will throw an error, so stop iterating over timepoints
             end
         end
-        if true
+        if false
             if ismember(timepoint, [0, 0.004, 0.0075, 0.008, 0.01, 0.025, 0.04, 0.05])
                 data_at_t = data(:, :,t);
             
@@ -150,8 +152,8 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, a
                 [xx,yy] = meshgrid(x,y); 
                 figure('visible', 'off');
                 contour(data_at_t, [0, 0], 'LineWidth', 2, "Color", '#808080'); axis square;
-                xlim([0, 256]);
-                ylim([0, 256]);
+                xlim([0, Nx]);
+                ylim([0, Nx]);
                 hold on;
             
                 % Extract contours at the 0 level
@@ -243,8 +245,8 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, a
             'Color', colors{i},"DisplayName",sprintf('Data %d', i));
     end
     legend show;
-    xlim([0, 256]);
-    ylim([0, 256]);
+    xlim([0, Nx]);
+    ylim([0, Nx]);
     title(sprintf('Centers of Each Droplet \n %s', name));
 
     % sprintf('%s/droplet_centers.pdf', outdir)
