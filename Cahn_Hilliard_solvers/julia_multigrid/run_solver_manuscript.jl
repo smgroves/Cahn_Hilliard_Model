@@ -1088,7 +1088,9 @@ for epsilon in [0.0096]
     end
 end
 
-#after this, still need to do .173/.1 and .22/.1 combos
+#DONE: cohesin = .1, CPC = .1, .12, .125, .15, need CPC = .173, .22
+#DONE: cohesin = .05, CPC = .1, .12, .125, .15, need CPC = .173, .22
+# need cohesin = .2 TODO
 
 #%%
 ###############################################
@@ -1156,9 +1158,12 @@ for epsilon in [0.0192, 0.0096, 0.015]
     end
 end
 
+#TODO
+#DONE: eps .0192, cohesin = .1, CPC = .125
+
 #%%
 ################################
-# CPC geometry: compare grid sizes
+# CPC geometry: compare domains-- smaller size 256 to compare to domain 0-2 with nx = 512
 ################################
 include("./Cahn_Hilliard_solvers/julia_multigrid/CH_multigrid_solver_with_alpha_v2.jl")
 

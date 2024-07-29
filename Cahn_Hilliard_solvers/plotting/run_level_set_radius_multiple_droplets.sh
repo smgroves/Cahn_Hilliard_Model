@@ -52,3 +52,7 @@ indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solver
 
 indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_domain_0_2"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "level_set_radius_multiple_droplets(.125, .1, 0.0192, '$indir', '0', 512, 0.000025, 0.05, '_domain_0_2');quit;"
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "level_set_radius_multiple_droplets(.125, .1, 0.0096, '$indir', '0', 256, 0.000001525878906, 0.03, '');quit;"
