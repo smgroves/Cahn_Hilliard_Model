@@ -34,7 +34,7 @@ indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solver
 epsilon=0.0096
 for cohesin in 0.1 
 do
-   for CPC in 0.125 
+   for CPC in 0.1 0.12 0.15
     do
         echo $cohesin
         echo $CPC

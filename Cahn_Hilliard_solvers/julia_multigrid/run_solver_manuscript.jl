@@ -1074,7 +1074,7 @@ ny = nx
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
 
 for epsilon in [0.0096]
-    for cohesin_width in [0.1, 0.05, 0.15, 0.2] #in um: radius of CPC droplet, experimental = 0.2
+    for cohesin_width in [0.05, 0.15, 0.2] #in um: radius of CPC droplet, experimental = 0.2
         for CPC_width in [0.125, 0.1, 0.12, 0.15, 0.173, 0.22] #in um: total width of cohesin stripe, experimental = 0.173
             println("cohesin=$(cohesin_width), CPC=$(CPC_width), epsilon=$(epsilon)")
             phi = initialize_round_CPC_um(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width, domain_width=3.2)
@@ -1087,3 +1087,5 @@ for epsilon in [0.0096]
         end
     end
 end
+
+#after this, still need to do .173/.1 and .22/.1 combos

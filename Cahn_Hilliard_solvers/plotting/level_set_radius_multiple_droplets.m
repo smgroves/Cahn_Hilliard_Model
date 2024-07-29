@@ -14,9 +14,9 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, a
     timesteps=round(total_time/dt);
     % cohesin=16;
     % epsilon=0.14;
-    name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s',Nx,string(timesteps),string(CPC), string(cohesin), epsilon)
+    % name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s',Nx,string(timesteps),string(CPC), string(cohesin), epsilon)
 
-    % name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s_alpha_%s',Nx,string(timesteps),string(CPC), string(cohesin), string(epsilon), string(alpha))
+    name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s_alpha_%s',Nx,string(timesteps),string(CPC), string(cohesin), string(epsilon), string(alpha))
     phi = readmatrix(sprintf('%s/%s.txt', indir, name),'FileType','text');
     phidims = size(phi);
     phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured

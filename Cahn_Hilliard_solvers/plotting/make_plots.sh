@@ -259,3 +259,29 @@ dt=0.000001525878906
 name="phi_512_19661_1.0e-5__CPC_0.125_cohesin_0.1_eps_0.0096_alpha_0"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue', 0);quit;"
 echo "Done."
+
+# alpha = 0 eps = 0.0096
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+dtout=10
+frame_rate=10
+dt=0.000001525878906
+name="phi_512_19661_1.0e-5__CPC_0.1_cohesin_0.1_eps_0.0096_alpha_0"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue', 0);quit;"
+echo "Done."
+
+# alpha = 0 eps = 0.0096
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+dtout=10
+frame_rate=10
+dt=0.000001525878906
+name="phi_512_19661_1.0e-5__CPC_0.12_cohesin_0.1_eps_0.0096_alpha_0"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue', 0);quit;"
+echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+dtout=10
+frame_rate=10
+dt=0.000001525878906
+name="phi_512_19661_1.0e-5__CPC_0.15_cohesin_0.1_eps_0.0096_alpha_0"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue', 0);quit;"
+echo "Done."
