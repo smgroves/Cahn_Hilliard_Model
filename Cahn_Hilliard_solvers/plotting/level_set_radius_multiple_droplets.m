@@ -1,7 +1,7 @@
 % Code transparency: part of this code was generated with ChatGPT4o.
 % June 25, 2025
 % Sarah Maddox Groves
-function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, alpha, Nx,dt, total_time)
+function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, alpha, Nx,dt, total_time, suffix)
     % indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_-0.5";
     % Nx = 2^8;Ny=2^8;
     Ny = Nx;
@@ -16,7 +16,7 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, a
     % epsilon=0.14;
     % name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s',Nx,string(timesteps),string(CPC), string(cohesin), epsilon)
 
-    name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s_alpha_%s',Nx,string(timesteps),string(CPC), string(cohesin), string(epsilon), string(alpha))
+    name=sprintf('phi_%d_%s_1.0e-5__CPC_%s_cohesin_%s_eps_%s_alpha_%s%s',Nx,string(timesteps),string(CPC), string(cohesin), string(epsilon), string(alpha), suffix)
     phi = readmatrix(sprintf('%s/%s.txt', indir, name),'FileType','text');
     phidims = size(phi);
     phidims(3) = phidims(1)/phidims(2); %Determine number of frames captured
