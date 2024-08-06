@@ -73,6 +73,7 @@ def add_images_to_pdf_grid(image_paths, pdf_path, images_per_row=2):
 
 def extract_variables(image_path):
     # Extract CPC and cohesin numbers using regex
+    print(image_path)
     cpc_match = re.search(r'CPC_(\d*\.?\d*)', image_path) #updated for um
     cohesin_match = re.search(r'cohesin_(\d*\.?\d*)', image_path) #updated for um
 
@@ -115,7 +116,7 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
     c.drawString(page_width/2 -50, page_height - 13, f'CPC radius in um [grid points]')
 
     for cpc, x in cpc_to_x.items():
-        c.drawString(x + img_width / 2-5, page_height - 25, f'{cpc} [{round(256*cpc/3.2,3)}]')
+        c.drawString(x , page_height - 25, f'{cpc} [{round(256*cpc/3.2,3)}]')
 
 
     # Add labels for cohesin rows
@@ -124,7 +125,7 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
     for cohesin, y in cohesin_to_y.items():
         # c.drawString(margin / 2, y - img_width / 2, f'cohesin {cohesin}')
         c.saveState()
-        c.translate(25, y - img_width / 2 +5)
+        c.translate(25, y - img_width / 2 )
         c.rotate(90)
         c.drawString(0, 0, f'{(cohesin)}')
         c.restoreState()
@@ -157,19 +158,37 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
 
     c.save()
 
+# indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/"
+# paths = glob(f"{indir}/radii_over_time_level_set_plots/alpha_-0.2/*/")
+# image_paths = []
+# epsilon = "0.0125"
+# for p in paths:
+#     print(p)
+#     eps_match = re.search(r'eps_(\d*\.?\d*)', p)
+#     eps = (eps_match.group(1)) if eps_match else 0
+#     if eps == epsilon:
+#         png = f"{p}radii_over_time.png"
+#         image_paths.append(png)
+# print(image_paths)
+# pdf_path = f"{indir}/radii_over_time_pdfs/radii_over_time_eps_{epsilon}_alpha_-0.2.pdf"
+# # add_images_to_pdf(image_paths, pdf_path)
+
+# add_images_to_pdf_sorted_grid(image_paths, pdf_path)
+
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/"
-paths = glob(f"{indir}/radii_over_time_level_set_plots/alpha_-0.2/*/")
+paths = glob(f"{indir}radii_over_time_level_set_plots/domain_0_2_from_rivanna_kymographs/*/")
 image_paths = []
-epsilon = "0.0125"
+epsilon = "0.0096"
 for p in paths:
-    print(p)
     eps_match = re.search(r'eps_(\d*\.?\d*)', p)
     eps = (eps_match.group(1)) if eps_match else 0
     if eps == epsilon:
-        png = f"{p}radii_over_time.png"
+        # png = f"{p}radii_over_time.png"
+        png=f"{p}kymograph_x_256_redblue_um.png"
         image_paths.append(png)
 print(image_paths)
-pdf_path = f"{indir}/radii_over_time_pdfs/radii_over_time_eps_{epsilon}_alpha_-0.2.pdf"
+# pdf_path = f"{indir}/radii_over_time_pdfs/radii_over_time_eps_{epsilon}_alpha_-0.2.pdf"
+pdf_path = f"{indir}/kymograph_pdfs/kymographs_domain_0_2_CPC_cohesin_scan.pdf"
 # add_images_to_pdf(image_paths, pdf_path)
 
 add_images_to_pdf_sorted_grid(image_paths, pdf_path)

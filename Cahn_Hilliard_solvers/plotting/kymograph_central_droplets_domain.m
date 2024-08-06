@@ -3,7 +3,7 @@
 
 % dt = 2.5e-5;
 % dtout = 10;
-function [] = kymograph_central_droplets(indir, outdir, name, dt, dtout, transposed, cutoff)
+function [] = kymograph_central_droplets_domain(indir, outdir, name, dt, dtout, transposed, cutoff, domain_um)
 
     mkdir(outdir) 
 
@@ -51,13 +51,19 @@ function [] = kymograph_central_droplets(indir, outdir, name, dt, dtout, transpo
     h.XLabel = "Time";
 
     YLabels = 1:phidims(2);
-    CustomYLabels = string(YLabels);
-    CustomYLabels(mod(YLabels,50) ~= 0) = " ";
+    % CustomYLabels = string(YLabels);
+
+    % in um
+    % 
+    CustomYLabels = string(domain_um*(YLabels-x)/Nx);
+    % CustomYLabels(mod(YLabels-x,50) ~= 0) = " ";
+    CustomYLabels(mod(domain_um*(YLabels-x)/Nx,.4) ~= 0) = " ";
+
     h.YDisplayLabels = CustomYLabels;
-    h.YLabel = sprintf("Y (Central axis at x = %d)",x );
+    h.YLabel = "Y (um)";
     h.Title = name;
 
-    print(gcf,sprintf('%s/kymograph_x_%d_redblue.png', outdir, x),"-dpng")
+    print(gcf,sprintf('%s/kymograph_x_%d_redblue_um.png', outdir, x),"-dpng")
 end
 
 function c = redblue(m)

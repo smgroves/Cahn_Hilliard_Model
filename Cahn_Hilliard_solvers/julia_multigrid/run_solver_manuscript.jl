@@ -1099,35 +1099,9 @@ end
 # domain width = 6.4um
 # epsilon should be doubled from normal length scale
 # grid size is doubled to keep the same resolution (512)
+
+## THIS WAS RUN ON RIVANNA IN A JOB ARRAY 7/30
 ###############################################
-# include("./Cahn_Hilliard_solvers/julia_multigrid/CH_multigrid_solver_with_alpha_change_domain.jl")
-
-# tol = 1e-5
-# dt = 0.1 * (1 / 256)^2
-
-# max_it_CH = 10000
-# total_time = 0.03
-# max_it = Int.(round(total_time / dt))
-# # max_it = 19660
-# ns = 10
-# nx = 1024
-# ny = nx
-# outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_domain_0_2"
-
-# for epsilon in [0.0192]
-#     for cohesin_width in [0.1] #in um: radius of CPC droplet
-#         for CPC_width in [0.125] #in um: total width of cohesin stripe, experimental = 0.173
-#             println("cohesin=$(cohesin_width), CPC=$(CPC_width), epsilon=$(epsilon)")
-#             phi = initialize_round_CPC_um(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width, domain_width=6.4)
-#             alpha = 0
-#             time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)_alpha_$(alpha)_domain_0_2", check_dir=false, alpha=alpha)
-#             open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
-#                 writedlm(f, ["CPC_geometry_alpha_0" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
-#                 # end
-#             end
-#         end
-#     end
-# end
 
 include("./Cahn_Hilliard_solvers/julia_multigrid/CH_multigrid_solver_with_alpha_change_domain.jl")
 
@@ -1135,7 +1109,7 @@ tol = 1e-5
 dt = 0.1 * (1 / 256)^2
 
 max_it_CH = 10000
-total_time = 0.03
+total_time = 0.015
 max_it = Int.(round(total_time / dt))
 # max_it = 19660
 ns = 10
@@ -1143,16 +1117,19 @@ nx = 512
 ny = nx
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_domain_0_2"
 
-for epsilon in [0.0192, 0.0096, 0.015]
-    for cohesin_width in [0.1] #in um: radius of CPC droplet
-        for CPC_width in [0.125, 0.173, 0.22, 0.12] #in um: total width of cohesin stripe, experimental = 0.173
-            println("cohesin=$(cohesin_width), CPC=$(CPC_width), epsilon=$(epsilon)")
-            phi = initialize_round_CPC_um(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width, domain_width=6.4)
-            alpha = 0
-            time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)_alpha_$(alpha)_domain_0_2", check_dir=false, alpha=alpha)
-            open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
-                writedlm(f, ["CPC_geometry_alpha_0" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
-                # end
+for epsilon in [0.0096]
+    for cohesin_width in [0.05, 0.1, 0.15, 0.2] #in um: radius of CPC droplet, experimental = 0.2
+        for CPC_width in [0.125, 0.1, 0.12, 0.15, 0.173, 0.22] #in um: total width of cohesin stripe, experimental = 0.173
+            if (CPC_width == 0.125) & (cohesin_width == 0.1)
+                println("Already completed")
+            else
+                println("cohesin=$(cohesin_width), CPC=$(CPC_width), epsilon=$(epsilon)")
+                phi = initialize_round_CPC_um(nx, nx, CPC_width=CPC_width, cohesin_width=cohesin_width, domain_width=6.4)
+                alpha = 0
+                time_passed = @elapsed main_w_alpha(phi, nx, tol, outdir, dt=dt, gam=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, suffix="_CPC_$(CPC_width)_cohesin_$(cohesin_width)_eps_$(epsilon)_alpha_$(alpha)_domain_0_2", check_dir=false, alpha=alpha)
+                open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/Job_specs.csv", "a", lock=false) do f
+                    writedlm(f, ["CPC_geometry_alpha_0" "Julia" nx epsilon dt tol max_it max_it_CH time_passed], ",")
+                end
             end
         end
     end

@@ -251,3 +251,58 @@ outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solve
 echo $outdir
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets('$indir', '$outdir','$name', $dt, $dtout, false);quit;"
 echo "Done."
+
+# for direct comparison between domain 0-1 and 0-2, need same time length
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+dtout=10
+dt=0.000001525878906
+name="phi_256_19661_1.0e-5__CPC_0.125_cohesin_0.1_eps_0.0096_alpha_0"
+echo $name 
+outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$name"
+echo $outdir
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets('$indir', '$outdir','$name', $dt, $dtout, false, 983);quit;"
+echo "Done."
+
+# domain change in axis labels
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_domain_0_2"
+dtout=10
+dt=0.000001525878906
+nx=512
+name="phi_${nx}_9830_1.0e-5__CPC_0.125_cohesin_0.1_eps_0.0096_alpha_0_domain_0_2"
+echo $name 
+outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$name"
+echo $outdir
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets_domain('$indir', '$outdir','$name', $dt, $dtout, false, 0, 6.4);quit;"
+echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_alpha_0"
+dtout=10
+dt=0.000001525878906
+nx=256
+name="phi_${nx}_19661_1.0e-5__CPC_0.125_cohesin_0.1_eps_0.0096_alpha_0"
+echo $name 
+outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$name"
+echo $outdir
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets_domain('$indir', '$outdir','$name', $dt, $dtout, false, 983, 3.2);quit;"
+echo "Done."
+
+# job array of double domain from rivanna
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_domain_0_2"
+dtout=10
+dt=0.000001525878906
+nx=512
+for CPC in .1 .12 0.125 0.15 0.173 0.22
+do
+    for cohesin in .1 0.05 0.15 0.2
+    do
+        name="phi_${nx}_9830_1.0e-5__CPC_${CPC}_cohesin_${cohesin}_eps_0.0096_alpha_0_domain_0_2"
+        echo $name 
+        outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$name"
+        echo $outdir
+        /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets_domain('$indir', '$outdir','$name', $dt, $dtout, false, 0, 6.4);quit;"
+        echo "Done."
+    done
+done
+
+
+
