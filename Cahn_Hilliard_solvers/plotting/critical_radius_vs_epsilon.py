@@ -6,50 +6,50 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 indir ="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output"
-#%%
-tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_0.015009.txt",header = 0, index_col=None)
-print(tmp.shape)
-# %%
-tmp['R0'].unique()
+# #%%
+# tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_0.015009.txt",header = 0, index_col=None)
+# print(tmp.shape)
+# # %%
+# tmp['R0'].unique()
 
-#%%
-sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
-plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-plt.title("Epsilon = 0.015009")
-plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.015009.pdf")
+# #%%
+# sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
+# plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+# plt.title("Epsilon = 0.015009")
+# plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.015009.pdf")
 
-plt.show()
-# %%
-tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_0.030019.txt",header = 0, index_col=None)
-print(tmp.shape)
-sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
-plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-plt.title("Epsilon = 0.030019")
-plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.030019.pdf")
 # plt.show()
-# %%
-tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_0.060037.txt",header = 0, index_col=None)
-print(tmp.shape)
-#%%
-sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
-plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-plt.title("Epsilon = 0.060037")
-plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.060037.pdf")
-# plt.show()
+# # %%
+# tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_0.030019.txt",header = 0, index_col=None)
+# print(tmp.shape)
+# sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
+# plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+# plt.title("Epsilon = 0.030019")
+# plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.030019.pdf")
+# # plt.show()
+# # %%
+# tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_0.060037.txt",header = 0, index_col=None)
+# print(tmp.shape)
+# #%%
+# sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
+# plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+# plt.title("Epsilon = 0.060037")
+# plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.060037.pdf")
+# # plt.show()
 #%%
 ## Reuse this one
 alpha = "0.0"
 
-for epsilon in ["0.0075047","0.0037523","0.022514"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
-    folder=f"critical_radius/"
-    tmp = pd.read_csv(f"{indir}/{folder}/alpha_{alpha}/radius_0.5_level_set_256_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
+for epsilon in ["0.0075047","0.011257"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
+    folder=f"critical_radius"
+    tmp = pd.read_csv(f"{indir}/{folder}/alpha_{alpha}/updated_radii/radius_0.5_level_set_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
                     on_bad_lines='skip')
     print(tmp.shape)
     sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize = 'small')
     plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
     plt.tight_layout()
-    plt.savefig(f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_256_{epsilon}_alpha_{alpha}.pdf")
+    plt.savefig(f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}.pdf")
     plt.close()
 #%%
 epsilon = "0.030019"

@@ -203,6 +203,12 @@ plt.show()
 # plt.savefig(f"Critical equilibrium radius (min)_vs_epsilon_alpha_{alpha}.png")
 #%%
 import scipy.optimize
+df = pd.read_csv("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv", header = 0, index_col=None)
+
+alpha = 0
+tmp = df.loc[df['alpha']==alpha]
+xs = np.array(tmp['epsilon'])#[0:2])
+ys = np.array(tmp['critical equilibrium radius (min)'])#[0:2])
 
 def monoExp(x, m, t, b):
 #     return m * np.exp(t * x) + b
@@ -224,7 +230,9 @@ rSquared = 1 - np.sum(squaredDiffs) / np.sum(squaredDiffsFromMean)
 print(f"R² = {rSquared}")
 
 # plot the results
-fig = plt.figure(figsize = (5,4))
+f, ax = plt.subplots()
+
+# fig = plt.figure(figsize = (5,4))
 plt.text(0.75,0.024, f"R² = {round(rSquared,3)}",
          horizontalalignment='right',
       verticalalignment='center',
@@ -236,8 +244,8 @@ plt.title("Hyperbolic-to-Linear Fit of \n Critical Radius vs Epsilon")
 plt.xlabel("Epsilon")
 plt.ylabel("Critical Radius")
 plt.legend()
-plt.savefig(f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin.png")
-plt.close()
+# plt.savefig(f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin.png")
+# plt.close()
 plt.show()
 
 # %%
