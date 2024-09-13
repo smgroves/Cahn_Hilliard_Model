@@ -10,7 +10,7 @@ indir =sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hillia
 % end
 
 function [] = plot_inflection(epsilon, indir, alpha)
-    path = sprintf("%s/radius_0.5_level_set_epsilon_%s_alpha_%s.txt", indir, epsilon, alpha);
+    path = sprintf("%s/radius_0.5_level_set_epsilon_%s_alpha_%s_nx_256.txt", indir, epsilon, alpha);
     all_data = readtable(path);
     % Predefine colors for each dataset for consistency in plotting
     colors = {'b', 'r', 'g', 'c', 'm', 'y', 'k',"#d142f5","#f542b6","#f59e42","#42f5d7","#42b3f5"};
@@ -113,5 +113,5 @@ function [] = plot_inflection(epsilon, indir, alpha)
     set(gcf, 'PaperSize', [11, 20])
     orient(gcf,'landscape')
 
-    print(gcf,sprintf('%s/%s_inflection_points.pdf', indir, epsilon),"-dpdf",'-fillpage')
+    print(gcf,sprintf('%s/%s_inflection_points_nx_256.pdf', indir, epsilon),"-dpdf",'-fillpage')
 end

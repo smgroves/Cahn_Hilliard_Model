@@ -40,16 +40,18 @@ indir ="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solve
 ## Reuse this one
 alpha = "0.0"
 
-for epsilon in ["0.0075047","0.011257"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
+for epsilon in ["0.011257"]:#"0.0037523","0.0056285", "0.0075047"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
     folder=f"critical_radius"
-    tmp = pd.read_csv(f"{indir}/{folder}/alpha_{alpha}/updated_radii/radius_0.5_level_set_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
+    tmp = pd.read_csv(f"{indir}/{folder}/alpha_{alpha}/radius_0.5_level_set_epsilon_{epsilon}_alpha_{alpha}_nx_256.txt",header = 0, index_col=None, sep =",",
                     on_bad_lines='skip')
+    # tmp = tmp.drop(tmp[tmp["R0"].isin([0.1,0.11, 0.1111, 0.1112, 0.1113, 0.1114, 0.1115])].index)
     print(tmp.shape)
+    tmp = tmp.sort_values("R0")
     sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize = 'small')
     plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
     plt.tight_layout()
-    plt.savefig(f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}.pdf")
+    plt.savefig(f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_256.pdf")
     plt.close()
 #%%
 epsilon = "0.030019"

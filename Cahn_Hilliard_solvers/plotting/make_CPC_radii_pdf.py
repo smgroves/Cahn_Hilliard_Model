@@ -176,9 +176,9 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
 # add_images_to_pdf_sorted_grid(image_paths, pdf_path)
 
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/"
-paths = glob(f"{indir}radii_over_time_level_set_plots/domain_0_2_from_rivanna_kymographs/*/")
+paths = glob(f"{indir}radii_over_time_level_set_plots/domain_0_2_from_rivanna_kymographs_e_0.0075/*/")
 image_paths = []
-epsilon = "0.0096"
+epsilon = "0.0075"
 for p in paths:
     eps_match = re.search(r'eps_(\d*\.?\d*)', p)
     eps = (eps_match.group(1)) if eps_match else 0
@@ -188,7 +188,7 @@ for p in paths:
         image_paths.append(png)
 print(image_paths)
 # pdf_path = f"{indir}/radii_over_time_pdfs/radii_over_time_eps_{epsilon}_alpha_-0.2.pdf"
-pdf_path = f"{indir}/kymograph_pdfs/kymographs_domain_0_2_CPC_cohesin_scan.pdf"
+pdf_path = f"{indir}/kymograph_pdfs/kymographs_domain_0_2_CPC_cohesin_scan_e_0.0075.pdf"
 # add_images_to_pdf(image_paths, pdf_path)
 
 add_images_to_pdf_sorted_grid(image_paths, pdf_path)

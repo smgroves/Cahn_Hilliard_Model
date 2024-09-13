@@ -209,7 +209,7 @@ alpha = 0
 tmp = df.loc[df['alpha']==alpha]
 xs = np.array(tmp['epsilon'])#[0:2])
 ys = np.array(tmp['critical equilibrium radius (min)'])#[0:2])
-
+print(df.head())
 def monoExp(x, m, t, b):
 #     return m * np.exp(t * x) + b
       #b(1).*(b(2).*xdata./(b(3) + xdata) + xdata);
@@ -233,19 +233,22 @@ print(f"R² = {rSquared}")
 f, ax = plt.subplots()
 
 # fig = plt.figure(figsize = (5,4))
-plt.text(0.75,0.024, f"R² = {round(rSquared,3)}",
+plt.text(0.95,0.024, f"R² = {round(rSquared,3)}",
          horizontalalignment='right',
       verticalalignment='center',
       transform = ax.transAxes)
-plt.plot(xs, ys, '.', label="Data")
-plt.plot(np.linspace(0, 0.09), monoExp(np.linspace(0, 0.09), m, t, b), '--', label="Fit")
+# plt.plot(xs, ys, '.', label="Simulation results")
+markers = {128: "o", 256: "X"}
+plt.plot(np.linspace(0, 0.09), monoExp(np.linspace(0, 0.09), m, t, b), '--', label="Fit", c = 'gray')
+sns.scatterplot(data = tmp, x = 'epsilon', y ='critical equilibrium radius (min)', hue = 'Nx', palette = sns.color_palette("bright"), edgecolor = 'k',
+                markers=markers, style = 'Nx')
 print(monoExp(0.0125, m, t, b))
-plt.title("Hyperbolic-to-Linear Fit of \n Critical Radius vs Epsilon")
+plt.title("Hyperbolic-to-Linear Fit of\n Critical Radius vs Epsilon")
 plt.xlabel("Epsilon")
 plt.ylabel("Critical Radius")
 plt.legend()
-# plt.savefig(f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin.png")
-# plt.close()
-plt.show()
+plt.savefig(f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256.png")
+plt.close()
+# plt.show()
 
 # %%
