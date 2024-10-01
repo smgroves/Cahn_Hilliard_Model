@@ -53,7 +53,7 @@ function [] = level_set_radius_multiple_droplets(CPC, cohesin, epsilon, indir, a
         currentData = data(:,:,t);
         
         % Find the 0-level contour
-        contourMatrix = contourc(currentData, [0, 0]);
+        contourMatrix = contourc(currentData, -.1);
         
         % Initialize a list to store droplets for the current time point
         droplets = [];
