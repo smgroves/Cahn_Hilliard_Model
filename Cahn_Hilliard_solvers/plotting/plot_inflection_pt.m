@@ -1,16 +1,18 @@
 % Define paths to the datasets and corresponding t0 values
 % /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "plot_inflection_pt();quit;"
 
-alpha = "0.0";
+alpha = "-0.5";
+level_set_r ="-0.166600";
+Nx = "128";
 indir =sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/alpha_%s", alpha);
 % epsilon ="0.015009";
 
 % for epsilon = ['0.060037'] 
-    plot_inflection('0.0075047', indir, alpha);
+plot_inflection('0.030019', indir, alpha,level_set_r,Nx);
 % end
 
-function [] = plot_inflection(epsilon, indir, alpha)
-    path = sprintf("%s/radius_0.5_level_set_epsilon_%s_alpha_%s_nx_256.txt", indir, epsilon, alpha);
+function [] = plot_inflection(epsilon, indir, alpha, level_set_r,Nx)
+    path = sprintf("%s/radius_%s_level_set_%s_epsilon_%s_alpha_%s.txt", indir,level_set_r,Nx, epsilon, alpha);
     all_data = readtable(path);
     % Predefine colors for each dataset for consistency in plotting
     colors = {'b', 'r', 'g', 'c', 'm', 'y', 'k',"#d142f5","#f542b6","#f59e42","#42f5d7","#42b3f5"};
@@ -113,5 +115,5 @@ function [] = plot_inflection(epsilon, indir, alpha)
     set(gcf, 'PaperSize', [11, 20])
     orient(gcf,'landscape')
 
-    print(gcf,sprintf('%s/%s_inflection_points_nx_256.pdf', indir, epsilon),"-dpdf",'-fillpage')
+    print(gcf,sprintf('%s/%s_inflection_points_nx_128.pdf', indir, epsilon),"-dpdf",'-fillpage')
 end

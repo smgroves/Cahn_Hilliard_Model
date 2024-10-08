@@ -150,9 +150,9 @@ plt.savefig("Critical equilibrium radius (min and max)_vs_epsilon.png")
 ########################################
 df = pd.read_csv("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv", header = 0, index_col=None)
 print(df.head())
-y = "critical equilibrium radius (max)"
+y = "critical equilibrium radius (min)"
 sns.lineplot(data = df, y = y, x = "epsilon",  marker='o', hue = 'alpha')
-plt.title(f"Critical radius vs. epsilon \n {y}, alpha = -0.5")
+plt.title(f"Critical radius vs. epsilon \n {y}")
 # plt.savefig(f"{y}_vs_epsilon.png")
 plt.show()
 

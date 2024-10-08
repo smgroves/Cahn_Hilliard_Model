@@ -1,11 +1,15 @@
 ### Plotting for each individual alpha and epsilon. This will plot the radius over time to figure out what the critical radius for each epsilon is.
 # After this, use the plot_inflection_pt.m code to find the inflection points, and record these in critical_radii_epsilon.csv.
-#%%
+# %%
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-indir ="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output"
+import matplotlib.cm as cm
+from matplotlib.colors import Normalize
+from matplotlib.colors import ListedColormap, BoundaryNorm
+
+indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output"
 # #%%
 # tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_0.015009.txt",header = 0, index_col=None)
 # print(tmp.shape)
@@ -36,36 +40,120 @@ indir ="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solve
 # plt.title("Epsilon = 0.060037")
 # plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.060037.pdf")
 # # plt.show()
-#%%
+# %%
 ## Reuse this one
 alpha = "-0.5"
 level_set_radius = "-0.166600"
 Nx = 256
 # for epsilon in ["0.011257", "0.0037523","0.0056285", "0.0075047"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
 # for epsilon in ["0.015009","0.030019","0.045028","0.0075046","0.060038", "0.075047","0.090056"]:
-for epsilon in ["0.015009","0.030019","0.0075046","0.0018761","0.0037523"]:
 
-    folder=f"critical_radius"
-    tmp = pd.read_csv(f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_{Nx}_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
-                    on_bad_lines='skip')
+for epsilon in ["0.015009"]:  # , "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
+
+    folder = f"critical_radius"
+    tmp = pd.read_csv(
+        f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_{Nx}_epsilon_{epsilon}_alpha_{alpha}.txt",
+        header=0,
+        index_col=None,
+        sep=",",
+        on_bad_lines="skip",
+    )
+    # tmp = pd.read_csv(
+    # f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_epsilon_{epsilon}.txt",
+    # header=0,
+    # index_col=None,
+    # sep=",",
+    # on_bad_lines='skip')
     # tmp = tmp.drop(tmp[tmp["R0"].isin([0.1,0.11, 0.1111, 0.1112, 0.1113, 0.1114, 0.1115])].index)
     print(tmp.shape)
     tmp = tmp.sort_values("R0")
-    sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize = 'small')
+
+    sns.lineplot(data=tmp, x="time", y="radius", hue="hue")
+    plt.legend(loc="center left", title="R0", bbox_to_anchor=(1, 0.5), fontsize="small")
+
     plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
+    # plt.axhline(0.07, linestyle="--", color="gray")
     plt.tight_layout()
-    plt.savefig(f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}.pdf")
+    plt.savefig(
+        f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}.pdf"
+    )
     plt.close()
-#%%
+# %% With a linear color mapping
+alpha = "-0.5"
+level_set_radius = "-0.166600"
+Nx = 256
+# for epsilon in ["0.011257", "0.0037523","0.0056285", "0.0075047"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
+# for epsilon in ["0.015009","0.030019","0.045028","0.0075046","0.060038", "0.075047","0.090056"]:
+
+for epsilon in ["0.015009", "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
+
+    folder = f"critical_radius"
+    tmp = pd.read_csv(
+        f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_{Nx}_epsilon_{epsilon}_alpha_{alpha}.txt",
+        header=0,
+        index_col=None,
+        sep=",",
+        on_bad_lines="skip",
+    )
+    # tmp = pd.read_csv(
+    # f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_epsilon_{epsilon}.txt",
+    # header=0,
+    # index_col=None,
+    # sep=",",
+    # on_bad_lines='skip')
+    # tmp = tmp.drop(tmp[tmp["R0"].isin([0.1,0.11, 0.1111, 0.1112, 0.1113, 0.1114, 0.1115])].index)
+    print(tmp.shape)
+    tmp = tmp.sort_values("R0")
+    color_values = tmp["R0"]
+    # norm = Normalize(vmin=np.min(color_values), vmax=np.max(color_values))
+    norm = Normalize(vmin=0, vmax=0.2)
+
+    colormap = cm.jet
+
+    for r in np.unique(tmp["R0"]):
+        tmp_r = tmp.loc[tmp["R0"] == r].sort_values("time")
+        color = colormap(norm(r))
+        plt.plot(tmp_r["time"], tmp_r["radius"], color=color)
+    plt.ylim(0, 0.2)
+    # sns.lineplot(data=tmp, x="time", y="radius", hue="hue")
+    # plt.legend(loc="center left",
+    #            title="R0",
+    #            bbox_to_anchor=(1, 0.5),
+    #            fontsize="small")
+    sm = cm.ScalarMappable(cmap=colormap, norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, label=f"R0 Value")
+    ticks = np.unique(tmp["R0"])
+    # tick_positions = norm(ticks)
+    cbar.set_ticks(ticks)
+    # plt.clim(np.min(color_values), np.max(color_values))
+    plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
+    # plt.axhline(0.07, linestyle="--", color="gray")
+    plt.tight_layout()
+    plt.show()
+    # plt.savefig(
+    #     f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}.pdf"
+    # )
+    # plt.close()
+
+
+# %%
 epsilon = "0.030019"
 radius = 0.0148
-tmp = pd.read_csv(f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_{epsilon}.txt",header = 0, index_col=None)
-tmp_old = pd.read_csv(f"{indir}/from_Rivanna_old/radius_0.5_level_set_epsilon_{epsilon}.txt",header = 0, index_col=None)
-tmp = tmp.loc[tmp['R0']==0.148].dropna()
-tmp_old = tmp_old.loc[tmp_old['R0']==0.148].dropna()
-plt.plot(tmp['time'].values,tmp['radius'].values, label = 'new IC')
-plt.plot(tmp_old['time'].values,tmp_old['radius'].values, label = 'old IC')
+tmp = pd.read_csv(
+    f"{indir}/from_Rivanna/radius_0.5_level_set_epsilon_{epsilon}.txt",
+    header=0,
+    index_col=None,
+)
+tmp_old = pd.read_csv(
+    f"{indir}/from_Rivanna_old/radius_0.5_level_set_epsilon_{epsilon}.txt",
+    header=0,
+    index_col=None,
+)
+tmp = tmp.loc[tmp["R0"] == 0.148].dropna()
+tmp_old = tmp_old.loc[tmp_old["R0"] == 0.148].dropna()
+plt.plot(tmp["time"].values, tmp["radius"].values, label="new IC")
+plt.plot(tmp_old["time"].values, tmp_old["radius"].values, label="old IC")
 plt.legend()
 plt.title("R0 = 0.148 for epsilon 0.033019")
 plt.xlabel("Time")
@@ -73,7 +161,7 @@ plt.ylabel("Radius")
 plt.savefig(f"{indir}/r0_{radius}_new_old_IC.pdf")
 
 # %%
-#from scipy.ndimage import gaussian_filter1d
+# from scipy.ndimage import gaussian_filter1d
 
 # data = tmp.loc[tmp['R0']==0.133].dropna()['radius'].values
 # data = data/np.max(data)
@@ -102,19 +190,25 @@ plt.savefig(f"{indir}/r0_{radius}_new_old_IC.pdf")
 # plt.legend(bbox_to_anchor=(1.55, 1.0))
 # %%
 epsilon = np.array([0.015009, 0.030019, 0.060037])
-critical_radius = np.array([0.07,0.095,0.14])
-plt.plot(epsilon, critical_radius, marker = "o",label = "Data")
+critical_radius = np.array([0.07, 0.095, 0.14])
+plt.plot(epsilon, critical_radius, marker="o", label="Data")
 from sklearn.linear_model import LinearRegression
+
 x = epsilon.reshape((-1, 1))
 y = critical_radius
-model = LinearRegression().fit(x,y)
+model = LinearRegression().fit(x, y)
 y_pred = model.intercept_ + model.coef_ * x
-plt.plot(epsilon, y_pred, linestyle = "--", label = "Regression")
+plt.plot(epsilon, y_pred, linestyle="--", label="Regression")
 plt.legend(bbox_to_anchor=(1.55, 1.0))
-eps =((0.108-model.intercept_)/model.coef_)[0]
-plt.annotate(f"Eps($R_c$= .108)={np.round(eps,6)}", xy = (eps, 0.108),
-             xytext=(1.1*eps, 0.108),
-             va="center", ha="left",arrowprops=dict(arrowstyle="-|>"))
+eps = ((0.108 - model.intercept_) / model.coef_)[0]
+plt.annotate(
+    f"Eps($R_c$= .108)={np.round(eps,6)}",
+    xy=(eps, 0.108),
+    xytext=(1.1 * eps, 0.108),
+    va="center",
+    ha="left",
+    arrowprops=dict(arrowstyle="-|>"),
+)
 plt.title("Epsilon versus critical radius for single droplet")
 plt.savefig(f"{indir}/epsilon_vs.critical_radius.pdf")
 
@@ -125,24 +219,29 @@ plt.savefig(f"{indir}/epsilon_vs.critical_radius.pdf")
 alpha = "-0.5"
 
 epsilon = "0.045028"
-folder=f"critical_radius/"
-tmp = pd.read_csv(f"{indir}/{folder}/radius_0.5_level_set_epsilon_{epsilon}_alpha_{alpha}.txt",header = 0, index_col=None, sep =",",
-                on_bad_lines='warn')
+folder = f"critical_radius/"
+tmp = pd.read_csv(
+    f"{indir}/{folder}/radius_0.5_level_set_epsilon_{epsilon}_alpha_{alpha}.txt",
+    header=0,
+    index_col=None,
+    sep=",",
+    on_bad_lines="warn",
+)
 print(tmp.shape)
 ## USE WARN TO DELETE THOSE ROWS
 
-#%%
-g = sns.lineplot(data = tmp, x = 'time', y = 'radius', hue = 'R0', palette = 'tab20')
+# %%
+g = sns.lineplot(data=tmp, x="time", y="radius", hue="R0", palette="tab20")
 g.set_xticks([tmp["time"].min(), tmp["time"].max()])
 g.set_yticks([tmp["radius"].min(), tmp["radius"].max()])
 
-plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize = 'small')
+plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), fontsize="small")
 plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
 plt.tight_layout()
 plt.savefig(f"{indir}/{folder}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}.pdf")
 plt.close()
 # %%
-for i,r in tmp.iterrows():
+for i, r in tmp.iterrows():
     try:
         f = float(r["time"])
     except:
