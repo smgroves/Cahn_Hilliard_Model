@@ -413,7 +413,7 @@ function calculate_discrete_norm_energy(phi, phi0, h2, nx, ny, Cahn)
     return E / E0
 end
 
-function multigrid_solver(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", overwrite=true, print_phi=true, print_mass=false, print_e=false, print_r=true, dt=2.5e-5, m=8, ns=10, epsilon=0.0, check_dir=true)
+function multigrid_solver(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suffix="", overwrite=true, print_phi=true, print_mass=false, print_e=false, print_r=true, dt=2.5e-5, m=8, ns=10, epsilon=0.01, check_dir=true)
     while true
         ny = nx
         n_level::Int = trunc(log(nx) / log(2.0) + 0.1)  # original c code uses natural log too

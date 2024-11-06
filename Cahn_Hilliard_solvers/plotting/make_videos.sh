@@ -304,3 +304,56 @@ dt=0.000001525878906
 name="phi_512_10000_1.0e-5__CPC_0.125_cohesin_0.1_eps_0.0192_alpha_0_domain_0_2"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'contourf', 'blue', 0);quit;"
 echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_normal_IC"
+dtout=10
+frame_rate=1
+dt=1.25e-5
+name="phi_128_2400_1.0e-6_dt_1.25e-5_mean_0_sd_0.2"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_normal_IC/output"
+dtout=10
+frame_rate=1
+dt=3e-9
+name="phi_128_10000_1.0e-5_dt_3.0e-9_mean_0_sd_0.2"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_normal_IC/output"
+dtout=1000
+frame_rate=1
+dt=3e-9
+name="phi_128_1000000_1.0e-5_dt_3.0e-9_mean_0_sd_0.2"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_normal_IC/output"
+dtout=10
+frame_rate=10
+dt=6.25e-6
+name="phi_128_4800_1.0e-6_dt_6.25e-6_mean_0_sd_0.2"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output"
+dtout=10
+frame_rate=10
+dt=6.25e-6
+name="phi_128_4800_1.0e-6_dt_6.25e-6"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output"
+dtout=10
+frame_rate=10
+dt=6.25e-6
+name="phi_128_9600_1.0e-6_dt_6.25e-6"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."

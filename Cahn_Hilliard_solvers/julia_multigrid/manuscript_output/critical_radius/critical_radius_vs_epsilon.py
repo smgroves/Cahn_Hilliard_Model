@@ -42,17 +42,24 @@ indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solv
 # # plt.show()
 # %%
 ## Reuse this one
-alpha = "-0.5"
-level_set_radius = "-0.166600"
-Nx = 256
+alpha = "0.5"
+level_set_radius = "0.166600"
+Nx = 128
 # for epsilon in ["0.011257", "0.0037523","0.0056285", "0.0075047"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
-# for epsilon in ["0.015009","0.030019","0.045028","0.0075046","0.060038", "0.075047","0.090056"]:
+for epsilon in [
+    "0.015009",
+    "0.030019",
+    "0.045028",
+    "0.0075046",
+    "0.075047",
+    "0.060038",
+    "0.090056",
+]:
 
-for epsilon in ["0.015009"]:  # , "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
-
+    # for epsilon in ["0.0037523", "0.0075046", "0.0018761", "0.015009"]:
     folder = f"critical_radius"
     tmp = pd.read_csv(
-        f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_{Nx}_epsilon_{epsilon}_alpha_{alpha}.txt",
+        f"{indir}/{folder}/alpha_{alpha}/updated/radius_{level_set_radius}_level_set_{Nx}_epsilon_{epsilon}_alpha_{alpha}.txt",
         header=0,
         index_col=None,
         sep=",",
@@ -68,28 +75,50 @@ for epsilon in ["0.015009"]:  # , "0.030019", "0.0075046", "0.0018761", "0.00375
     print(tmp.shape)
     tmp = tmp.sort_values("R0")
 
-    sns.lineplot(data=tmp, x="time", y="radius", hue="hue")
+    sns.lineplot(data=tmp, x="time", y="radius", hue="R0", palette="tab20")
     plt.legend(loc="center left", title="R0", bbox_to_anchor=(1, 0.5), fontsize="small")
 
     plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
     # plt.axhline(0.07, linestyle="--", color="gray")
     plt.tight_layout()
     plt.savefig(
-        f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}.pdf"
+        f"{indir}/{folder}/alpha_{alpha}/updated/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}.pdf"
     )
     plt.close()
 # %% With a linear color mapping
-alpha = "-0.5"
-level_set_radius = "-0.166600"
-Nx = 256
-# for epsilon in ["0.011257", "0.0037523","0.0056285", "0.0075047"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
-# for epsilon in ["0.015009","0.030019","0.045028","0.0075046","0.060038", "0.075047","0.090056"]:
+alpha = "0.0"
+level_set_radius = "0.5"
+Nx = 128
+for epsilon in [
+    # "0.0037523",
+    # "0.0075047",
+    # "0.0075046",
+    # "0.0018761",
+    "0.015009",
+    # "0.030019",
+]:  # ,"0.060037"]:#,"0.04","0.075047","0.090056"
+    # for epsilon in [
+    # "0.015009",
+    #     "0.030019",
+    #     "0.045028",
+    #     "0.0075046",
+    #     # "0.075047",
+    #     "0.090056",
+    # ]:
 
-for epsilon in ["0.015009", "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
-
+    # for epsilon in ["0.015009", "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
+    meta = pd.read_csv(
+        f"{indir}/{folder}/critical_radii_epsilon copy.csv", header=0, index_col=None
+    )
+    crit_rad = meta.loc[
+        (meta["alpha"] == float(alpha))
+        & (meta["epsilon"] == float(epsilon))
+        & (meta["Nx"] == Nx)
+    ]["critical equilibrium radius (min)"].iloc[0]
     folder = f"critical_radius"
     tmp = pd.read_csv(
-        f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_{Nx}_epsilon_{epsilon}_alpha_{alpha}.txt",
+        # f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_{Nx}_epsilon_{epsilon}_alpha_{alpha}.txt",
+        f"{indir}/{folder}/alpha_{alpha}/radius_{level_set_radius}_level_set_epsilon_{epsilon} copy.txt",
         header=0,
         index_col=None,
         sep=",",
@@ -105,8 +134,8 @@ for epsilon in ["0.015009", "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
     print(tmp.shape)
     tmp = tmp.sort_values("R0")
     color_values = tmp["R0"]
-    # norm = Normalize(vmin=np.min(color_values), vmax=np.max(color_values))
-    norm = Normalize(vmin=0, vmax=0.2)
+    norm = Normalize(vmin=np.min(color_values), vmax=np.max(color_values))
+    # norm = Normalize(vmin=0, vmax=0.2)
 
     colormap = cm.jet
 
@@ -114,7 +143,7 @@ for epsilon in ["0.015009", "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
         tmp_r = tmp.loc[tmp["R0"] == r].sort_values("time")
         color = colormap(norm(r))
         plt.plot(tmp_r["time"], tmp_r["radius"], color=color)
-    plt.ylim(0, 0.2)
+    # plt.ylim(0, 0.2)
     # sns.lineplot(data=tmp, x="time", y="radius", hue="hue")
     # plt.legend(loc="center left",
     #            title="R0",
@@ -127,14 +156,16 @@ for epsilon in ["0.015009", "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
     # tick_positions = norm(ticks)
     cbar.set_ticks(ticks)
     # plt.clim(np.min(color_values), np.max(color_values))
+
+    plt.axhline(crit_rad, linestyle="--", color="lightgrey")
     plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
     # plt.axhline(0.07, linestyle="--", color="gray")
     plt.tight_layout()
-    plt.show()
-    # plt.savefig(
-    #     f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}.pdf"
-    # )
-    # plt.close()
+    # plt.show()
+    plt.savefig(
+        f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}_.pdf"
+    )
+    plt.close()
 
 
 # %%

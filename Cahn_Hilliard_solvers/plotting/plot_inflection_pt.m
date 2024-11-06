@@ -1,15 +1,19 @@
 % Define paths to the datasets and corresponding t0 values
 % /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "plot_inflection_pt();quit;"
 
-alpha = "-0.5";
-level_set_r ="-0.166600";
+alpha = "0.5";
+level_set_r ="0.166600";
 Nx = "128";
-indir =sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/alpha_%s", alpha);
+indir =sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/critical_radius/alpha_%s/updated", alpha);
 % epsilon ="0.015009";
 
-% for epsilon = ['0.060037'] 
-plot_inflection('0.030019', indir, alpha,level_set_r,Nx);
-% end
+% for epsilon = ["0.0037523","0.0075046","0.0018761","0.015009",]
+
+% for epsilon = [ "0.045028", "0.0075046", "0.075047","0.090056"]
+for epsilon = ["0.015009","0.030019","0.045028", "0.090056","0.0075046", "0.060038"]
+
+    plot_inflection(epsilon, indir, alpha,level_set_r,Nx);
+end
 
 function [] = plot_inflection(epsilon, indir, alpha, level_set_r,Nx)
     path = sprintf("%s/radius_%s_level_set_%s_epsilon_%s_alpha_%s.txt", indir,level_set_r,Nx, epsilon, alpha);
@@ -115,5 +119,5 @@ function [] = plot_inflection(epsilon, indir, alpha, level_set_r,Nx)
     set(gcf, 'PaperSize', [11, 20])
     orient(gcf,'landscape')
 
-    print(gcf,sprintf('%s/%s_inflection_points_nx_128.pdf', indir, epsilon),"-dpdf",'-fillpage')
+    print(gcf,sprintf('%s/%s_inflection_points_nx_%s.pdf', indir, epsilon,Nx),"-dpdf",'-fillpage')
 end

@@ -53,7 +53,7 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
                 view(90,0)
                 ylim([0,2])
             elseif plot_type == "heatmap"
-                h=heatmap(phi(:,:,i), 'CellLabelColor','none', 'GridVisible','off'); axis square;
+                h=heatmap(phi(:,:,i), 'CellLabelColor','none', 'GridVisible','off');
             end
 
             % contour(:,:,i); colorbar; axis square;

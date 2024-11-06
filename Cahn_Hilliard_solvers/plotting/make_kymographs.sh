@@ -304,5 +304,22 @@ do
     done
 done
 
+# job array of double domain from rivanna
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/CPC_geometry/CPC_domain_0_2_alpha_-0.5_e_0.0075"
+dtout=10
+dt=0.000001525878906
+nx=512
+for CPC in 0.125 
+do
+    for cohesin in  0.05 0.12 0.13 0.14 0.15 0.2
+    do
+        name="phi_${nx}_19661_1.0e-5__CPC_${CPC}_cohesin_${cohesin}_eps_0.0075_alpha_-0.5_domain_0_2"
+        echo $name 
+        outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/plotting/radii_over_time_level_set_plots/$name"
+        echo $outdir
+        /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets_domain('$indir', '$outdir','$name', $dt, $dtout, false, 0, 6.4);quit;"
+        echo "Done."
+    done
+done
 
 
