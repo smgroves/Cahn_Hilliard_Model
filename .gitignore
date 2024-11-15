@@ -6,6 +6,7 @@ C/out/*
 *.gz
 *.zip
 *.csv
+.idea/*
 Code from Kevin/phi_CPC_big.m
 .DS_Store
 C/.DS_Store

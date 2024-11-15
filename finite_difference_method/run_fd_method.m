@@ -1,15 +1,15 @@
-
-for GridSize = [64, 128, 256, 512]
-    for dt = [6.25e-6, 1.25e-5, 2.5e-5, 5e-5, 0.0001]
-            indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output/";
-            outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/spinodal_+1_-1";
+for GridSize = [64, 128, 256]
+    for dt = [1e-4/(GridSize^2), 1e-3/(GridSize^2), 1e-2/(GridSize^2), 1e-1/(GridSize^2)]
+        for n_relax = [2, 4, 8]
+            indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output/";
+            outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/spinodal_smooth_relax_function";
             m = 8;
             h = 1/GridSize;
             epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9));
             % epsilon = m/(2 * sqrt(2) * atanh(0.9));
             gamma = epsilon^2/h^2;
             D = GridSize^2;
-            total_time = 0.06;
+            total_time = (.1/64^2)*500;
             max_it = round(total_time / dt);
             % max_it = 4000;
             % GridSize = 128;
@@ -20,9 +20,39 @@ for GridSize = [64, 128, 256, 512]
                             "NumIterations",max_it,...
                             "FrameSpacing",10,...
                             'ImgStyle','true',...
-                            "InputMatrix",sprintf("%s/initial_phi_%d.csv",indir,GridSize),...
-                            "FileName",sprintf("%s/FE_%d_dt_%.2e_Nx_%d_gam_%.2e_D_%g",outdir,max_it,dt, GridSize,gamma,D),...
+                            "InputMatrix",sprintf("%s/initial_phi_%d_smooth_n_relax_%d.csv",indir,GridSize,n_relax),...
+                            "FileName",sprintf("%s/FD_%d_dt_%.2e_Nx_%d_n_relax_%d_gam_%.2e_D_%g",outdir,max_it,dt, GridSize,n_relax, gamma,D),...
                             "InputType",'phi',...
                             "ConstantColorbar", true)
+        end
     end
 end
+
+
+% for GridSize = [64, 128, 256, 512]
+%     for dt = [6.25e-6, 1.25e-5, 2.5e-5, 5e-5, 0.0001]
+%             indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output/";
+%             outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/spinodal_+1_-1";
+%             m = 8;
+%             h = 1/GridSize;
+%             epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9));
+%             % epsilon = m/(2 * sqrt(2) * atanh(0.9));
+%             gamma = epsilon^2/h^2;
+%             D = GridSize^2;
+%             total_time = 0.06;
+%             max_it = round(total_time / dt);
+%             % max_it = 4000;
+%             % GridSize = 128;
+%             spinodal_decomp(D,gamma, ...
+%                             "dt",dt,...
+%                             "GridSize",GridSize,...
+%                             "CaptureMode","standard",...
+%                             "NumIterations",max_it,...
+%                             "FrameSpacing",10,...
+%                             'ImgStyle','true',...
+%                             "InputMatrix",sprintf("%s/initial_phi_%d.csv",indir,GridSize),...
+%                             "FileName",sprintf("%s/FD_%d_dt_%.2e_Nx_%d_gam_%.2e_D_%g",outdir,max_it,dt, GridSize,gamma,D),...
+%                             "InputType",'phi',...
+%                             "ConstantColorbar", true)
+%     end
+% end

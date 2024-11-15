@@ -465,13 +465,16 @@ function multigrid_solver(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suf
             type = "psi"
             oc = (oc .- minimum(oc)) ./ (maximum(oc) - minimum(oc))
             oc = 2 .* oc .- 1    # psi0=(phi0+1)/2 
-        else if minimum(oc)>=-1 && maximum(oc)<=1
+            println(type)
+
+        elseif minimum(oc) >= -1 && maximum(oc) <= 1
             type = "phi"
+            println(type)
+
         else
-            println("Warning: cannot interpret initial data. Data should be in range [-1,1] or only positive values.")
-            break
+            println("Warning: cannot interpret initial data. Data should be in range [-1,1] or only positive values. Assuming type is phi.")
+            type = "phi"
         end
-        println(type)
 
         #initialization
         println("nx = $nx, ny = $ny, dt = $dt, epsilon = $epsilon, max_it = $max_it,max_it_CH= $max_it_CH, ns = $ns, n_level = $n_level")
@@ -520,4 +523,5 @@ function multigrid_solver(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suf
         end
         break
     end
+    return oc
 end

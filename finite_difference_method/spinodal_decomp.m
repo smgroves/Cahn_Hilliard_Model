@@ -159,7 +159,11 @@ function uOut = iterate(u,D,gamma,dt)
     fid = fopen(sprintf('%s_residual.txt',options.FileName), 'a+');
     fprintf(fid, '%f \n', res2);
     fclose(fid);
-    writematrix(uOut,sprintf('%s_phi.csv', options.FileName),'WriteMode','append');
+    E = discrete_energy(uOut,u,uMu,dt,D);
+    fid = fopen(sprintf('%s_energy.txt',options.FileName), 'a+');
+    fprintf(fid, '%f \n', E);
+    fclose(fid);
+    % writematrix(uOut,sprintf('%s_phi.csv', options.FileName),'WriteMode','append');
 end 
 
 end
@@ -167,7 +171,7 @@ end
 function res2 = calc_residual(uNew, uOld, uMu, dt, D)
     s = size(uNew);
     Nx = s(1);
-    rr = uMu - uOld;
+    rr = uMu;
     sor = D*laplacian(rr);
     rr = sor - (uNew - uOld)/dt;
     x = sum(sum(rr.*rr));
@@ -201,3 +205,21 @@ function c = redblue(m)
     c = [r g b]; 
 end    
 
+function E = discrete_energy(phi,hxy,gridx,gridy,eps2)
+    %Local function for calculating the discrete energy across the domain
+    f = @(x) 0.25*(x.^2-1).^2; %Define double-well free energy
+    a = hxy*sum(sum(f(phi))); %Calculate chemical free energy
+    sum_i = 0; %Initialize interfacial free energy in x
+    for i = 1:gridx-1
+        for j = 1:gridy
+            sum_i = sum_i + (phi(i+1,j)-phi(i,j))^2;
+        end
+    end
+    sum_j = 0; %Initialize interfacial free energy in y
+    for i = 1:gridx
+        for j = 1:gridy-1
+            sum_j = sum_j + (phi(i,j+1)-phi(i,j))^2;
+        end
+    end
+    E = a + 0.5*eps2*(sum_i+sum_j);
+    end

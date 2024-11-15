@@ -3,6 +3,7 @@ import random
 import os
 import time
 import pandas as pd
+
 ######################
 # Global variables
 ######################
@@ -18,10 +19,10 @@ yright = 1.0  # right y-coordinate defined as a global variable
 
 # todo: check if these are needed; it appears that only ht2 (temp h^2) is used in the code
 h = xright / float(nx)  # space step size defined as a global variable
-h2 = h**2 #space step size squared defined as a global variable
+h2 = h**2  # space step size squared defined as a global variable
 dt = 0.1 * h2  # ∆t defined as a global variable
 gam = 4 * h / (2 * np.sqrt(2) * np.arctanh(0.9))
-Cahn = gam ** 2  # ϵ^2 defined as a global variable
+Cahn = gam**2  # ϵ^2 defined as a global variable
 
 
 def dmatrix(nrows, ncols):
@@ -41,7 +42,7 @@ def print_data(filename, a):
     :param a: Data that is written to file
     :return: None
     """
-    np.savetxt(filename, a, fmt='%16.15f', delimiter=' ')
+    np.savetxt(filename, a, fmt="%16.15f", delimiter=" ")
 
 
 def laplace(a, nxt, nyt, xright=xright, xleft=xleft):
@@ -58,19 +59,19 @@ def laplace(a, nxt, nyt, xright=xright, xleft=xleft):
     for i in range(nxt):
         for j in range(nyt):
             if i > 0:
-                dadx_L = (a[i, j] - a[i - 1, j])
+                dadx_L = a[i, j] - a[i - 1, j]
             else:
                 dadx_L = 0
             if i < nxt - 1:
-                dadx_R = (a[i + 1, j] - a[i, j])
+                dadx_R = a[i + 1, j] - a[i, j]
             else:
                 dadx_R = 0
             if j > 0:
-                dady_B = (a[i, j] - a[i, j - 1])
+                dady_B = a[i, j] - a[i, j - 1]
             else:
                 dady_B = 0
             if j < nyt - 1:
-                dady_T = (a[i, j + 1] - a[i, j])
+                dady_T = a[i, j + 1] - a[i, j]
             else:
                 dady_T = 0
             lap_a[i, j] = (dadx_R - dadx_L + dady_T - dady_B) / h2
@@ -96,15 +97,26 @@ def source(c_old, nx=nx, ny=ny, dt=dt):
 
 
 def df(c):
-    return c ** 3
+    return c**3
 
 
 def d2f(c):
-    return 3 * c ** 2
+    return 3 * c**2
 
 
-def relax(c_new, mu_new, su, sw, nxt, nyt,
-          c_relax=c_relax, xright=xright, xleft=xleft, dt=dt, Cahn=Cahn):
+def relax(
+    c_new,
+    mu_new,
+    su,
+    sw,
+    nxt,
+    nyt,
+    c_relax=c_relax,
+    xright=xright,
+    xleft=xleft,
+    dt=dt,
+    Cahn=Cahn,
+):
     """
     SMOOTH Relaxation operator. This is just solving x =b*A-1 for the system of equations c_new and mu_new, where A is
     the LHS of equations 22 and 23, and b is the RHS.
@@ -145,8 +157,12 @@ def relax(c_new, mu_new, su, sw, nxt, nyt,
                 a[3] = 1.0
 
                 f[0] = su[i][j]
-                f[1] = sw[i][j] - 2 * (c_new[i][j] ** 3)  # replaced from c code with a more condensed version
-                if i > 0:  # boundary cases are slightly different because i-1 doesn't exist for i = 0, for example (same for j)
+                f[1] = sw[i][j] - 2 * (
+                    c_new[i][j] ** 3
+                )  # replaced from c code with a more condensed version
+                if (
+                    i > 0
+                ):  # boundary cases are slightly different because i-1 doesn't exist for i = 0, for example (same for j)
                     f[0] += mu_new[i - 1][j] / ht2
                     f[1] -= Cahn * c_new[i - 1][j] / ht2
                 if i < nxt - 1:
@@ -184,9 +200,17 @@ def restrict_ch(uf, vf, nxc, nyc):
     for i in range(nxc):
         for j in range(nyc):
             uc[i][j] = 0.25 * (
-                    uf[2 * i][2 * j] + uf[2 * i + 1][2 * j] + uf[2 * i][2 * j + 1] + uf[2 * i + 1][2 * j + 1])
+                uf[2 * i][2 * j]
+                + uf[2 * i + 1][2 * j]
+                + uf[2 * i][2 * j + 1]
+                + uf[2 * i + 1][2 * j + 1]
+            )
             vc[i][j] = 0.25 * (
-                    vf[2 * i][2 * j] + vf[2 * i + 1][2 * j] + vf[2 * i][2 * j + 1] + vf[2 * i + 1][2 * j + 1])
+                vf[2 * i][2 * j]
+                + vf[2 * i + 1][2 * j]
+                + vf[2 * i][2 * j + 1]
+                + vf[2 * i + 1][2 * j + 1]
+            )
     return uc, vc
 
 
@@ -227,25 +251,39 @@ def prolong_ch(uc, vc, nxc, nyc):
     vf = np.zeros((2 * nxc, 2 * nyc))
     for i in range(nxc):
         for j in range(nyc):
-            uf[2 * i][2 * j] = uf[2 * i + 1][2 * j] = uf[2 * i][2 * j + 1] = uf[2 * i + 1][2 * j + 1] = uc[i][j]
-            vf[2 * i][2 * j] = vf[2 * i + 1][2 * j] = vf[2 * i][2 * j + 1] = vf[2 * i + 1][2 * j + 1] = vc[i][j]
+            uf[2 * i][2 * j] = uf[2 * i + 1][2 * j] = uf[2 * i][2 * j + 1] = uf[
+                2 * i + 1
+            ][2 * j + 1] = uc[i][j]
+            vf[2 * i][2 * j] = vf[2 * i + 1][2 * j] = vf[2 * i][2 * j + 1] = vf[
+                2 * i + 1
+            ][2 * j + 1] = vc[i][j]
     return uf, vf
-
 
 
 def vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel):
     """
     FAS multigrid cycle
     """
-    #relax the input data
+    # relax the input data
     # print("before relaxing IN VCYCLE")
     # print("nxf: ", nxf) #same
     # print("uf_new: \n", uf_new) #same
     # print("wf_new: \n", wf_new)
     # print("su: \n", su)
     # print("sw: \n", sw)
-    uf_new, wf_new = relax(c_new=uf_new, mu_new=wf_new, su=su, sw=sw, nxt=nxf, nyt=nyf, c_relax=c_relax, xright=xright,
-                           xleft=xleft, dt=dt, Cahn=Cahn)
+    uf_new, wf_new = relax(
+        c_new=uf_new,
+        mu_new=wf_new,
+        su=su,
+        sw=sw,
+        nxt=nxf,
+        nyt=nyf,
+        c_relax=c_relax,
+        xright=xright,
+        xleft=xleft,
+        dt=dt,
+        Cahn=Cahn,
+    )
     # print("after relaxing IN VCYCLE")
     # print("uf_new: \n", uf_new) #same
     # print("wf_new: \n", wf_new)
@@ -256,9 +294,20 @@ def vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel):
         # print("ilevel: ", ilevel)
         nxc = int(nxf / 2)
         nyc = int(nyf / 2)
-        uc_new, wc_new = restrict_ch(uf = uf_new, vf = wf_new, nxc = nxc, nyc = nyc)
+        uc_new, wc_new = restrict_ch(uf=uf_new, vf=wf_new, nxc=nxc, nyc=nyc)
 
-        duc, dwc = defect(uf_new = uf_new, wf_new = wf_new, suf = su, swf = sw, nxf = nxf, nyf = nyf, uc_new=uc_new, wc_new = wc_new, nxc = nxc, nyc = nyc)
+        duc, dwc = defect(
+            uf_new=uf_new,
+            wf_new=wf_new,
+            suf=su,
+            swf=sw,
+            nxf=nxf,
+            nyf=nyf,
+            uc_new=uc_new,
+            wc_new=wc_new,
+            nxc=nxc,
+            nyc=nyc,
+        )
 
         uc_def = uc_new.copy()
         wc_def = wc_new.copy()
@@ -269,7 +318,15 @@ def vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel):
         # print("ilevel \n", ilevel)
         # print("uc_def: \n", uc_def)
         # print("wc_def: \n", wc_def)
-        uc_def, wc_def = vcycle(uf_new = uc_def, wf_new = wc_def, su = duc, sw = dwc, nxf = nxc, nyf = nyc, ilevel = ilevel + 1)
+        uc_def, wc_def = vcycle(
+            uf_new=uc_def,
+            wf_new=wc_def,
+            su=duc,
+            sw=dwc,
+            nxf=nxc,
+            nyf=nyc,
+            ilevel=ilevel + 1,
+        )
         # print("uc_def right after vcycle")
         # print("uc_def: \n", uc_def) #different
         # print("uc_new: \n", uc_new) #same
@@ -278,7 +335,7 @@ def vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel):
         # print("uc_def after matrix subtraction")
         # print("uc_def: \n", uc_def) #different
 
-        uf_def, wf_def = prolong_ch(uc = uc_def, vc = wc_def, nxc = nxc, nyc = nyc)
+        uf_def, wf_def = prolong_ch(uc=uc_def, vc=wc_def, nxc=nxc, nyc=nyc)
         # print('after prolonging \n')
         # print("nxc: \n", nxc)
         # print("uf_new: \n", uf_new)
@@ -286,15 +343,27 @@ def vcycle(uf_new, wf_new, su, sw, nxf, nyf, ilevel):
         uf_new = uf_new + uf_def
         wf_new = wf_new + wf_def
 
-        uf_new, wf_new = relax(c_new=uf_new, mu_new=wf_new, su=su, sw=sw, nxt=nxf, nyt=nyf, c_relax=c_relax, xright=xright, xleft=xleft,
-              dt=dt, Cahn=Cahn)
+        uf_new, wf_new = relax(
+            c_new=uf_new,
+            mu_new=wf_new,
+            su=su,
+            sw=sw,
+            nxt=nxf,
+            nyt=nyf,
+            c_relax=c_relax,
+            xright=xright,
+            xleft=xleft,
+            dt=dt,
+            Cahn=Cahn,
+        )
         # print("after final relaxing IN VCYCLE")
         # print("uf_new: \n", uf_new)
         # print("wf_new: \n", wf_new)
     # print("Done with VCycle")
     return uf_new, wf_new
 
-def error2(c_old, c_new, mu, nxt, nyt, dt = dt):
+
+def error2(c_old, c_new, mu, nxt, nyt, dt=dt):
     """
     Calculate the residual for phi
     :param c_old: old phi
@@ -309,12 +378,13 @@ def error2(c_old, c_new, mu, nxt, nyt, dt = dt):
         for j in range(nyt):
             rr[i][j] = mu[i][j] - c_old[i][j]
 
-    sor = laplace(rr,nxt,nyt)
+    sor = laplace(rr, nxt, nyt)
     for i in range(nxt):
         for j in range(nyt):
             rr[i][j] = sor[i][j] - (c_new[i][j] - c_old[i][j]) / dt
-    res2 = np.sqrt(np.sum(rr ** 2)/(nxt*nyt))
+    res2 = np.sqrt(np.sum(rr**2) / (nxt * nyt))
     return res2
+
 
 def initialization(nx, ny):
     """
@@ -329,10 +399,12 @@ def initialization(nx, ny):
     #         phi[i][j] = 0.1 * (1 - 2 * random.randint(0,1))
     for i in range(nx):
         for j in range(ny):
-            if i > int(nx/2 - CPC_width-1) and i < int(nx/2 + CPC_width-1):
-                if j > int(ny/2 - CPC_width-1) and j < int(ny/2 + CPC_width-1):
+            if i > int(nx / 2 - CPC_width - 1) and i < int(nx / 2 + CPC_width - 1):
+                if j > int(ny / 2 - CPC_width - 1) and j < int(ny / 2 + CPC_width - 1):
                     phi[i][j] = 1
-                elif i > int(nx/2 - cohesin_width-1) and i < int(nx/2 + cohesin_width-1):
+                elif i > int(nx / 2 - cohesin_width - 1) and i < int(
+                    nx / 2 + cohesin_width - 1
+                ):
                     phi[i][j] = 1
                 else:
                     phi[i][j] = -1
@@ -340,11 +412,12 @@ def initialization(nx, ny):
                 phi[i][j] = -1
     return phi
 
-#todo: test how quickly this function runs without printing to a file
-def cahn(c_old, c_new, mu, nx = nx, ny = ny, dt = dt, max_it_CH = 10000, tol = 1e-10):
+
+# todo: test how quickly this function runs without printing to a file
+def cahn(c_old, c_new, mu, nx=nx, ny=ny, dt=dt, max_it_CH=10000, tol=1e-10):
     it_mg2 = 0
     resid2 = 1
-    sc, smu = source(c_old, nx= nx, ny = ny, dt = dt)
+    sc, smu = source(c_old, nx=nx, ny=ny, dt=dt)
     # print("sc after sourcing \n", sc)
 
     # with open(os.path.join(out_dir, resid_file)) as f:
@@ -353,9 +426,11 @@ def cahn(c_old, c_new, mu, nx = nx, ny = ny, dt = dt, max_it_CH = 10000, tol = 1
         # print("mu before vcycle \n", mu)
         # print("sc before vcycle \n", sc)
         # print("smu before vcycle \n", smu)
-        c_new, mu = vcycle(uf_new = c_new, wf_new = mu, su = sc, sw = smu, nxf = nx, nyf = ny, ilevel = 1) # TODO why does this give any error when assigned to c_new, mu?
-        resid2 = error2(c_old = c_old, c_new = c_new, mu = mu, nxt = nx, nyt = ny, dt = dt)
-            # f.write(f"{it_mg2} error: {resid2}\n")
+        c_new, mu = vcycle(
+            uf_new=c_new, wf_new=mu, su=sc, sw=smu, nxf=nx, nyf=ny, ilevel=1
+        )  # TODO why does this give any error when assigned to c_new, mu?
+        resid2 = error2(c_old=c_old, c_new=c_new, mu=mu, nxt=nx, nyt=ny, dt=dt)
+        # f.write(f"{it_mg2} error: {resid2}\n")
         it_mg2 += 1
         # print("c_new after vcycle \n", c_new)
         # print("mu after vcycle \n", mu)
@@ -364,34 +439,37 @@ def cahn(c_old, c_new, mu, nx = nx, ny = ny, dt = dt, max_it_CH = 10000, tol = 1
     # f.close()
     return c_new
 
+
 if __name__ == "__main__":
     for max_it in [10000]:
-        for max_it_CH in [1000,10000,100000]:
-            brcd = random.randint(0,1000)
+        for max_it_CH in [1000, 10000, 100000]:
+            brcd = random.randint(0, 1000)
             start = time.time()
             # max_it_CH = 1
             tol = 1e-6
             # max_it = 100 # number of time steps
-            ns = 10 # frequency that time step is printed to file (1 = every time step, 10 = every 10 steps, etc)
-            print(f"nx = {nx}, ny = {ny}, dt = {dt}, Cahn = {Cahn}, max_it = {max_it}, ns = {ns}, n_level = {n_level}")
+            ns = 10  # frequency that time step is printed to file (1 = every time step, 10 = every 10 steps, etc)
+            print(
+                f"nx = {nx}, ny = {ny}, dt = {dt}, Cahn = {Cahn}, max_it = {max_it}, ns = {ns}, n_level = {n_level}"
+            )
             mu = np.zeros((nx, ny))  # µ defined as a global variable
             oc = initialization(nx, ny)
             # print(oc)
             nc = oc.copy()
 
-            # for it in range(max_it):
-            #     nc = cahn(oc, nc, mu, max_it_CH=max_it_CH, tol = tol) # update phi
-            #     oc = nc.copy() # copy updated phi to old phi
+            for it in range(max_it):
+                nc = cahn(oc, nc, mu, max_it_CH=max_it_CH, tol=tol)  # update phi
+                oc = nc.copy()  # copy updated phi to old phi
 
-            with open(f'../outputs/runtime_tests/phi_{brcd}.txt', "w") as f:
+            with open(f"../outputs/runtime_tests/phi_{brcd}.txt", "w") as f:
                 # write initial state to file
                 for i in range(nx):
                     for j in range(ny):
                         f.write(f"{oc[i][j]} ")
                     f.write("\n")
                 for it in range(max_it):
-                    nc = cahn(oc, nc, mu, max_it_CH=max_it_CH, tol = tol) # update phi
-                    oc = nc.copy() # copy updated phi to old phi
+                    nc = cahn(oc, nc, mu, max_it_CH=max_it_CH, tol=tol)  # update phi
+                    oc = nc.copy()  # copy updated phi to old phi
                     if it % ns == 0:
                         # write state to file every ns iterations
                         for i in range(nx):
@@ -403,25 +481,23 @@ if __name__ == "__main__":
             print(f"Time elapsed: {end - start} seconds")
             T = {}
             # T['brcd'] = brcd
-            T['c_relax'] = c_relax
-            T['Cahn'] = Cahn
-            T['solver'] = "Python"
-            T['dt'] = dt
-            T['max_it'] = max_it
-            T['max_it_CH'] = max_it_CH
-            T['n_level'] = n_level
-            T['ns'] = ns
-            T['nx'] = nx
-            T['ny'] = ny
-            T['time'] = end - start
-            T['tol'] = tol
+            T["c_relax"] = c_relax
+            T["Cahn"] = Cahn
+            T["solver"] = "Python"
+            T["dt"] = dt
+            T["max_it"] = max_it
+            T["max_it_CH"] = max_it_CH
+            T["n_level"] = n_level
+            T["ns"] = ns
+            T["nx"] = nx
+            T["ny"] = ny
+            T["time"] = end - start
+            T["tol"] = tol
             T = pd.DataFrame([T])
-            file = '../Job_specs_all_py_c.csv'
+            file = "../Job_specs_all_py_c.csv"
             if max_it != 1:
                 if not os.path.isfile(file):
                     T.to_csv(file)
                 else:
-                    with open(file, 'a') as f:
-                        T.to_csv(f, header=False, index = False)
-
-
+                    with open(file, "a") as f:
+                        T.to_csv(f, header=False, index=False)

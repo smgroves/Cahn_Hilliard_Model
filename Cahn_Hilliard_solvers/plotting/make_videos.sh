@@ -357,3 +357,11 @@ dt=6.25e-6
 name="phi_128_9600_1.0e-6_dt_6.25e-6"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
 echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Cahn_Hilliard_solvers/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
+dtout=10
+frame_rate=10
+dt=6.25e-6
+name="phi_128_9600_1.0e-6_dt_6.25e-6"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
