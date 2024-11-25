@@ -365,3 +365,37 @@ dt=6.25e-6
 name="phi_128_9600_1.0e-6_dt_6.25e-6"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
 echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/checkerboard_IC/output"
+dtout=10
+frame_rate=10
+dt=6.103515625e-6
+name="MG_20000_dt_6.103515625e-6_Nx_128_eps_0.015009369912862116_grid_8_phi"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/large_and_small_droplets/output"
+dtout=10
+frame_rate=1
+dt=6.103515625e-5
+name="MG_2000_dt_6.103515625e-5_Nx_128_eps_0.015009369912862116_r1_5_r2_10_space_2_phi"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/large_and_small_droplets/output"
+dtout=10
+frame_rate=1
+dt=6.103515625e-5
+name="MG_2000_dt_6.103515625e-5_Nx_128_eps_0.015009369912862116_r1_20_r2_30_space_10_phi"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/large_and_small_droplets/output"
+dtout=10
+frame_rate=1
+dt=0.001
+name="MG_5000_dt_0.001_Nx_128_eps_0.015009369912862116_r1_20_r2_30_space_10_phi"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."

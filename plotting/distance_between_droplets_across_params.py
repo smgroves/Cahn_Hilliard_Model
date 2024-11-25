@@ -4,11 +4,14 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/plotting/"
+indir = (
+    "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/plotting/"
+)
 
 
 def make_long_dist_df(
-    indir, file="simulated_droplet_distances_e_0.0075_noisy_cohesin.csv"
+    indir,
+    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_noisy_cohesin.csv",
 ):
     # dist = pd.read_csv(f"{indir}/distance_between_droplets.csv",converters={'distances': pd.eval})
     dist = pd.read_csv(f"{indir}/{file}", header=0)
@@ -59,7 +62,8 @@ plt.tight_layout()
 outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_from_rivanna_kymographs_e_0.0075/"
 
 long_dist_df = make_long_dist_df(
-    indir, file="simulated_droplet_distances_e_0.0075_domain_0_2_chr_lengths.csv"
+    indir,
+    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_domain_0_2_chr_lengths.csv",
 )
 sns.histplot(
     data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30
@@ -74,7 +78,8 @@ plt.show()
 outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_1_eps_0.0075/"
 
 long_dist_df2 = make_long_dist_df(
-    indir, file="simulated_droplet_distances_e_0.0075_domain_0_1_chr_lengths.csv"
+    indir,
+    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_domain_0_1_chr_lengths.csv",
 )
 sns.histplot(
     data=long_dist_df2, x="distance", palette=sns.color_palette("muted"), bins=30
@@ -108,7 +113,8 @@ plt.savefig(
 outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_noisy_cohesin_sd_0.25/"
 
 long_dist_df = make_long_dist_df(
-    indir, file="simulated_droplet_distances_e_0.0075_noisy_cohesin_sd_0.25.csv"
+    indir,
+    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_noisy_cohesin_sd_0.25.csv",
 )
 sns.histplot(
     data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30
@@ -124,7 +130,8 @@ plt.show()
 outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_noisy_cohesin_sd_0.11/"
 
 long_dist_df = make_long_dist_df(
-    indir, file="simulated_droplet_distances_e_0.0075_noisy_cohesin_sd_0.11.csv"
+    indir,
+    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_noisy_cohesin_sd_0.11.csv",
 )
 sns.histplot(
     data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30

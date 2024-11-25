@@ -3,7 +3,7 @@
 # https://olddocs.fenicsproject.org/dolfin/1.4.0/python/demo/documented/cahn-hilliard/python/documentation.html
 # install with conda install -c conda-forge fenics-dolfinx mpich pyvista
 import random
-from dolfin import *
+from dolfinx import *
 
 
 # Class representing the intial conditions

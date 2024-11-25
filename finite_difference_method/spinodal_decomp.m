@@ -2,7 +2,7 @@
 % adapted to use same initial conditions as our method 
 % and to output energy, mass, and residual
 
-function [phi_t,mass_t,E_t] = spinodal_decomp(D,gamma,options)
+function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     % SPINODAL_DECOMP Generates and records Cahn-Hilliard spinodal
     % decomposition models using Euler's method.
     % 
@@ -110,21 +110,24 @@ function [phi_t,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     mass_t = zeros(options.NumIterations+1,1);
     nx = options.GridSize;
     ny = nx;
-    phi_t = zeros(nx,ny,options.NumIterations+1); %Initialize outputs
-    if options.write_phi
-        writematrix(u,sprintf('%s_phi.csv', options.FileName)); %write IC to file
-    end
+    % phi_t = zeros(nx,ny,options.NumIterations+1); %Initialize outputs
+    % if options.write_phi
+    %     writematrix(u,sprintf('%s_phi.csv', options.FileName)); %write IC to file
+    % end
 
     for i = 1:options.NumIterations
+        if rem(i, 1000) == 0
+            i
+        end
         curr_t=(i)*options.dt;
-        phi_t(:,:,i) = u;
+        % phi_t(:,:,i) = u;
         mass_t(i) = sum(sum(u))/(h2*nx*ny);
         E_t(i) = discrete_energy(u,h2,nx,ny,gamma);
 
         u = iterate(u,D,gamma,options.dt);
-        if options.write_phi
-            writematrix(u,sprintf('%s_phi.csv', options.FileName),'WriteMode','append');
-        end 
+        % if options.write_phi
+        %     writematrix(u,sprintf('%s_phi.csv', options.FileName),'WriteMode','append');
+        % end 
 
         % Incremental video mode
         if (strcmp(options.CaptureMode,'incremental'))
@@ -161,14 +164,14 @@ function [phi_t,mass_t,E_t] = spinodal_decomp(D,gamma,options)
         end
     end
 
-    phi_t(:,:,options.NumIterations+1) = u;
+    % phi_t(:,:,options.NumIterations+1) = u;
+    final_phi = u;
     mass_t(options.NumIterations+1) = sum(sum(u))/(h2*nx*ny);
     E_t(options.NumIterations+1) = discrete_energy(u,h2,nx,ny,gamma);
 
     close(writer);
 
-    %Normalize mass and energy
-    mass_t = mass_t/mass_t(1);
+    %Normalize energy #note that we don't want to normalize mass because initial mass might be 0. 
     E_t = E_t/E_t(1);
     fprintf('Done!\n');
 

@@ -95,10 +95,10 @@ function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, dt, Cahn
                 end
                 a[1] = 1 / dt
                 a[2] = (x_fac + y_fac) / ht2
-                #a[2] = -(x_fac + y_fac) * Cahn / ht2 - d2f(c_new[i][j]);
+                #a[3] = -(x_fac + y_fac) * Cahn / ht2 - d2f(c_new[i][j]);
                 a[3] = -(x_fac + y_fac) * Cahn / ht2 - 3 * (c_new[i, j])^2
-                cnew_val = (c_new[i, j])
-                d2f = -3 * (c_new[i, j])^2
+                # cnew_val = (c_new[i, j])
+                # d2f = -3 * (c_new[i, j])^2
 
                 a[4] = 1.0
 
@@ -357,7 +357,7 @@ function cahn(c_old, c_new, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xle
 
         resid2 = error2(c_old, c_new, mu, nx, ny, dt)
         if print_r
-            print_mat("$(outdir)/residual_$(nx)_$(tol)_$(suffix).txt", resid2)
+            print_mat("$(outdir)/$(suffix)_residual.txt", resid2)
         end
         it_mg2 += 1
     end
@@ -483,11 +483,11 @@ function multigrid_solver(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suf
         oc0 = copy(oc)
         if print_phi
             if type == "phi"
-                open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "w", lock=false) do f
+                open("$(outdir)/$(suffix)_phi.txt", "w", lock=false) do f
                     writedlm(f, oc, " ")
                 end
             elseif type == "psi"
-                open("$(outdir)/psi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "w", lock=false) do f
+                open("$(outdir)/$(suffix)_psi.txt", "w", lock=false) do f
                     psi = (oc .+ 1) ./ 2
                     writedlm(f, psi, " ")
                 end
@@ -499,21 +499,21 @@ function multigrid_solver(oc, nx, tol, outdir; max_it=1000, max_it_CH=10000, suf
             nc = cahn(oc, nc, mu, nx, ny, dt, max_it_CH, tol, c_relax, xright, xleft, Cahn, n_level, suffix=suffix, print_r=print_r)
 
             if print_mass
-                print_mat("$(outdir)/ave_mass_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_mass(oc, h2, nx, ny))
+                print_mat("$(outdir)/$(suffix)_mass.txt", calculate_mass(oc, h2, nx, ny))
             end
             if print_e
-                print_mat("$(outdir)/discrete_norm_e_$(nx)_$(max_it)_$(tol)_$(suffix).txt", calculate_discrete_norm_energy(oc, oc0, h2, nx, ny, Cahn))
+                print_mat("$(outdir)/$(suffix)_energy.txt", calculate_discrete_norm_energy(oc, oc0, h2, nx, ny, Cahn))
             end
             oc = copy(nc)
             if it % ns == 0
+                println(it)
                 if print_phi
-                    println(it)
                     if type == "phi"
-                        open("$(outdir)/phi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "a", lock=false) do f
+                        open("$(outdir)/$(suffix)_phi.txt", "a", lock=false) do f
                             writedlm(f, oc, " ")
                         end
                     elseif type == "psi"
-                        open("$(outdir)/psi_$(nx)_$(max_it)_$(tol)_$(suffix).txt", "a", lock=false) do f
+                        open("$(outdir)/$(suffix)_psi.txt", "a", lock=false) do f
                             psi = (oc .+ 1) ./ 2
                             writedlm(f, psi, " ")
                         end

@@ -15,15 +15,15 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
     phidims(1) = phidims(2); %Determine size of square grid
     phi = reshape(phi,phidims(1),phidims(3),phidims(2)); %Reshape multidimensional array
     phi = shiftdim(phi,2); %Shift dimensions to move frames to the third dimension
-    myfig = figure();
+    % myfig = figure();
     % hold on
     if const_colorbar == true
-        phi_movie = VideoWriter(sprintf('%s/%s%s.mp4', indir, name, suffix),'MPEG-4');
+        writer = VideoWriter(sprintf('%s/%s%s.mp4', indir, name, suffix),'MPEG-4');
     else
-        phi_movie = VideoWriter(sprintf('%s/_%s%s.mp4', indir, name, suffix),'MPEG-4');
+        writer = VideoWriter(sprintf('%s/_%s%s.mp4', indir, name, suffix),'MPEG-4');
     end
-    phi_movie.Quality = 100; %Highest quality video
-    open(phi_movie);
+    % writer.Quality = 100; %Highest quality video
+    open(writer);
     % Set consistent color axis limits for the entire movie
     clim([-1, 1]);
     % for i = 1:10
@@ -38,22 +38,24 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
             fig = figure('visible','off');
             % phi(:,:,i) = transpose(phi(:,:,i)); #use for VCell simulations but nothing else
             if plot_type == "surf"
-                surf(phi(:,:,i),'EdgeColor','none');colorbar;axis square;
+                surf(transpose(phi(:,:,i)),'EdgeColor','none');colorbar;axis square;
                 view(2);
         
             elseif plot_type == "contourf"
-                contourf((phi(:,:,i))); colorbar; axis square;
+                contourf(transpose(phi(:,:,i))); colorbar; axis square;
                 view(2);
         
             elseif plot_type == "surf3d"
-                surfc(phi(:,:,i)); colorbar; axis square;
+                surfc(transpose(phi(:,:,i))); colorbar; axis square;
                 ylim([0, 2])
             elseif plot_type == "surfside"
-                surfc(phi(:,:,i)); colorbar; axis square;
+                surfc(transpose(phi(:,:,i))); colorbar; axis square;
                 view(90,0)
                 ylim([0,2])
             elseif plot_type == "heatmap"
-                h=heatmap(phi(:,:,i), 'CellLabelColor','none', 'GridVisible','off');
+                % h=heatmap(transpose(phi(:,:,i)), 'CellLabelColor','none', 'GridVisible','off'); axis square;
+                image(transpose(phi(:,:,i)),'CDataMapping','scaled');colorbar; axis square;
+
             end
 
             % contour(:,:,i); colorbar; axis square;
@@ -80,7 +82,7 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
                 clim([-1, 1]);
             end
             frame = getframe(fig); % Capture the current figure window as a frame
-            writeVideo(phi_movie, frame); % Add the frame to the video
+            writeVideo(writer, frame); % Add the frame to the video
             % if mod(i,20)==0
             %     close all;
             % end
@@ -90,7 +92,7 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
         end
     end
 
-    close(phi_movie);
+    close(writer);
 end
 
 function c = redblue(m)

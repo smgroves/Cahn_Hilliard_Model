@@ -45,7 +45,7 @@ for CPC = ["0.1","0.12","0.125", "0.15", "0.22","0.25","0.3", "0.35"]
             % histogram(distances);
             % saveas(gcf,sprintf('%s/%s/distances_between_droplets_t_0.001.png', indir, name))
 
-            fid = fopen('simulated_droplet_distances_e_0.0075_domain_0_1.csv', 'a+');
+            fid = fopen('simulated_droplet_distances/simulated_droplet_distances_e_0.0075_domain_0_1.csv', 'a+');
             fprintf(fid, '%s,%s,%s,%s,%s \r\n', CPC, cohesin, eps, time, mat2str(distances));
             fclose(fid);
 

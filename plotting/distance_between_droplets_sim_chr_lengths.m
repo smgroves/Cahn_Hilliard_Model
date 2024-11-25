@@ -43,7 +43,7 @@ for CPC = ["0.1","0.12","0.125", "0.15", "0.22","0.25","0.3", "0.35"]
         end
         droplet_centers = sort(droplet_centers);
         distances = domain*diff(droplet_centers)/Nx;
-        fid = fopen('simulated_droplet_distances_e_0.0075_domain_0_2_chr_lengths.csv', 'a+');
+        fid = fopen('simulated_droplet_distances/simulated_droplet_distances_e_0.0075_domain_0_2_chr_lengths.csv', 'a+');
         fprintf(fid, '%s,%s,%s,%f,%f,%s \r\n', CPC, cohesin, eps, t,arm_length, mat2str(distances));
         fclose(fid);
          
