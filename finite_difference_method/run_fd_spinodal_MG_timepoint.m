@@ -8,8 +8,9 @@ epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9));
 % epsilon = m/(2 * sqrt(2) * atanh(0.9));
 gamma = epsilon^2/h^2;
 D = GridSize^2;
-total_time = 0.06;
-for dt = [0.0001, 5e-5, 2.5e-5, 1.25e-5, 6.25e-6]
+total_time = 0.01;
+% for dt = [0.0001, 5e-5, 2.5e-5, 1.25e-5, 6.25e-6]
+for dt = 6.25e-6
     max_it = round(total_time / dt);
     FileName = sprintf("%s/FD_%d_dt_%.2e_Nx_%d_gam_%.2e_D_%g",outdir,max_it,dt, GridSize,gamma,D)
 
@@ -18,25 +19,25 @@ for dt = [0.0001, 5e-5, 2.5e-5, 1.25e-5, 6.25e-6]
                     "GridSize",GridSize,...
                     "CaptureMode","standard",...
                     "NumIterations",max_it,...
-                    "FrameSpacing",1,...
+                    "FrameSpacing",10,...
                     'ImgStyle','true',...
                     "InputMatrix",sprintf("%s/t=0.01_dt_1.25e-5.csv",indir),...
                     "FileName",FileName,...
                     "InputType",'phi',...
                     "ConstantColorbar", true,...
                     "write_residual",false,...
-                    "write_phi",false);
+                    "write_phi",true);
             % save([FileName, '.mat'],'phi_t');
-    writematrix(final_phi,sprintf('%s_final_phi.csv', FileName));
-    writematrix(mass_t,sprintf('%s_mass.csv', FileName));
-    writematrix(E_t,sprintf('%s_energy.csv', FileName));
+    % writematrix(final_phi,sprintf('%s_final_phi.csv', FileName));
+    % writematrix(mass_t,sprintf('%s_mass.csv', FileName));
+    % writematrix(E_t,sprintf('%s_energy.csv', FileName));
 
-    fig = figure('visible', 'off');
-    image(final_phi,'CDataMapping','scaled'); colorbar; axis square;
-    set(gca,'FontSize',16);title(['t = ',num2str(total_time)]); xlabel('x'); ylabel('y');
-    clim([-1, 1]);
-    colormap(redblue(100));
-    saveas(gca,sprintf('%s_final_phi.png', FileName))
+    % fig = figure('visible', 'off');
+    % image(final_phi,'CDataMapping','scaled'); colorbar; axis square;
+    % set(gca,'FontSize',16);title(['t = ',num2str(total_time)]); xlabel('x'); ylabel('y');
+    % clim([-1, 1]);
+    % colormap(redblue(100));
+    % saveas(gca,sprintf('%s_final_phi.png', FileName))
 end
 
 function c = redblue(m)

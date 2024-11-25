@@ -1,4 +1,4 @@
-function [phi_t,mass_t,E_t] = CahnHilliard_NMG(phi0,varargin)
+function [final_phi, mass_t,E_t] = CahnHilliard_NMG(phi0,varargin)
 %This function uses the nonlinear multigrid method to solve the 
 %Cahn-Hilliard equation for a specified number of time steps of size dt.
 % 
@@ -10,9 +10,9 @@ function [phi_t,mass_t,E_t] = CahnHilliard_NMG(phi0,varargin)
     %dt = Time step. Default = **2.5e-5 characteristic times** **OR FRACTION OF dt?**.
     %solver_iter = Number of solver iterations per time step. Default = 1e4.
     %tol = Solver tolerance per time step. Default = **1e-6** **OR SCALED BY nx?**.
-    %m = Number of mesh points over which the interface exists. Default = **8** **OR 4?**.
+    %m = Number of mesh points over which the interface exists. Default = 4.
     %boundary = Boundary conditions for the simulation:
-    %   'periodic' (**default** **OR DO WE WANT THE OPPOSITE**) - flux on one domain border equals negative flux on the opposite border
+    %   'periodic' (default) - flux on one domain border equals negative flux on the opposite border
     %   'neumann' - zero flux on the domain borders
     %c_relax = Number of smoothing relaxations done at the start and end
     %   of each V-cycle. Default = 2 **THIS HAS ALWAYS BEEN TRUE, CORRECT?**;
@@ -31,10 +31,11 @@ default_t_iter = 1e3;
 default_dt = 2.5e-5;
 default_solver_iter = 1e4;
 default_tol = 1e-6;
-default_m = 8;
+default_m = 4;
 default_boundary = 'periodic';
 default_c_relax = 2;
 default_domain = [1 0 1 0];
+default_ns = 10;
 
 CahnHilliard_NMG_parser = inputParser;
 
@@ -56,6 +57,10 @@ addOptional(CahnHilliard_NMG_parser,'m',default_m,valid_integer);
 addOptional(CahnHilliard_NMG_parser,'boundary',default_boundary,valid_boundary_type);
 addOptional(CahnHilliard_NMG_parser,'c_relax',default_c_relax,valid_integer);
 addOptional(CahnHilliard_NMG_parser,'domain',default_domain,valid_domain_vector);
+addOptional(CahnHilliard_NMG_parser,'write_phi',true);
+addOptional(CahnHilliard_NMG_parser,'FileName', "");
+addOptional(CahnHilliard_NMG_parser,'ns', default_ns, valid_pos_num);
+
 
 parse(CahnHilliard_NMG_parser,phi0,varargin{:});
 
@@ -72,6 +77,9 @@ xright = CahnHilliard_NMG_parser.Results.domain(1);
 xleft = CahnHilliard_NMG_parser.Results.domain(2);
 yright = CahnHilliard_NMG_parser.Results.domain(3);
 yleft = CahnHilliard_NMG_parser.Results.domain(4);
+write_phi = CahnHilliard_NMG_parser.Results.write_phi;
+FileName = CahnHilliard_NMG_parser.Results.FileName;
+ns = CahnHilliard_NMG_parser.Results.ns;
 
 %% Define and initialize key simulation parameters
 
@@ -89,27 +97,34 @@ epsilon2 = h2*m^2/(2*sqrt(2)*atanh(0.9))^2; %Define ϵ^2
 mu = zeros(nx,ny); %Initialize chemical potential
 phi_old = phi0; %Initialize prior chemical state
 phi_new = phi0; %Initialize next chemical state
-phi_t = zeros(nx,ny,t_iter); %Initialize outputs
+% phi_t = zeros(nx,ny,t_iter); %Initialize outputs
 mass_t = zeros(t_iter,1);
 E_t = zeros(t_iter,1);
 
 %% Run nonlinear multigrid solver
-
+if write_phi
+    writematrix(phi_new,sprintf('%s_phi.csv', FileName)); %write IC to file
+end
 for i = 1:t_iter
-    phi_t(:,:,i) = phi_new;
+    % phi_t(:,:,i) = phi_new;
     mass_t(i) = sum(sum(phi_new))/(h2*nx*ny);
     E_t(i) = discrete_energy(phi_new,h2,nx,ny,epsilon2);
     phi_new = nmg_solver(phi_old,phi_new,mu,nx,ny, ...
         xright,xleft,yright,yleft,c_relax,dt,epsilon2,n_level, ...
         solver_iter,tol,boundary);
     phi_old = phi_new;
+    if write_phi
+        if rem(i, ns) == 0
+            writematrix(phi_new,sprintf('%s_phi.csv', FileName),'WriteMode','append');
+        end
+    end 
     if mod(i/t_iter*100,5) == 0
         fprintf('%3.0f percent complete\n',i/t_iter*100)
     end
 end
 
-%Normalize mass and energy
-mass_t = mass_t/mass_t(1);
+final_phi = phi_new;
+%Normalize energy to t == 0
 E_t = E_t/E_t(1);
 
 end

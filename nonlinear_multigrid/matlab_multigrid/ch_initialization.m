@@ -3,8 +3,8 @@ function phi0 = ch_initialization(nx,ny,varargin)
 %terms of qualitative chemical states in the [-1,+1] interval.
 %
 %INPUTS
-    %nx = Number of grid points in x. No default value.
-    %ny = Number of grid points in y. No default value. nx and ny should be equal for nonlinear multigrid.
+    %nx = Number of grid points in x. No default value but must be even.
+    %ny = Number of grid points in y. No default value but must be even.
 %
 %NAME-VALUE PAIRS
     %inittype = Type of initial conditions:
@@ -42,6 +42,7 @@ default_chemstates = [-1 1];
 ch_initialization_parser = inputParser;
 
 %Set general criteria for inputs and name-value pairs
+valid_even = @(x) mod(x,2) == 0;
 valid_integer = @(x) x-floor(x) == 0;
 valid_inittype = @(x) strcmpi(x,'spinodal') || strcmpi(x,'unirand') || ...
     strcmpi(x,'droplet') || strcmpi(x,'geometric') || strcmpi(x,'file');
@@ -51,8 +52,8 @@ valid_char = @(x) ischar(x);
 valid_chemstate = @(x) length(x) == 2 && (x(1) < x(2));
 
 %Set parser options and valid input criteria
-addRequired(ch_initialization_parser,'nx',valid_integer);
-addRequired(ch_initialization_parser,'ny',valid_integer);
+addRequired(ch_initialization_parser,'nx',valid_even);
+addRequired(ch_initialization_parser,'ny',valid_even);
    
 addOptional(ch_initialization_parser,'inittype',default_inittype,valid_inittype);
 addOptional(ch_initialization_parser,'seed',default_seed,valid_pos_num);

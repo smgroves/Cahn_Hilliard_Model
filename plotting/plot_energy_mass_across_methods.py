@@ -510,21 +510,28 @@ sns.lineplot(
     # markeredgecolor="None",
     palette="tab10",
 )
-plt.ylim(0.5, 1.1)
-plt.title("Spinodal Decomposition (+1/-1 IC) - Energy")
+plt.ylim(0.5, 1.4)
+plt.title("Spinodal Decomposition (t = 0.01 MG IC) - Energy")
 plt.ylabel("Normalized Discrete Energy")
-# plt.savefig(f"{outdir}/SD_t=0.01_IC_FD_MG_energy_zoomed.png")
-plt.show()
+plt.savefig(f"{outdir}/SD_t=0.01_IC_FD_MG_energy.png")
+# plt.show()
 plt.close()
 # %%
+small = all_data.loc[
+    ~(
+        all_data["Solver"].isin(
+            ["FD, dt=1.00e-04", "FD, dt=1.25e-05", "FD, dt=2.50e-05", "FD, dt=5.00e-05"]
+        )
+    )
+]
 sns.lineplot(
-    all_data, x="Time", y="Mass", hue="Solver"
+    small, x="Time", y="Mass", hue="Solver"
 )  # , palette=sns.color_palette()[1:6]
 # )
-plt.title("Spinodal Decomposition (+1/-1 IC) - Mass")
+plt.title("Spinodal Decomposition (t = 0.01 MG IC) - Mass")
 plt.ylabel("Deviation from Initial Average Mass (M(t)-M(0))")
-# plt.savefig(f"{outdir}/SD_t=0.01_IC_FD_MG_mass.pdf")
-plt.show()
+plt.savefig(f"{outdir}/SD_t=0.01_IC_FD_MG_mass.pdf")
+# plt.show()
 
 
 # %%

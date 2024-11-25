@@ -111,9 +111,9 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     nx = options.GridSize;
     ny = nx;
     % phi_t = zeros(nx,ny,options.NumIterations+1); %Initialize outputs
-    % if options.write_phi
-    %     writematrix(u,sprintf('%s_phi.csv', options.FileName)); %write IC to file
-    % end
+    if options.write_phi
+        writematrix(u,sprintf('%s_phi.csv', options.FileName)); %write IC to file
+    end
 
     for i = 1:options.NumIterations
         if rem(i, 1000) == 0
@@ -125,9 +125,9 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
         E_t(i) = discrete_energy(u,h2,nx,ny,gamma);
 
         u = iterate(u,D,gamma,options.dt);
-        % if options.write_phi
-        %     writematrix(u,sprintf('%s_phi.csv', options.FileName),'WriteMode','append');
-        % end 
+        if options.write_phi
+            writematrix(u,sprintf('%s_phi.csv', options.FileName),'WriteMode','append');
+        end 
 
         % Incremental video mode
         if (strcmp(options.CaptureMode,'incremental'))
