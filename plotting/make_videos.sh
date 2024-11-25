@@ -407,3 +407,11 @@ dt=6.25e-6
 name="MG_9600_dt_6.25e-6_Nx_128_eps_0.015009369912862116_phi"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
 echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/matlab_multigrid/output/large_and_small_droplets"
+dtout=10
+frame_rate=10
+dt=0.001
+name="MG_MATLAB_5000_dt_1.00e-03_Nx_128_r1_20_r2_30_space_10_phi"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."

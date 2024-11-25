@@ -382,12 +382,12 @@ end
 
 function y = fft2_filtered(x)
 global nt nt0
-    if nt>=nt0
+    % if nt>=nt0
         % y=real(fft2(x));
+        % y=fft2(x);
+    % else
         y=fft2(x);
-    else
-        y=fft2(x);
-    end
+    % end
 end
 
 function x_ext = ext(x)

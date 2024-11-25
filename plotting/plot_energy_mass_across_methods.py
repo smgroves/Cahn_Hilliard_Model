@@ -54,7 +54,7 @@ for file in glob.glob(f"*{FD_suffix}_energy.csv"):
 all_FD = pd.DataFrame(columns=["Time", "Solver", "Mass", "Energy"])
 # loop through them and add to all_FD
 for it, dt in z:
-    if (it == "5000000") and (dt == "1.00e-06"):
+    if (it == "500000") and (dt == "1.00e-06"):
         continue
     print(it, dt)
 
@@ -64,8 +64,8 @@ for it, dt in z:
         it,
         dt,
         name,
-        # keepevery=(round(int(it) / 1000) if int(it) > 10000 else 10),
-        keepevery=1,
+        keepevery=(round(int(it) / 1000) if int(it) > 10000 else 10),
+        # keepevery=1,
         filetype="csv",
         plus_one=1,
     )
@@ -96,8 +96,8 @@ for it, dt in z:
         it,
         dt,
         name,
-        # keepevery=(round(int(it) / 1000) if int(it) > 10000 else 10),
-        keepevery=1,
+        keepevery=(round(int(it) / 1000) if int(it) > 10000 else 10),
+        # keepevery=1,
         filetype="txt",
         plus_one=0,
     )
@@ -113,7 +113,25 @@ for i, r in all_MG.iterrows():
         all_MG.loc[i, "Solver"] = "MG, dt=1.00e-04"
 
 # %%
-all_data = pd.concat([all_FD, all_MG], ignore_index=True)
+MG_MATLAB_path = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/matlab_multigrid/output/large_and_small_droplets/"
+MG_MATLAB_suffix = "Nx_128_r1_20_r2_30_space_10"
+name = "MG_MATLAB"
+filetype = "txt"
+MG_MATLAB_df = read_in_files(
+    MG_MATLAB_path,
+    MG_MATLAB_suffix,
+    "5000",
+    "1.00e-03",
+    name,
+    keepevery=(round(int(it) / 1000) if int(it) > 10000 else 10),
+    # keepevery=1,
+    filetype="csv",
+    plus_one=0,
+)
+MG_MATLAB_df["Mass"] = MG_MATLAB_df["Mass"] - MG_MATLAB_df.iloc[0]["Mass"]
+
+# %%
+all_data = pd.concat([all_FD, all_MG, MG_MATLAB_df], ignore_index=True)
 
 
 # %%
@@ -127,7 +145,7 @@ sns.lineplot(
 )
 plt.title("Ostwald Ripening of Two Droplets")
 plt.ylabel("Normalized Discrete Energy")
-plt.savefig(f"{outdir}/two_droplets_totaltime_5_FD_MG_energy.pdf")
+plt.savefig(f"{outdir}/two_droplets_totaltime_5_FD_MG_julMATLAB_energy.png")
 # plt.show()
 plt.close()
 sns.lineplot(
@@ -138,7 +156,7 @@ sns.lineplot(
 )
 plt.title("Ostwald Ripening of Two Droplets")
 plt.ylabel("Deviation from Initial Average Mass (M(t)-M(0))")
-plt.savefig(f"{outdir}/two_droplets_totaltime_5_FD_MG_mass.pdf")
+plt.savefig(f"{outdir}/two_droplets_totaltime_5_FD_MG_julMATLAB_mass.png")
 # plt.show()
 
 # %%
