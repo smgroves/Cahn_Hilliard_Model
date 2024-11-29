@@ -1,6 +1,6 @@
 function phi_new = nmg_solver(phi_old,phi_new,mu,nx,ny, ...
     xright,xleft,yright,yleft,c_relax,dt,epsilon2,n_level,max_iter,tol, ...
-    boundary)
+    boundary,printres)
 %This function uses the nonlinear multigrid method to solve the 
 %Cahn-Hilliard equation for the next time step.
 %
@@ -22,6 +22,7 @@ function phi_new = nmg_solver(phi_old,phi_new,mu,nx,ny, ...
     %max_iter = Maximum number of iterations for numerical convergence
     %tol = Tolerance for numerical convergence
     %boundary = 'periodic' or 'neumann' boundary conditions.
+    %printres = Logical to print residuals to file.
 %
 %OUTPUT
     %phi_new = Next chemical state.
@@ -38,6 +39,9 @@ while resid2 > tol && iter < max_iter
     [phi_new,mu] = nmg_vcycle(phi_new,mu,s_phi,s_mu,nx,ny, ...
         xright,xleft,yright,yleft,1,c_relax,dt,epsilon2,n_level,boundary); %V-cycle starting a level 1
     resid2 = error2(phi_old,phi_new,mu,nx,ny,xright,xleft,yright,yleft,dt,boundary);
+    if printres
+        writematrix(resid2,strcat(pwd,'/phi_res2.csv'),'WriteMode','append');
+    end
     iter = iter+1;
 end
 

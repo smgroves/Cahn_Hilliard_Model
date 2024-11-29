@@ -415,3 +415,30 @@ dt=0.001
 name="MG_MATLAB_5000_dt_1.00e-03_Nx_128_r1_20_r2_30_space_10_phi"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
 echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output_large_domain"
+dtout=10
+frame_rate=10
+dt=0.000006103515625
+name="MG_2000_dt_6.103515625e-6_Nx_128_n_relax_4_eps_1.9211993488463508_large_domain_phi"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output_large_domain"
+dtout=10
+frame_rate=1
+dt=0.1
+name="MG_2000_dt_0.1_Nx_128_n_relax_4_eps_1.9211993488463508_large_domain_phi"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
+dtout=10
+frame_rate=1
+dt=6.103515625e-6
+name="MG_2000_dt_6.103515625e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, 'fast', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."

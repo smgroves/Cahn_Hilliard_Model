@@ -76,6 +76,7 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     options.ConstantColorbar = true
     options.write_phi = true
     options.write_residual = true
+    options.ns = 10
     end
 
     % Random Starting Concentrations (-1 and 1 represent different species)
@@ -126,9 +127,10 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
 
         u = iterate(u,D,gamma,options.dt);
         if options.write_phi
-            writematrix(u,sprintf('%s_phi.csv', options.FileName),'WriteMode','append');
-        end 
-
+            if rem(i, options.ns) == 0
+                writematrix(u,sprintf('%s_phi.csv', options.FileName),'WriteMode','append');
+            end 
+        end
         % Incremental video mode
         if (strcmp(options.CaptureMode,'incremental'))
             if (count == frameStep)

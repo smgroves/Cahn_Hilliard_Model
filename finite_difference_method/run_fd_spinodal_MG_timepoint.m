@@ -28,16 +28,16 @@ for dt = 6.25e-6
                     "write_residual",false,...
                     "write_phi",true);
             % save([FileName, '.mat'],'phi_t');
-    % writematrix(final_phi,sprintf('%s_final_phi.csv', FileName));
-    % writematrix(mass_t,sprintf('%s_mass.csv', FileName));
-    % writematrix(E_t,sprintf('%s_energy.csv', FileName));
+    writematrix(final_phi,sprintf('%s_final_phi.csv', FileName));
+    writematrix(mass_t,sprintf('%s_mass.csv', FileName));
+    writematrix(E_t,sprintf('%s_energy.csv', FileName));
 
-    % fig = figure('visible', 'off');
-    % image(final_phi,'CDataMapping','scaled'); colorbar; axis square;
-    % set(gca,'FontSize',16);title(['t = ',num2str(total_time)]); xlabel('x'); ylabel('y');
-    % clim([-1, 1]);
-    % colormap(redblue(100));
-    % saveas(gca,sprintf('%s_final_phi.png', FileName))
+    fig = figure('visible', 'off');
+    image(final_phi,'CDataMapping','scaled'); colorbar; axis square;
+    set(gca,'FontSize',16);title(['t = ',num2str(total_time)]); xlabel('x'); ylabel('y');
+    clim([-1, 1]);
+    colormap(redblue(100));
+    saveas(gca,sprintf('%s_final_phi.png', FileName))
 end
 
 function c = redblue(m)
