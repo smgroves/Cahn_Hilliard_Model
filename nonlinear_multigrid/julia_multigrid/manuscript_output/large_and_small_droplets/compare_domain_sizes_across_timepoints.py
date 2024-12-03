@@ -103,15 +103,30 @@ title = (
 plot_differences(90, title=title)
 
 # %%
-plt.plot(phi_MG[:, 64, np.argmin(sses)], label="MG")
-plt.plot(phi_final_FD[:, 64], label="FD")
-plt.legend()
-plt.title("Vertical profile at y = 64")
+# plt.plot(phi_MG[:, 64, np.argmin(sses)], label="MG")
+# plt.plot(phi_final_FD[:, 64], label="FD")
+# plt.legend()
+# plt.title("Vertical profile at y = 64")
+# plt.show()
+timepoints = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 96, 100, 110, 120]
+dt = 0.001
+ns = 10
+cmap = cm.get_cmap("viridis")  # You can use any colormap (e.g., 'plasma', 'coolwarm')
+norm = mcolors.Normalize(
+    vmin=0, vmax=len(timepoints) - 1
+)  # Normalize between 0 and num_lines-1
+
+for i, timepoint in enumerate(timepoints):
+    color = cmap(norm(i))  # Get color from colormap
+    plt.plot(
+        phi_MG[64, :, timepoint],
+        color=color,
+        label=f"t = {round(timepoint * dt * ns,2)}",
+    )
+plt.plot(phi_final_FD[64, :], label="FD", color="k")
+plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+plt.title(f"Horizontal profile at x = 64, timepoints for MG compared to T = 3 for FD")
 plt.show()
-plt.plot(phi_MG[64, :, np.argmin(sses)], label="MG")
-plt.plot(phi_final_FD[64, :], label="FD")
-plt.legend()
-plt.title("Horizontal profile at x = 64")
-plt.show()
+
 
 # %%

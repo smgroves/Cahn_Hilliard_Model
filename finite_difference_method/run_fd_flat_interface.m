@@ -1,7 +1,7 @@
 
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/flat_interface/IC/";
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/flat_interface/";
-m = 16;
+m = 8;
 GridSize = 128
 h = 1/GridSize;
 epsilon = m * (1 / 128) / (2* sqrt(2) * atanh(0.9));
@@ -9,7 +9,7 @@ epsilon = m * (1 / 128) / (2* sqrt(2) * atanh(0.9));
 gamma = epsilon^2/h^2;
 D = GridSize^2;
 total_time = 0.01;
-dt = 6.25e-6;
+dt = 6.25e-7;
 max_it = round(total_time / dt);
 FileName = sprintf("%s/FD_%d_dt_%.2e_Nx_%d_gam_%.2e_D_%g",outdir,max_it,dt, GridSize,gamma,D)
 

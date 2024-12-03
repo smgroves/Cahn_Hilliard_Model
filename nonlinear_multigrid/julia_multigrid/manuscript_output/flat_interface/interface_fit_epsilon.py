@@ -138,7 +138,7 @@ xx = np.linspace(0, 1 / 128 * (nx - 1), nx)
 
 ########################################################################################
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/flat_interface"
-phi_name = "FD_1600_dt_6.25e-06_Nx_128_gam_1.48e+01_D_16384_phi.csv"
+phi_name = "FD_16000_dt_6.25e-07_Nx_128_gam_3.69e+00_D_16384_phi.csv"
 # want t = 0
 skip_header = 0
 phi_initial = np.genfromtxt(
@@ -167,7 +167,7 @@ plt.plot(
 plt.plot(
     xx,
     phi_final_FD[:, int(nx / 2)],
-    label="Final (FD), dt = 6.25e-6",
+    label="Final (FD), dt = 6.25e-7",
     linestyle="--",
     linewidth=3,
 )
@@ -206,7 +206,7 @@ plt.axvline(x=0.5, linestyle="--", color="lightgrey")
 plt.xlim(0.4, 0.6)
 plt.legend()
 plt.title(
-    "Initial and Final Phi (1D profile) for Flat Interface \n total time = 0.01, m = 16"
+    "Initial and Final Phi (1D profile) for Flat Interface \n total time = 0.01, m = 8"
 )
 # plt.show()
-plt.savefig(f"{indir}/interface_profile_m=16_+theory.pdf")
+plt.savefig(f"{indir}/interface_profile_m=8_+theory_fixed_laplace.pdf")

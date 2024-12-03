@@ -1,7 +1,7 @@
 % function arrOut = laplacian(arrIn)
 % % Calculates laplacian for a matrix using a 3x3 convolution with edge wrapping
-% arrOut = -arrIn + ...
-%     0.25*(circshift(arrIn,1)+circshift(arrIn,-1)+circshift(arrIn,-1,2)+circshift(arrIn,1,2));
+% arrOut = -4arrIn + ...
+%     (circshift(arrIn,1)+circshift(arrIn,-1)+circshift(arrIn,-1,2)+circshift(arrIn,1,2));
 %     %  + ...
 %     % 0.05*(circshift(arrIn,[1 1])+circshift(arrIn,[1 -1])+circshift(arrIn,[-1 1])+circshift(arrIn,[-1 -1]));
 % end
@@ -32,7 +32,7 @@ function arrOut = laplacian(arrIn)
             else
                 dady_T = 0;
             end
-            arrOut(i,j) = (dadx_R-dadx_L + dady_T-dady_B)/4;
+            arrOut(i,j) = (dadx_R-dadx_L + dady_T-dady_B);
         end
     end
     
