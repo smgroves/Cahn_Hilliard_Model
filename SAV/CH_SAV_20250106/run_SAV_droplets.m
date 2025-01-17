@@ -1,0 +1,116 @@
+% /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "run_SAV_droplets();quit;"
+indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/large_and_small_droplets/IC/";
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/SAV/output/large_and_small_droplets/";
+r1 = 10;
+r2 = 15;
+space = 10;
+m = 8;
+GridSize = 128;
+h = 1/GridSize;
+epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9));
+% epsilon = m/(2 * sqrt(2) * atanh(0.9));
+epsilon2 = epsilon^2/h^2;
+D = GridSize^2;
+total_time = .2;
+dt = 1e-5;
+max_it = round(total_time / dt);
+init_file = sprintf("%s/initial_phi_%d_r1_%d_r2_%d_space_%d.csv",indir,GridSize, r1,r2,space);
+phi0 = readmatrix(init_file);
+FileName = sprintf("%s/SAV_MATLAB_%d_dt_%.2e_Nx_%d_r1_%d_r2_%d_space_%d",outdir,max_it,dt, GridSize, r1,r2,space);
+[t_out, phi_t, delta_mass_t, E_t] = CahnHilliard_SAV(phi0,...
+                                    t_iter = max_it,...
+                                    dt = dt,...
+                                    m = 8,...
+                                    boundary = "neumann",...
+                                    printphi=true,...
+                                    filename = FileName);
+
+writematrix(phi_t(:,:,end),sprintf('%s_final_phi.csv', FileName));
+writematrix(delta_mass_t,sprintf('%s_mass.csv', FileName));
+writematrix(E_t,sprintf('%s_energy.csv', FileName));
+
+ch_movie(t_out,phi_t, filename = FileName)
+% name = "ch_movie_dt_1e-3";
+% suffix = "CHplotting";
+% fig = figure('visible', 'off');
+% image(phi_t(:,:,end),'CDataMapping','scaled'); colorbar; axis square;
+% set(gca,'FontSize',16);title(['t = ',num2str(total_time)]); xlabel('x'); ylabel('y');
+% clim([-1, 1]);
+% colormap(redblue(100));
+% saveas(gca,sprintf('%s_final_phi.png', FileName))
+% % end
+% %if you want a faster video, set frame_rate to something like 4
+% frame_rate = 1;
+% dtout = 10;
+% writer = VideoWriter(sprintf('%s/%s%s.mp4', outdir, name, suffix),'MPEG-4');
+% % writer.Quality = 100; %Highest quality video
+% open(writer);
+% % Set consistent color axis limits for the entire movie
+% clim([-1, 1]);
+% % for i = 1:10
+% phidims = size( phi_t);
+% cutoff = phidims(3);
+% for i = 1:cutoff
+
+%     if mod(i-1,frame_rate) == 0
+%         curr_t=(i-1)*dtout*dt;
+    
+%         fig = figure('visible','off');
+
+%         image(( phi_t(:,:,i)),'CDataMapping','scaled');colorbar; axis square;
+
+%         % contour(:,:,i); colorbar; axis square;
+%         % XLabels = 1:phidims(2);
+%         % % Convert each number in the array into a string
+%         % CustomXLabels = string(XLabels);
+%         % % Replace all but the fifth elements by spaces
+%         % CustomXLabels(mod(XLabels,10) ~= 0) = " ";
+%         % % Set the 'XDisplayLabels' property of the heatmap 
+%         % % object 'h' to the custom x-axis tick labels
+%         % h.XDisplayLabels = CustomXLabels;
+%         % h.YDisplayLabels = CustomXLabels;
+
+
+%         colormap(redblue(100));
+%         % Set the color axis limits for the current frame
+%         set(gca,'FontSize',16);title(['t = ',num2str(curr_t)]); xlabel('x'); ylabel('y');
+%         clim([-1, 1]);
+%         frame = getframe(fig); % Capture the current figure window as a frame
+%         writeVideo(writer, frame); % Add the frame to the video
+%         % if mod(i,20)==0
+%         %     close all;
+%         % end
+%         if mod(i,20*frame_rate)==0
+%             fprintf("%f%% \n",round(100*i/phidims(3),2));
+%         end
+%     end
+% end
+
+% close(writer);
+
+% function c = redblue(m)
+%     %   Adam Auton, 9th October 2009
+    
+%     if nargin < 1, m = size(get(gcf,'colormap'),1); end
+    
+%     if (mod(m,2) == 0)
+%         % From [0 0 1] to [1 1 1], then [1 1 1] to [1 0 0];
+%         m1 = m*0.5;
+%         r = (0:m1-1)'/max(m1-1,1);
+%         g = r;
+%         r = [r; ones(m1,1)];
+%         g = [g; flipud(g)];
+%         b = flipud(r);
+%     else
+%         % From [0 0 1] to [1 1 1] to [1 0 0];
+%         m1 = floor(m*0.5);
+%         r = (0:m1-1)'/max(m1,1);
+%         g = r;
+%         r = [r; ones(m1+1,1)];
+%         g = [g; 1; flipud(g)];
+%         b = flipud(r);
+%     end
+    
+%     c = [r g b]; 
+% end    
+

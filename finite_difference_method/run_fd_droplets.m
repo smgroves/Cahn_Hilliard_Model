@@ -1,23 +1,23 @@
 
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/large_and_small_droplets/IC/";
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/large_and_small_droplets/";
-r1 = 20;
-r2 = 30;
+r1 = 10;
+r2 = 15;
 space = 10;
 m = 8;
-GridSize = 128
+GridSize = 128;
 h = 1/GridSize;
 epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9));
 % epsilon = m/(2 * sqrt(2) * atanh(0.9));
 gamma = epsilon^2/h^2;
 D = GridSize^2;
 % total_time = (1/64^2)*500;
-total_time = 3;
+total_time = .2;
 % dt_orig = 0.0001;
 % for factor = [0.001]
 % total_time = 0.01;
     % dt = dt_orig*factor;
-dt = 1e-6
+dt = 1e-7
 max_it = round(total_time / dt);
 FileName = sprintf("%s/FD_%d_dt_%.2e_Nx_%d_gam_%.2e_D_%g_r1_%d_r2_%d_space_%d",outdir,max_it,dt, GridSize,gamma,D, r1,r2,space)
 
@@ -26,7 +26,7 @@ FileName = sprintf("%s/FD_%d_dt_%.2e_Nx_%d_gam_%.2e_D_%g_r1_%d_r2_%d_space_%d",o
                 "GridSize",GridSize,...
                 "CaptureMode","standard",...
                 "NumIterations",max_it,...
-                "FrameSpacing",1000,...
+                "FrameSpacing",10000,...
                 'ImgStyle','true',...
                 "InputMatrix",sprintf("%s/initial_phi_%d_r1_%d_r2_%d_space_%d.csv",indir,GridSize, r1,r2,space),...
                 "FileName",FileName,...

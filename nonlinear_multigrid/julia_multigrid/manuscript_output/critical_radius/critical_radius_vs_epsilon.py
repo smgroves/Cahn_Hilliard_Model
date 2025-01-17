@@ -42,24 +42,24 @@ indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigri
 # # plt.show()
 # %%
 ## Reuse this one
-alpha = "0.5"
-level_set_radius = "0.166600"
+# alpha = "0.5"
+level_set_radius = "0.5"  # the default from Min-Jhe's code was to use phi = 0 or psi = 0.5, so for the plotting without alpha it will be 0.5
 Nx = 128
 # for epsilon in ["0.011257", "0.0037523","0.0056285", "0.0075047"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
 for epsilon in [
     "0.015009",
     "0.030019",
-    "0.045028",
-    "0.0075046",
-    "0.075047",
-    "0.060038",
-    "0.090056",
+    # "0.045028",
+    # "0.0075046",
+    # "0.075047",
+    "0.060037",
+    # "0.090056",
 ]:
 
     # for epsilon in ["0.0037523", "0.0075046", "0.0018761", "0.015009"]:
     folder = f"critical_radius"
     tmp = pd.read_csv(
-        f"{indir}/{folder}/alpha_{alpha}/updated/radius_{level_set_radius}_level_set_{Nx}_epsilon_{epsilon}_alpha_{alpha}.txt",
+        f"{indir}/{folder}/periodic_BC_single_drop/radius_{level_set_radius}_level_set_epsilon_{epsilon}.txt",
         header=0,
         index_col=None,
         sep=",",
@@ -78,11 +78,11 @@ for epsilon in [
     sns.lineplot(data=tmp, x="time", y="radius", hue="R0", palette="tab20")
     plt.legend(loc="center left", title="R0", bbox_to_anchor=(1, 0.5), fontsize="small")
 
-    plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
+    plt.title(f"Epsilon = {epsilon}")
     # plt.axhline(0.07, linestyle="--", color="gray")
     plt.tight_layout()
     plt.savefig(
-        f"{indir}/{folder}/alpha_{alpha}/updated/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}.pdf"
+        f"{indir}/{folder}/periodic_BC_single_drop/critical_radius_vs_epsilon_{epsilon}_radius_{level_set_radius}.pdf"
     )
     plt.close()
 # %% With a linear color mapping

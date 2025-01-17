@@ -76,7 +76,7 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     options.ConstantColorbar = true
     options.write_phi = true
     options.write_residual = true
-    options.ns = 10
+    options.ns = 1
     end
 
     % Random Starting Concentrations (-1 and 1 represent different species)

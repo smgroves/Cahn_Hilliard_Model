@@ -158,3 +158,29 @@ for nx in [128]
         end
     end
 end
+
+#%%
+using DelimitedFiles
+using Dates
+using Plots
+
+indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/IC/"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output/"
+
+include("../../CH_multigrid_solver.jl")
+nx = 128
+dt = 5.5e-5
+n_relax = 4
+ny = nx
+tol = 1e-5
+m = 8
+epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
+# total_time = (0.1 / 64^2) * 500
+
+max_it = 2000
+total_time = max_it * dt
+date_time = now()
+name = "MG_$(max_it)_dt_$(dt)_Nx_$(nx)_n_relax_$(n_relax)_eps_$(epsilon)"
+phi = initialization_from_file("$(indir)initial_phi_$(nx)_smooth_n_relax_$(n_relax).csv", nx, nx)
+final_phi = multigrid_solver(phi, nx, tol, outdir, ns=1, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=true, print_e=true, overwrite=false, print_r=false, print_phi=true, suffix=name, check_dir=false)
+writedlm("$(outdir)/$(name)_final_phi.csv", final_phi, ',')

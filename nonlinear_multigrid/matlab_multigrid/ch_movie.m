@@ -1,37 +1,84 @@
-function ch_movie(phi_t)
-%This function creates a pseudocolore mp4 video of trajectory of
-%chemical states
+function ch_movie(phi_t,t_out,varargin)
+%This function creates a red-white-blue video trajectory of
+%chemical states in the current directory
 %
 %INPUTS
     %phi_t = Multidimensional array of chemical states.
+    %t_out = Vector of time steps corresponding to the third dimension of phi_t
 %
 %NAME-VALUE PAIRS
-    %t_iter = Number of time steps simulated. Default = 1e3.
-    %dt = Time step. Default = 2.5e-5 characteristic times.
-    %solver_iter = Number of solver iterations per time step. Default = 1e4.
-    %tol = Solver tolerance per time step. Default = 1e-6.
-    %m = Number of mesh points over which the interface exists. Default = 8.
-    %c_relax = Number of smoothing relaxations done at the start and end
-    %   of each V-cycle. Default = 2;
-    %domain = Vector of rightmost and leftmost grid points in x and y.
-    %   Format: [xright xleft yright yleft]. Default = [1 0 1 0];
+    %dtframes = Number of dt time steps per frame. Default = 1 (all time
+    %   steps recorded)
+    %filename = Number of movie file to be saved. Default = 'ch_movie'.
+    %filetype = Any permissible movie profile in VideoWriter. Most useful:
+    %   'MPEG-4' (default) - MPEG-4 file with H.264 encoding; best
+    %       compression but may cause artifacts with image fields
+    %       of high spatial frequency
+    %   'Motion JPEG AVI' - AVI file using Motion JPEG encoding; max
+    %       quality JPEG compression
+    %   'Uncompressed AVI' - Uncompressed AVI file with RGB24 video;
+    %       largest file size
 %
 %OUTPUT
-    %phi_t = Multidimensional array of phi over dt time steps.
-    %mass_t = Vector of total mass over dt time steps.
-    %E_t = Vector of total energy over dt time steps.
+    %None except for the saved red-white-blue video
 
 warning off
 
-phi_movie = VideoWriter(strcat(cd,'/ch_movie.mp4'),'MPEG-4');
-phi_movie.Quality = 100; %Highest quality video
+%% Set option defaults and parse inputs
+
+%Set parameter defaults
+default_dtframes = 1;
+default_filename = 'ch_movie';
+default_filetype = 'MPEG-4';
+
+ch_movie_parser = inputParser;
+
+%Set general criteria for inputs and name-value pairs
+valid_3darray = @(x) ismatrix(x(:,:,1));
+valid_vector = @(x) isvector(x);
+valid_integer = @(x) mod(x,1) == 0;
+valid_filename = @(x) ischar(x) || isstring(x);
+valid_filetype = @(x) strcmpi(x,'MPEG-4') || strcmpi(x,'Motion JPEG AVI') ...
+    || strcmpi(x,'Uncompressed AVI');
+
+%Set parser options and valid input criteria
+addRequired(ch_movie_parser,'phi_t',valid_3darray);
+addRequired(ch_movie_parser,'t_out',valid_vector);
+   
+addParameter(ch_movie_parser,'dtframes',default_dtframes,valid_integer);
+addParameter(ch_movie_parser,'filename',default_filename,valid_filename);
+addParameter(ch_movie_parser,'filetype',default_filetype,valid_filetype);
+
+parse(ch_movie_parser,phi_t,t_out,varargin{:});
+
+%Extract parsed inputs
+phi_t = ch_movie_parser.Results.phi_t;
+t_out = ch_movie_parser.Results.t_out;
+dtframes = ch_movie_parser.Results.dtframes;
+filename = ch_movie_parser.Results.filename;
+filetype = ch_movie_parser.Results.filetype;
+
+phi_movie = VideoWriter(strcat(cd,'/',filename),filetype); %Extension will be automatically appended
+if strcmpi(filetype,'MPEG-4') || strcmpi(filetype,'Motion JPEG AVI')
+    phi_movie.Quality = 100; %Highest quality video compression
+end
 open(phi_movie);
-for i = 1:size(phi_t,3)
-    surf(phi_t(:,:,i),'EdgeColor','none');
-    view(2);
+
+for i = 1:dtframes:size(phi_t,3)
+    h = figure(1);
+    image(transpose(phi_t(:,:,i)),'CDataMapping','scaled');
+    colorbar; 
+    axis square;
+    clim([min(phi_t(:,:,1),[],'all') max(phi_t(:,:,1),[],'all')]); %Set color axis to initial conditions
+    g = gca;
+    %Scale and center display roughly to the size of the mesh,
+    %with extra space horizontally for the color bar
+    g.Position = [0.5-size(phi_t,2)/1000 0.5-size(phi_t,1)/1000 ...
+        2.2*size(phi_t,2)/1000 2*size(phi_t,1)/1000];
     axis([0 size(phi_t,2) 0 size(phi_t,1)]);
-    colormap(viridis);
+    title(strcat('t = ',num2str(t_out(i))));
+    colormap(interp1(1:100:1100,redbluecmap,1:1001)); %Expand redbluecmap to 1000 elements
     colorbar;
-    writeVideo(phi_movie,getframe);
+    writeVideo(phi_movie,getframe(h));
 end
 close(phi_movie);

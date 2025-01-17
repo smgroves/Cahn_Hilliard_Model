@@ -4,15 +4,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-indir = (
-    "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/plotting/"
-)
+indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting"
 
 
-def make_long_dist_df(
-    indir,
-    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_noisy_cohesin.csv",
-):
+def make_long_dist_df(indir, file):
     # dist = pd.read_csv(f"{indir}/distance_between_droplets.csv",converters={'distances': pd.eval})
     dist = pd.read_csv(f"{indir}/{file}", header=0)
     long_dist_df = pd.DataFrame(
@@ -46,27 +41,19 @@ def make_long_dist_df(
 
 
 # %%
-outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_e_0.0075_noisy_cohesin/"
-
-long_dist_df = make_long_dist_df(indir)
-sns.histplot(
-    data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30
-)
-
-# sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
-plt.title("Distances between droplets by CPC radius and Cohesin width")
-plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
-plt.tight_layout()
-# plt.savefig(f"{outdir}distances_between_droplets_swarmplot_0.0075.png")
-# %%
-outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_from_rivanna_kymographs_e_0.0075/"
 
 long_dist_df = make_long_dist_df(
     indir,
-    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_domain_0_2_chr_lengths.csv",
+    "simulated_droplet_distributions/simulated_droplet_distances_e_0.01_noisy_cohesin_chr_lengths.csv",
 )
 sns.histplot(
-    data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30
+    data=long_dist_df,
+    x="distance",
+    palette=sns.color_palette("muted"),
+    binwidth=0.1,
+    stat="probability",
+    common_norm=False,
+    kde=True,
 )
 
 # sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
@@ -74,15 +61,117 @@ plt.title("Distances between droplets by CPC radius and Cohesin width")
 plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
 plt.tight_layout()
 plt.show()
+# plt.savefig(f"{outdir}distances_between_droplets_swarmplot_0.0075.png")
 # %%
-outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_1_eps_0.0075/"
+# outdir = (
+#     f"{indir}/radii_lineplots_kymographs/domain_0_2_from_rivanna_kymographs_e_0.0075/"
+# )
+
+# long_dist_df = make_long_dist_df(
+#     indir,
+#     file="simulated_droplet_distributions/simulated_droplet_distances_e_0.0075_domain_0_2_chr_lengths.csv",
+# )
+# sns.histplot(
+#     data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30
+# )
+
+# # sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
+# plt.title("Distances between droplets by CPC radius and Cohesin width")
+# plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
+# plt.tight_layout()
+# plt.show()
+# %%
+# outdir = f"{indir}/radii_lineplots_kymographs/domain_0_1_eps_0.0075/"
+
+# long_dist_df2 = make_long_dist_df(
+#     indir,
+#     file="simulated_droplet_distributions/simulated_droplet_distances_e_0.0075_domain_0_1_chr_lengths.csv",
+# )
+# sns.histplot(
+#     data=long_dist_df2, x="distance", palette=sns.color_palette("muted"), bins=30
+# )
+
+# # sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
+# plt.title("Distances between droplets by CPC radius and Cohesin width")
+# plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
+# plt.tight_layout()
+# plt.show()
+
+# %%
 
 long_dist_df2 = make_long_dist_df(
     indir,
-    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_domain_0_1_chr_lengths.csv",
+    file="simulated_droplet_distributions/simulated_droplet_distances_e_0.0075_noisy_cohesin_sd_0.11.csv",
+)
+# %%
+outdir = f"{indir}/radii_lineplots_kymographs/domain_0_2_noisy_cohesin_sd_0.11"
+
+sns.histplot(
+    data=long_dist_df2,
+    x="distance",
+    palette=sns.color_palette("muted"),
+    binwidth=0.05,
+    stat="probability",
+    common_norm=False,
+    kde=True,
+)
+plt.xlabel("Distance (um)")
+plt.ylim(0, 0.16)
+plt.xlim(0, 3.2)
+# plt.tight_layout()
+# plt.savefig(f"{outdir}/sim_histplot_eps_0.0075_bin_0.05.pdf")
+plt.show()
+
+# %%
+sns.swarmplot(
+    data=long_dist_df,
+    x="cohesin",
+    y="distance",
+    hue="cpc",
+    palette=sns.color_palette("muted"),
+    size=4,
+)
+plt.title("Distances between droplets by CPC radius and Cohesin width")
+plt.ylim(0, 0.16)
+plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
+plt.tight_layout()
+plt.show()
+# %%
+
+long_dist_df3 = make_long_dist_df(
+    indir,
+    file="simulated_droplet_distributions/simulated_droplet_distances_e_0.005_noisy_cohesin_chr_lengths.csv",
 )
 sns.histplot(
-    data=long_dist_df2, x="distance", palette=sns.color_palette("muted"), bins=30
+    data=long_dist_df3,
+    x="distance",
+    palette=sns.color_palette("muted"),
+    binwidth=0.1,
+    stat="probability",
+    common_norm=False,
+    kde=True,
+)
+
+# sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
+plt.title("Distances between droplets by CPC radius and Cohesin width")
+plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
+plt.tight_layout()
+plt.show()
+
+# %%
+
+long_dist_df4 = make_long_dist_df(
+    indir,
+    file="simulated_droplet_distributions/simulated_droplet_distances_e_0.008_noisy_cohesin_chr_lengths.csv",
+)
+sns.histplot(
+    data=long_dist_df4,
+    x="distance",
+    palette=sns.color_palette("muted"),
+    binwidth=0.1,
+    stat="probability",
+    common_norm=False,
+    kde=True,
 )
 
 # sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
@@ -92,56 +181,45 @@ plt.tight_layout()
 plt.show()
 
 # %% compare two simulation types
-binwidth = 0.1
-long_dist_df["sim"] = "6.4"
-long_dist_df2["sim"] = "3.2"
+outdir = f"{indir}/radii_lineplots_kymographs/domain_0_2_noisy_cohesin_sd_0.11"
 
-long_dist_df = pd.concat([long_dist_df, long_dist_df2], ignore_index=True)
+binwidth = 0.05
+long_dist_df["Category"] = "eps = 0.01"
+long_dist_df2["Category"] = "eps = 0.0075"
+# long_dist_df3["Category"] = "eps = 0.005"
+long_dist_df4["Category"] = "eps = 0.008"
+
+long_dist_df = pd.concat(
+    [long_dist_df, long_dist_df2, long_dist_df4], ignore_index=True
+)
 sns.histplot(
     data=long_dist_df,
     x="distance",
-    hue="sim",
+    hue="Category",
     binwidth=binwidth,
     stat="probability",
     common_norm=False,
     kde=True,
 )
-plt.savefig(
-    f"{outdir}/comparing_6.4_3.2_domains_distances_between_droplets_histplot{binwidth}.png"
-)
-# %%
-outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_noisy_cohesin_sd_0.25/"
-
-long_dist_df = make_long_dist_df(
-    indir,
-    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_noisy_cohesin_sd_0.25.csv",
-)
-sns.histplot(
-    data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30
-)
-
-# sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
-plt.title("Distances between droplets by CPC radius and Cohesin width")
-plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
-plt.tight_layout()
+# plt.savefig(f"{outdir}/distances_between_droplets_histplot_image_vs_sim_{binwidth}_v3.png")
 plt.show()
-
 # %%
-outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_noisy_cohesin_sd_0.11/"
+# outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_noisy_cohesin_sd_0.25/"
 
-long_dist_df = make_long_dist_df(
-    indir,
-    file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_noisy_cohesin_sd_0.11.csv",
-)
-sns.histplot(
-    data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30
-)
+# long_dist_df = make_long_dist_df(
+#     indir,
+#     file="simulated_droplet_distances/simulated_droplet_distances_e_0.0075_noisy_cohesin_sd_0.25.csv",
+# )
+# sns.histplot(
+#     data=long_dist_df, x="distance", palette=sns.color_palette("muted"), bins=30
+# )
 
-# sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
-plt.title("Distances between droplets by CPC radius and Cohesin width")
-plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
-plt.tight_layout()
-plt.show()
+# # sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
+# plt.title("Distances between droplets by CPC radius and Cohesin width")
+# plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
+# plt.tight_layout()
+# plt.show()
+
 # %%
 
 
@@ -181,14 +259,14 @@ for image in [0, 1, 2, 5, 7, 8, 9]:
 
 print(all_images)
 
-long_dist_df["Category"] = "Simulation"
+# long_dist_df["Category"] = "Simulation"
 for d in all_images:
     long_dist_df = pd.concat(
         [
             long_dist_df,
             pd.DataFrame(
                 {
-                    "Category": ["Experiment"],
+                    "Category": ["Experiment_HeLa"],
                     "seed": [0],
                     "time": [0],
                     "cpc": [0],
@@ -200,6 +278,65 @@ for d in all_images:
         ignore_index=True,
     )
 
+# %%
+indir3 = "/Users/smgroves/Box/CPC_Model_Project/CPC_condensate_images/haspin_stripe_linescans/MCF10A"
+all_images = []
+for image in [10]:
+    distance_dict = inter_droplet_distance(indir3, image=image)
+
+    all_ = []
+    for k in distance_dict.keys():
+        all_.extend(distance_dict[k])
+    all_images.extend(all_)
+
+print(all_images)
+
+# long_dist_df["Category"] = "Simulation"
+for d in all_images:
+    long_dist_df = pd.concat(
+        [
+            long_dist_df,
+            pd.DataFrame(
+                {
+                    "Category": ["Experiment_MCF10A"],
+                    "seed": [0],
+                    "time": [0],
+                    "cpc": [0],
+                    "cohesin": [0],
+                    "distance": [d],
+                }
+            ),
+        ],
+        ignore_index=True,
+    )
+
+# %%
+# Earth movers distance
+import scipy.stats as ss
+from itertools import combinations
+
+distances = pd.DataFrame(
+    np.zeros((5, 5)),
+    index=long_dist_df["Category"].unique(),
+    columns=long_dist_df["Category"].unique(),
+)
+
+for i, j in list(combinations(long_dist_df["Category"].unique(), 2)):
+    i_dist = long_dist_df.loc[long_dist_df["Category"] == i]["distance"].values
+    j_dist = long_dist_df.loc[long_dist_df["Category"] == j]["distance"].values
+
+    distance = ss.wasserstein_distance(i_dist, j_dist)
+    distances.loc[j, i] = distance
+
+mask = np.triu(np.ones_like(distances))
+
+# plotting a triangle correlation heatmap
+#%%
+dataplot = sns.heatmap(distances, cmap="Reds_r", annot=True, mask=mask)
+plt.tight_layout()
+# plt.show()
+plt.savefig(f"{outdir}/wasserstein_distance_image_vs_sim_wMCF10A.png")
+# plt.show()
 # %%
 # dist_df = pd.DataFrame(columns=['distance', 'chr'])
 binwidth = 0.05
@@ -222,34 +359,51 @@ num_sim_timepoints = (
 )
 # num_sim_timepoints = 33
 plt.title(
-    f"Distances between droplets\n 7 Images (n = {len(long_dist_df.loc[long_dist_df['Category']=='Experiment'].index)}) vs {num_sim_timepoints} Simulation Timepoints (n = {len(long_dist_df.loc[long_dist_df['Category']=='Simulation'].index)})"
+    f"Distances between droplets: 7 Images (n = {len(long_dist_df.loc[long_dist_df['Category']=='Experiment'].index)}) \nvs {num_sim_timepoints} Simulation Timepoints ($n_{{0.01}}$ = {len(long_dist_df.loc[long_dist_df['Category']=='eps = 0.01'].index)},$n_{{0.0075}}$ = {len(long_dist_df.loc[long_dist_df['Category']!='eps = 0.0075'].index)})"
 )
 
 plt.xlabel("Distance (um)")
 plt.xlim(0, 3.2)
-# plt.ylim(0, 0.16)
-plt.savefig(f"{outdir}distances_between_droplets_histplot_image_vs_sim_{binwidth}.png")
+plt.ylim(0, 0.2)
+plt.savefig(
+    f"{outdir}/distances_between_droplets_histplot_image_vs_sim_{binwidth}_v3.png"
+)
 plt.show()
-plt.close()
+# plt.close()
 
-sns.histplot(
-    data=long_dist_df.loc[long_dist_df["Category"] == "Experiment"],
+# sns.histplot(
+#     data=long_dist_df.loc[long_dist_df["Category"] == "Experiment"],
+#     x="distance",
+#     bins=30,
+#     stat="probability",
+#     binwidth=binwidth,
+#     common_norm=False,
+#     color=sns.color_palette()[1],
+#     kde=True,
+# )
+# plt.xlim(0, 3.2)
+# # plt.ylim(0, 0.16)
+# plt.title(
+#     f"Distances between droplets\n 7 Images, median = {round(long_dist_df.loc[long_dist_df['Category']== 'exp']['distance'].median(),3)}"
+# )
+# plt.xlabel("Distance (um)")
+# # plt.savefig(f"{outdir}distances_between_droplets_histplot_image_{binwidth}.png")
+# plt.show()
+# %%
+outdir = f"{indir}/radii_lineplots_kymographs/domain_0_2_noisy_cohesin_sd_0.11"
+
+sns.kdeplot(
+    data=long_dist_df,
     x="distance",
-    bins=30,
-    stat="probability",
-    binwidth=binwidth,
+    hue="Category",
     common_norm=False,
-    color=sns.color_palette()[1],
-    kde=True,
 )
-plt.xlim(0, 3.2)
-# plt.ylim(0, 0.16)
-plt.title(
-    f"Distances between droplets\n 7 Images, median = {round(long_dist_df.loc[long_dist_df['Category']== 'exp']['distance'].median(),3)}"
+plt.savefig(
+    f"{outdir}/distances_between_droplets_kde_image_vs_sim_{binwidth}_withMCF10A.png"
 )
-plt.xlabel("Distance (um)")
-plt.savefig(f"{outdir}distances_between_droplets_histplot_image_{binwidth}.png")
-plt.show()
+
+
+# plt.show()
 
 
 # %%
@@ -321,6 +475,7 @@ plt.title(
 plt.xlabel("Distance (um)")
 plt.ylabel("Frequency")
 # plt.show()
-plt.savefig(f"{outdir}distances_between_droplets_kdeplot_image_vs_sim_grouped.png")
+plt.savefig(
+    f"{outdir}distances_between_droplets_kdeplot_image_vs_sim_grouped.png")
 
 # %%

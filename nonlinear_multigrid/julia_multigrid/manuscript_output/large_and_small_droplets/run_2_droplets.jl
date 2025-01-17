@@ -43,11 +43,11 @@ function create_matrix_with_circles(radius_1, radius_2, space, nx)
 end
 
 nx = 128
-radius_1 = 20
-radius_2 = 30
+radius_1 = 10
+radius_2 = 15
 space = 10
-# phi = create_matrix_with_circles(radius_1, radius_2, space, nx)
-# writedlm("$(outdir)initial_phi_$(nx)_r1_$(radius_1)_r2_$(radius_2)_space_$(space).csv", phi, ',')
+phi = create_matrix_with_circles(radius_1, radius_2, space, nx)
+writedlm("$(outdir)initial_phi_$(nx)_r1_$(radius_1)_r2_$(radius_2)_space_$(space).csv", phi, ',')
 
 #%%
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/large_and_small_droplets/IC/"
@@ -55,12 +55,12 @@ outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigr
 nx = 128
 include("../../CH_multigrid_solver.jl")
 
-for dt = [0.001]
+for dt = [1e-4, 1e-3]
     ny = nx
     tol = 1e-6
     m = 8
     epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
-    total_time = 5
+    total_time = 0.2
     # total_time = (1 / 64^2) * 500
     max_it = Int.(total_time / dt)
     date_time = now()

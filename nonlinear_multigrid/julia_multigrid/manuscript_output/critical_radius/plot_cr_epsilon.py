@@ -63,24 +63,24 @@ print(y[0])
 # import scipy.optimize
 # xs = np.array(x)
 # ys = np.array(y)
-# def monoExp(x, m, t, b):
+# def h2l(x, m, t, b):
 #     return m * np.exp(t * x) + b
 # # perform the fit
 # p0 = (1, 0.5, -1) # start with values near those we expect
-# params, cv = scipy.optimize.curve_fit(monoExp, xs, ys, p0)
+# params, cv = scipy.optimize.curve_fit(h2l, xs, ys, p0)
 # m, t, b = params
 # sampleRate = 20_000 # Hz
 # tauSec = (1 / t) / sampleRate
 
 # # determine quality of the fit
-# squaredDiffs = np.square(ys - monoExp(xs, m, t, b))
+# squaredDiffs = np.square(ys - h2l(xs, m, t, b))
 # squaredDiffsFromMean = np.square(ys - np.mean(ys))
 # rSquared = 1 - np.sum(squaredDiffs) / np.sum(squaredDiffsFromMean)
 # print(f"R² = {rSquared}")
 
 # # plot the results
 # plt.plot(xs, ys, '.', label="data")
-# plt.plot(xs, monoExp(xs, m, t, b), '--', label="fitted")
+# plt.plot(xs, h2l(xs, m, t, b), '--', label="fitted")
 # plt.title("Fitted Exponential Curve")
 
 
@@ -197,33 +197,34 @@ plt.savefig("Critical equilibrium radius (min and max)_vs_epsilon.png")
 # all alpha, REUSE THIS ONE
 ########################################
 df = pd.read_csv(
-    "/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv",
+    "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv",
     header=0,
     index_col=None,
 )
 print(df.head())
+df_0 = df.loc[df["alpha"] == 0]
 y = "critical equilibrium radius (min)"
 sns.lineplot(
-    data=df,
+    data=df_0,
     y=y,
     x="epsilon",
     markers=True,
     style="Nx",
-    hue="alpha",
+    hue="Nx",
     palette="muted",
     alpha=0.6,
 )
 plt.title(f"Critical radius vs. epsilon")
 plt.ylabel("Critical equilibrium radius")
 plt.savefig(
-    f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/cr_vs_epsilon_all_alpha.pdf"
+    f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/cr_vs_epsilon_alpha_0.pdf"
 )
 plt.close()
-# plt.show()
+plt.show()
 
 # %%
 df = pd.read_csv(
-    "/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv",
+    "critical_radii_epsilon copy.csv",
     header=0,
     index_col=None,
 )
@@ -279,7 +280,7 @@ plt.show()
 import scipy.optimize
 
 df = pd.read_csv(
-    "/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv",
+    "critical_radii_epsilon copy.csv",
     header=0,
     index_col=None,
 )
@@ -291,27 +292,26 @@ ys = np.array(tmp["critical equilibrium radius (min)"])  # [0:2])
 print(df.head())
 
 
-def monoExp(x, m, t, b):
+def h2l(x, m, t, b):
     #     return m * np.exp(t * x) + b
     # b(1).*(b(2).*xdata./(b(3) + xdata) + xdata);
     return m * (t * x / (b + x) + x)  ## HYPERBOLIC FIT
     # return
 
 
+# hyperbolic to linear
 # perform the fit
 p0 = (0, 0, 0)  # start with values near those we expect
-params, cv = scipy.optimize.curve_fit(monoExp, xs, ys, p0)
+params, cv = scipy.optimize.curve_fit(h2l, xs, ys, p0)
 print(params)
 m, t, b = params
-sampleRate = 20_000  # Hz
-tauSec = (1 / t) / sampleRate
-
 # determine quality of the fit
-squaredDiffs = np.square(ys - monoExp(xs, m, t, b))
+squaredDiffs = np.square(ys - h2l(xs, m, t, b))
 squaredDiffsFromMean = np.square(ys - np.mean(ys))
 rSquared = 1 - np.sum(squaredDiffs) / np.sum(squaredDiffsFromMean)
-print(f"R² = {rSquared}")
+print(f"H2L R² = {rSquared}")
 
+# %%
 # plot the results
 f, ax = plt.subplots()
 
@@ -328,7 +328,7 @@ plt.text(
 markers = {128: "o", 256: "X"}
 plt.plot(
     np.linspace(0, 0.09),
-    monoExp(np.linspace(0, 0.09), m, t, b),
+    h2l(np.linspace(0, 0.09), m, t, b),
     "--",
     label="Fit",
     c="gray",
@@ -343,7 +343,7 @@ sns.scatterplot(
     markers=markers,
     style="Nx",
 )
-print(monoExp(0.0125, m, t, b))
+print(h2l(0.0125, m, t, b))
 plt.title("Hyperbolic-to-Linear Fit of\n Critical Radius vs Epsilon")
 plt.xlabel("Epsilon")
 plt.ylabel("Critical Radius")
@@ -352,6 +352,126 @@ plt.legend()
 #     f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256.png"
 # )
 # plt.close()
+plt.show()
+
+# %%
+
+
+def linFit(x, m, b):
+    return m * x + b
+
+
+def logFit(x, a, b):
+    return a * np.log(x) + b
+
+
+def hyperbolic(x, m, t, b):
+    return m * (t * x / (b + x))  ## HYPERBOLIC FIT
+    # return
+
+
+def calculate_bic(xs, ys, func, p0):
+    """
+    Calculate the best fit parameters and BIC for a given function.
+
+    Parameters:
+    xs (array): Independent variable data.
+    ys (array): Dependent variable data.
+    func (callable): The model function.
+    p0 (list): Initial guess for parameters.
+
+    Returns:
+    dict: Dictionary containing best fit parameters, BIC, and residuals.
+    """
+    # Fit the function to the data
+    params, cv = scipy.optimize.curve_fit(func, xs, ys, p0=p0)
+
+    # Calculate residuals
+    residuals = ys - func(xs, *params)
+
+    # Sum of squared residuals
+    ssr = np.sum(residuals**2)
+
+    # Number of observations
+    n = len(ys)
+
+    # Number of parameters
+    k = len(params)
+
+    # Bayesian Information Criterion
+    bic = n * np.log(ssr / n) + k * np.log(n)
+
+    return {"best_fit_parameters": params, "bic": bic, "residuals": residuals}
+
+
+initial_guess = [1.0, 0.0]
+results = calculate_bic(xs, ys, linFit, initial_guess)
+print("Linear", results["bic"])
+plt.plot(
+    np.linspace(0, 0.09),
+    linFit(np.linspace(0, 0.09), *results["best_fit_parameters"]),
+    "--",
+    label=f"Linear Fit, BIC = {round(results['bic'],2)}",
+    c=sns.color_palette()[3],
+    alpha=0.6,
+)
+initial_guess = [0.0, 0.0, 0.0]
+results = calculate_bic(xs, ys, h2l, initial_guess)
+print("H2L", results["bic"])
+plt.plot(
+    np.linspace(0, 0.09),
+    h2l(np.linspace(0, 0.09), *results["best_fit_parameters"]),
+    "--",
+    label=f"H2L Fit, BIC = {round(results['bic'],2)}",
+    c=sns.color_palette()[4],
+    alpha=0.6,
+)
+
+initial_guess = [1, 0.0, 0.0]
+results = calculate_bic(xs, ys, hyperbolic, initial_guess)
+print("Hyperbolic", results["bic"])
+plt.plot(
+    np.linspace(0, 0.09),
+    hyperbolic(np.linspace(0, 0.09), *results["best_fit_parameters"]),
+    "--",
+    label=f"Hyperbolic Fit, BIC = {round(results['bic'],2)}",
+    c=sns.color_palette()[5],
+    alpha=0.6,
+)
+
+initial_guess = [1.0, 0.0]
+results = calculate_bic(xs, ys, logFit, initial_guess)
+print("Log", results["bic"])
+plt.plot(
+    np.linspace(0, 0.09),
+    logFit(np.linspace(0, 0.09), *results["best_fit_parameters"]),
+    "--",
+    label=f"Log Fit, BIC = {round(results['bic'],2)}",
+    c=sns.color_palette()[6],
+    alpha=0.6,
+)
+
+markers = {128: "o", 256: "X"}
+
+sns.scatterplot(
+    data=tmp,
+    x="epsilon",
+    y="critical equilibrium radius (min)",
+    hue="Nx",
+    palette=sns.color_palette("bright"),
+    edgecolor="k",
+    markers=markers,
+    style="Nx",
+)
+print(h2l(0.0125, m, t, b))
+plt.title("Different Fits of\n Critical Radius vs Epsilon")
+plt.xlabel("Epsilon")
+plt.ylabel("Critical Radius")
+plt.legend()
+plt.savefig(
+    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_128_256.png"
+)
+plt.close()
 plt.show()
 
 # %%
