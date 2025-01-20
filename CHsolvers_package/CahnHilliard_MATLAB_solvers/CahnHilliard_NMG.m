@@ -10,7 +10,7 @@ function [t_out,phi_t,delta_mass_t,E_t] = CahnHilliard_NMG(phi0,varargin)
     %dt = Time step. Default = 2.5e-5 characteristic times.
     %solver_iter = Number of solver iterations per time step. Default = 1e4.
     %tol = Solver tolerance per time step. Default = 1e-5.
-    %dt_output = Number of time steps output to phi_t as a multidimensional
+    %dt_out = Number of time steps output to phi_t as a multidimensional
     %   array (if less than 1e9 elements) or printed file (if greater than
     %   1e9 elements). Default = nan (output as many timesteps that enable
     %   saving a multidimensional array of less than 1e9 elements).
@@ -44,7 +44,7 @@ default_t_iter = 1e3;
 default_dt = 2.5e-5;
 default_solver_iter = 1e4;
 default_tol = 1e-6;
-default_dt_output = nan;
+default_dt_out = nan;
 default_m = 4;
 default_epsilon2 = nan;
 default_boundary = 'periodic';
@@ -74,7 +74,7 @@ addParameter(CahnHilliard_NMG_parser,'t_iter',default_t_iter,valid_integer);
 addParameter(CahnHilliard_NMG_parser,'dt',default_dt,valid_pos_num);
 addParameter(CahnHilliard_NMG_parser,'solver_iter',default_solver_iter,valid_integer);
 addParameter(CahnHilliard_NMG_parser,'tol',default_tol,valid_pos_num);
-addParameter(CahnHilliard_NMG_parser,'dt_output',default_dt_output,valid_integer);
+addParameter(CahnHilliard_NMG_parser,'dt_out',default_dt_out,valid_integer);
 addParameter(CahnHilliard_NMG_parser,'m',default_m,valid_integer);
 addParameter(CahnHilliard_NMG_parser,'epsilon2',default_epsilon2,valid_pos_num);
 addParameter(CahnHilliard_NMG_parser,'boundary',default_boundary,valid_boundary_type);
@@ -94,7 +94,7 @@ t_iter = CahnHilliard_NMG_parser.Results.t_iter;
 dt = CahnHilliard_NMG_parser.Results.dt;
 solver_iter = CahnHilliard_NMG_parser.Results.solver_iter;
 tol = CahnHilliard_NMG_parser.Results.tol;
-dt_output = CahnHilliard_NMG_parser.Results.dt_output;
+dt_out = CahnHilliard_NMG_parser.Results.dt_out;
 m = CahnHilliard_NMG_parser.Results.m;
 epsilon2 = CahnHilliard_NMG_parser.Results.epsilon2;
 boundary = CahnHilliard_NMG_parser.Results.boundary;
@@ -130,7 +130,7 @@ mu = zeros(nx,ny); %Initialize chemical potential
 phi_old = phi0; %Initialize prior chemical state
 phi_new = phi0; %Initialize next chemical state
 downsampled = nx*ny*t_iter > 1e9; %Logical index for the need to downsample
-optdownsampled = dt_output < t_iter; %Logical index if the user opted to downsample
+optdownsampled = dt_out < t_iter; %Logical index if the user opted to downsample
 if ~downsampled && ~optdownsampled %Initialize outputs
     phi_t = zeros(nx,ny,t_iter);
     mass_t = zeros(t_iter,1);
@@ -142,15 +142,15 @@ else %Downsample outputs
         t_iter_ds = floor(1e9/nx/ny);
         t_spacing = floor(t_iter/t_iter_ds);
     else
-        t_iter_ds = dt_output;
-        t_spacing = floor(t_iter/dt_output); %Space out according to dt_output
+        t_spacing = dt_out;
+        t_iter_ds = floor(t_iter/dt_out); %Space out according to dt_out
     end
-    if isnan(dt_output) || optdownsampled %If downsampled to be saved
+    if isnan(dt_out) || optdownsampled %If downsampled to be saved
         phi_t = zeros(nx,ny,t_iter_ds);
     end
     mass_t = zeros(t_iter_ds,1);
     E_t = zeros(t_iter_ds,1);
-    t_out = 0:t_spacing:(t_iter-t_spacing);
+    t_out = 0:t_spacing*dt:(t_iter-t_spacing)*dt;
 end
         
 %% Run nonlinear multigrid solver
@@ -158,7 +158,7 @@ end
 if printres
     fprintf('Saving squared residuals per iteration to file in the working directory\n')
 end
-if ~downsampled && (isnan(dt_output) || ~optdownsampled || ~printphi) %If output is not specified or does not need to be downsampled
+if ~downsampled && (isnan(dt_out) || ~optdownsampled || ~printphi) %If output is not specified or does not need to be downsampled
     for i = 1:t_iter
         phi_t(:,:,i) = phi_old;
         mass_t(i) = sum(sum(phi_old))/(h2*nx*ny);
@@ -172,7 +172,7 @@ if ~downsampled && (isnan(dt_output) || ~optdownsampled || ~printphi) %If output
         end
     end
 else %Downsample output or specify output
-    if isnan(dt_output)
+    if isnan(dt_out)
         fprintf('Downsaving every %4.0f time steps\n',t_spacing)
     else
         fprintf('Saving phi_t to file specified by pathname\n')
@@ -188,7 +188,7 @@ else %Downsample output or specify output
                 solver_iter,tol,boundary,printres);
             phi_old = phi_temp;
         end
-        if isnan(dt_output) && ~printphi %Save to variable
+        if isnan(dt_out) && ~printphi %Save to variable
             phi_t(:,:,k) = phi_temp;
         else %Write to file
 

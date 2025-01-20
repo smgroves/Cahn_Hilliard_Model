@@ -8,11 +8,11 @@ import matplotlib.colors as mcolors
 
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function"
 
-indir_small = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
-phi_name = "MG_200_dt_5.5e-7_Nx_128_n_relax_4_eps_0.015009369912862116_phi.txt"
+indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
+phi_name_MG = "MG_2000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi.txt"
 
 phi_MG = np.genfromtxt(
-    f"{indir_small}/{phi_name}",
+    f"{indir_MG}/{phi_name_MG}",
 )
 
 phi_MG = phi_MG.reshape(-1, 128, 128).transpose(1, 2, 0)
@@ -25,7 +25,151 @@ phi_FD = np.genfromtxt(f"{indir_FD}/{phi_name_FD}", delimiter=",")
 
 phi_FD = phi_FD.reshape(-1, 128, 128).transpose(1, 2, 0)
 
+# %%
+indir_SAV = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/SAV/output/spinodal_smooth_relax_function"
+phi_name_SAV = "SAV_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
 
+phi_SAV = np.genfromtxt(f"{indir_SAV}/{phi_name_SAV}", delimiter=",")
+
+phi_SAV = phi_SAV.reshape(-1, 128, 128).transpose(1, 2, 0)
+
+# %% save individual plots
+indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
+
+timepoints = [0, 10, 20, 100, 1000, 2000]
+dt_out = 1
+dt = 5.5e-6
+for timepoint in timepoints:
+    normalize_phis = mcolors.TwoSlopeNorm(vcenter=0, vmin=-1, vmax=1)
+    s = sns.heatmap(
+        phi_MG[:, :, timepoint],
+        square=True,
+        cmap=cm.RdBu_r,
+        norm=normalize_phis,
+        cbar=False,
+        linewidths=0.0,
+    )
+    plt.xticks(ticks=[], labels=[])
+    plt.yticks(ticks=[], labels=[])
+    # plt.title(f"Time= {timepoint*dt}")
+    plt.tight_layout()
+    plt.savefig(
+        f"{indir_MG}/MG_2000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}.png",
+        bbox_inches="tight",
+        pad_inches=0,
+        dpi=300,
+    )
+    plt.close()
+
+# %% zoom in to timepoint 10:
+timepoint = 1
+dt_out = 1
+dt = 5.5e-6
+normalize_phis = mcolors.TwoSlopeNorm(vcenter=0, vmin=-1, vmax=1)
+s = sns.heatmap(
+    phi_SAV[65:80, 50:65, timepoint - 1],
+    square=True,
+    cmap=cm.RdBu_r,
+    norm=normalize_phis,
+    cbar=False,
+    linewidths=0.0,
+)
+plt.xticks(ticks=[], labels=[])
+plt.yticks(ticks=[], labels=[])
+# plt.title(f"Time= {timepoint*dt}")
+plt.tight_layout()
+plt.savefig(
+    f"{indir_SAV}/zoomed_65-80v50-65_SAV_2000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}.png",
+    bbox_inches="tight",
+    pad_inches=0,
+    dpi=300,
+)
+plt.close()
+# %%
+indir_FD = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/spinodal_smooth_relax_function"
+phi_name_FD_big = "FD_200_dt_5.50e-07_Nx_128_n_relax_4_gam_3.69e+00_D_16384_phi.csv"
+
+phi_FD_big = np.genfromtxt(f"{indir_FD}/{phi_name_FD_big}", delimiter=",")
+
+phi_FD_big = phi_FD_big.reshape(-1, 128, 128).transpose(1, 2, 0)
+
+# %% save individual plots
+
+timepoints = [0, 500, 750, 1000, 2000]
+dt_out = 1
+dt = 5.5e-8
+for timepoint in timepoints:
+    normalize_phis = mcolors.TwoSlopeNorm(vcenter=0, vmin=-1, vmax=1)
+    s = sns.heatmap(
+        phi_FD[:, :, timepoint],
+        square=True,
+        cmap=cm.RdBu_r,
+        norm=normalize_phis,
+        cbar=False,
+        linewidths=0.0,
+    )
+    s.collections[0].cmap.set_bad("grey")
+    plt.xticks(ticks=[], labels=[])
+    plt.yticks(ticks=[], labels=[])
+    # plt.title(f"Time= {timepoint*dt}")
+    plt.tight_layout()
+    plt.savefig(
+        f"{indir_FD}/FD_2000_dt_{dt}_t_{timepoint*dt*dt_out:.2e}.png",
+        bbox_inches="tight",
+        pad_inches=0,
+        dpi=300,
+    )
+    plt.close()
+# %% zoom in to timepoint 75:
+timepoint = 75
+dt_out = 1
+dt = 5.5e-7
+normalize_phis = mcolors.TwoSlopeNorm(vcenter=0, vmin=-1, vmax=1)
+s = sns.heatmap(
+    phi_FD_big[65:80, 50:65, timepoint - 1],
+    square=True,
+    cmap=cm.RdBu_r,
+    norm=normalize_phis,
+    cbar=False,
+    linewidths=0.0,
+)
+plt.xticks(ticks=[], labels=[])
+plt.yticks(ticks=[], labels=[])
+# plt.title(f"Time= {timepoint*dt}")
+plt.tight_layout()
+plt.savefig(
+    f"{indir_FD}/zoomed_65-80v50-65_FD_200_dt_5.5e-7_t_{timepoint*dt*dt_out:.2e}.png",
+    bbox_inches="tight",
+    pad_inches=0,
+    dpi=300,
+)
+plt.close()
+# %% save individual plots
+
+timepoints = [1, 2, 10, 100, 200]
+dt_out = 10
+dt = 5.5e-6
+for timepoint in timepoints:
+    normalize_phis = mcolors.TwoSlopeNorm(vcenter=0, vmin=-1, vmax=1)
+    s = sns.heatmap(
+        phi_SAV[:, :, timepoint - 1],  # the first one saved by SAV is timestep = 10
+        square=True,
+        cmap=cm.RdBu_r,
+        norm=normalize_phis,
+        cbar=False,
+        linewidths=0.0,
+    )
+    plt.xticks(ticks=[], labels=[])
+    plt.yticks(ticks=[], labels=[])
+    # plt.title(f"Time= {timepoint*dt}")
+    plt.tight_layout()
+    plt.savefig(
+        f"{indir_SAV}/SAV_2000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}.png",
+        bbox_inches="tight",
+        pad_inches=0,
+        dpi=300,
+    )
+    plt.close()
 # %%
 save = True
 dt = 5.5e-7
@@ -117,4 +261,70 @@ plt.tight_layout()
 plt.savefig(f"{outdir}/FD_dt5.5e-8_v2.png")
 # plt.show()
 
+
+# %% comparing energy and mass
+def get_energy(indir, phi_name, dt, dt_out, variable="energy", suffix="csv", title=""):
+    e_name = "_".join(phi_name.split("_")[:-1])
+    e_name = e_name + f"_{variable}.{suffix}"
+    print(e_name)
+    e = pd.read_csv(f"{indir}/{e_name}", header=None, index_col=None)
+    l = [x * dt * dt_out for x in range(len(e.iloc[:, 0]))]
+    e.columns = [title]
+    e["time"] = l
+    return e
+
+
+# %%
+
+e_NMG = get_energy(
+    indir_MG, phi_name_MG, dt=5.5e-6, dt_out=1, suffix="txt", title="NMG"
+)
+e_FD = get_energy(indir_FD, phi_name_FD, dt=5.5e-8, dt_out=1, title="FD")
+e_SAV = get_energy(indir_SAV, phi_name_SAV, dt=5.5e-6, dt_out=10, title="SAV")
+
+# %%
+for e in [e_NMG, e_FD, e_SAV]:
+    sns.lineplot(x=e["time"], y=e.iloc[:, 0], label=e.columns[0], alpha=0.6)
+plt.ylabel("Normalized Energy")
+plt.xlabel(r"Time ($t_{char}$)")
+plt.title("Normalized (Modified) Energy for Spinodal Decomposition")
+plt.savefig(f"{outdir}/FD_NMG_SAV_energy.pdf")
+
+# %%
+for e in [e_NMG, e_FD, e_SAV]:
+    sns.lineplot(x=e["time"], y=e.iloc[:, 0], label=e.columns[0], alpha=0.6)
+plt.xlim(0.01, 0.0111)
+plt.ylim(0.255, 0.27)
+plt.ylabel("")
+plt.xlabel("")
+# plt.title("Normalized (Modified) Energy for Spinodal Decomposition")
+plt.savefig(f"{outdir}/FD_NMG_SAV_energy_zoom_end.pdf")
+# %%
+
+m_NMG = get_energy(
+    indir_MG,
+    phi_name_MG,
+    dt=5.5e-6,
+    dt_out=1,
+    variable="mass",
+    suffix="txt",
+    title="NMG",
+)
+m_NMG["NMG"] = m_NMG["NMG"] - m_NMG["NMG"].iloc[0]
+
+m_FD = get_energy(
+    indir_FD, phi_name_FD, dt=5.5e-8, variable="mass", dt_out=1, title="FD"
+)
+m_FD["FD"] = m_FD["FD"] - m_FD["FD"].iloc[0]
+
+m_SAV = get_energy(
+    indir_SAV, phi_name_SAV, dt=5.5e-6, variable="mass", dt_out=10, title="SAV"
+)
+# %%
+for m in [m_NMG, m_FD, m_SAV]:
+    sns.lineplot(x=m["time"], y=m.iloc[:, 0], label=m.columns[0], alpha=0.6)
+plt.ylabel("Normalized Average Mass")
+plt.xlabel(r"Time ($t_{char}$)")
+plt.title("Normalized Average Mass for Spinodal Decomposition")
+plt.savefig(f"{outdir}/FD_NMG_SAV_mass.pdf")
 # %%

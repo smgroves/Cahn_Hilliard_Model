@@ -10,3 +10,5 @@ date,name,language,solver,nx,epsilon,dt,tol,timesteps,max_it_CH,time (secs)
 17-Jan-2025 10:18:36,NMG_spinodal_decomp_smoothed_print,MATLAB,NMG,128,0.015009,5.5e-05,NaN,2000,NaN,701.4272
 17-Jan-2025 10:18:47,spinodal_decomp_smoothed_print,MATLAB,FD,128,0.015009,5.5e-05,NaN,2000,NaN,1.6914
 17-Jan-2025 11:19:26,NMG_spinodal_decomp_smoothed_print,MATLAB,NMG,128,0.015009,5.5e-05,NaN,2000,NaN,870.9613
+17-Jan-2025 14:33:48,SAV_spinodal_decomp_smoothed_print,MATLAB,SAV,128,0.015009,5.5e-06,NaN,2000,NaN,8.3329
+17-Jan-2025 15:32:06,SAV_spinodal_decomp_smoothed_print,MATLAB,SAV,128,0.015009,5.5e-06,NaN,2000,NaN,24.8221

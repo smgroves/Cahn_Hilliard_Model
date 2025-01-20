@@ -138,30 +138,29 @@ function [t_out, phi_t, delta_mass_t, E_t] = CahnHilliard_SAV(phi0, varargin)
         % Store current states every dt_out time steps
         if mod(i,dt_out) == 0
             [phi_t,mass_t,E_t] = store_data(phi_t,mass_t,E_t,phi_new,mass,E,i/dt_out+1);
+            if pathname == "cd"
+                pathname = pwd;
+            end
+            % Print phi to file if specified
+            if printphi
+                Filename = strcat(pathname, 'phi.csv');
+                % Path = strcat(pwd, '/', Filename);
+                writematrix(phi_new, Filename, 'WriteMode', 'append'); 
+            end
         end
 
         % Update iteration variables
         phi_old = phi_new;
         r_old = r_new;
-
         % Print percentage of completion
         if mod(i/t_iter*100,5) == 0
             fprintf('%3.0f percent complete\n',i/t_iter*100)
         end
     end
+    fprintf('Data appended to %s\n', Filename);
 
 %% For post-processing
 
-    if pathname == "cd"
-        pathname = pwd;
-    end
-    % Print phi to file if specified
-    if printphi
-        Filename = strcat(pathname, 'phi.csv');
-        % Path = strcat(pwd, '/', Filename);
-        writematrix(phi_new, Filename, 'WriteMode', 'append'); 
-        fprintf('Data appended to %s\n', Filename);
-    end
 
     % Center mass and normalize energy to t == 0
     delta_mass_t = mass_t - mass_t(1);
