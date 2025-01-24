@@ -504,7 +504,7 @@ echo "Done."
 indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
 dtout=1
 frame_rate=10
-dt=5.5e-5
-name="MG_2000_dt_5.5e-5_Nx_128_n_relax_4_eps_0.015009369912862116_phi"
+dt=5.5e-6
+name="MG_2000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
 echo "Done."

@@ -73,9 +73,11 @@ function [] = CHplotting_function(indir, name, dt, dtout, suffix, frame_rate,plo
             else
                 axis([1 size(phi,1) 1 size(phi,2)]);
             end
-            if color == "red"
-                colormap(redblue(100));
-            end
+            % if color == "red"
+            %     colormap(redblue(100));
+            % end
+            colormap(interp1(1:100:1100,redbluecmap,1:1001)); %Expand redbluecmap to 1000 elements
+
             % Set the color axis limits for the current frame
             set(gca,'FontSize',16);title(['t = ',num2str(curr_t)]); xlabel('x'); ylabel('y');
             if const_colorbar == true

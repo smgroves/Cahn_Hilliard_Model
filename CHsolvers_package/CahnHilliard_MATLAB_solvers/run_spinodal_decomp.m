@@ -17,30 +17,30 @@ print_phi = true;
 % RUN SAV SOLVER 
 % #################################################
 
-outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/SAV/output/spinodal_smooth_relax_function/";
-pathname = sprintf("%s/SAV_MATLAB_%d_dt_%.2e_Nx_%d_n_relax_%d_",outdir,max_it,dt, GridSize, n_relax);
-tStart_SAV = tic;
-[t_out, phi_t, delta_mass_t, E_t] = CahnHilliard_SAV(phi0,...
-                                    t_iter = max_it,...
-                                    dt = dt,...
-                                    m = m,...
-                                    boundary = boundary,...
-                                    printphi=print_phi,...
-                                    pathname=pathname,...
-                                    dt_out = 10);
-elapsedTime = toc(tStart_SAV);
+% outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/SAV/output/spinodal_smooth_relax_function/";
+% pathname = sprintf("%s/SAV_MATLAB_%d_dt_%.2e_Nx_%d_n_relax_%d_",outdir,max_it,dt, GridSize, n_relax);
+% tStart_SAV = tic;
+% [t_out, phi_t, delta_mass_t, E_t] = CahnHilliard_SAV(phi0,...
+%                                     t_iter = max_it,...
+%                                     dt = dt,...
+%                                     m = m,...
+%                                     boundary = boundary,...
+%                                     printphi=print_phi,...
+%                                     pathname=pathname,...
+%                                     dt_out = 10);
+% elapsedTime = toc(tStart_SAV);
 
-fid = fopen('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/CHsolvers_package/Job_specs.txt', 'a+');
-v = [string(datetime) "SAV_spinodal_decomp_smoothed_print" "MATLAB" "SAV" GridSize epsilon dt 'NaN' max_it 'NaN' elapsedTime];
-fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n', v);
-fclose(fid);
+% fid = fopen('/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/CHsolvers_package/Job_specs.txt', 'a+');
+% v = [string(datetime) "SAV_spinodal_decomp_smoothed_print" "MATLAB" "SAV" GridSize epsilon dt 'NaN' max_it 'NaN' elapsedTime];
+% fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n', v);
+% fclose(fid);
 
-writematrix(phi_t(:,:,end),sprintf('%sfinal_phi.csv', pathname));
-writematrix(delta_mass_t,sprintf('%smass.csv', pathname));
-writematrix(E_t,sprintf('%senergy.csv', pathname));
+% writematrix(phi_t(:,:,end),sprintf('%sfinal_phi.csv', pathname));
+% writematrix(delta_mass_t,sprintf('%smass.csv', pathname));
+% writematrix(E_t,sprintf('%senergy.csv', pathname));
 
-filename = strcat(pathname, "movie");
-ch_movie(phi_t,t_out, filename = filename);
+% filename = strcat(pathname, "movie");
+% ch_movie(phi_t,t_out, filename = filename);
 
 
 % #################################################

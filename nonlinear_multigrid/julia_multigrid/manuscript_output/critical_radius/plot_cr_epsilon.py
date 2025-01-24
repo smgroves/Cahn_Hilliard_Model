@@ -6,6 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+plt.rcParams["font.family"] = "Arial"
+
 # %%
 ########################################
 # Trend of R0 vs equilibrium radii
@@ -277,6 +279,9 @@ plt.ylabel("Critical Radius")
 plt.show()
 # plt.savefig(f"Critical equilibrium radius (min)_vs_epsilon_alpha_{alpha}.png")
 # %% with hyperbolic to linear fit
+########################################
+# FINAL FIGURE CR vs E
+########################################
 import scipy.optimize
 
 df = pd.read_csv(
@@ -289,6 +294,8 @@ alpha = 0
 tmp = df.loc[df["alpha"] == alpha]
 xs = np.array(tmp["epsilon"])  # [0:2])
 ys = np.array(tmp["critical equilibrium radius (min)"])  # [0:2])
+# ys = np.array(tmp["critical initial radius"])  # [0:2])
+
 print(df.head())
 
 
@@ -313,7 +320,7 @@ print(f"H2L R² = {rSquared}")
 
 # %%
 # plot the results
-f, ax = plt.subplots()
+f, ax = plt.subplots(figsize=(5, 4))
 
 # fig = plt.figure(figsize = (5,4))
 plt.text(
@@ -325,7 +332,7 @@ plt.text(
     transform=ax.transAxes,
 )
 # plt.plot(xs, ys, '.', label="Simulation results")
-markers = {128: "o", 256: "X"}
+markers = {128: "o", 256: "^"}
 plt.plot(
     np.linspace(0, 0.09),
     h2l(np.linspace(0, 0.09), m, t, b),
@@ -333,26 +340,39 @@ plt.plot(
     label="Fit",
     c="gray",
 )
-sns.scatterplot(
-    data=tmp,
-    x="epsilon",
-    y="critical equilibrium radius (min)",
-    hue="Nx",
-    palette=sns.color_palette("bright"),
-    edgecolor="k",
-    markers=markers,
-    style="Nx",
-)
+# sns.scatterplot(
+#     data=tmp,
+#     x="epsilon",
+#     y="critical equilibrium radius (min)",
+#     # hue="Nx",
+#     palette=sns.color_palette("bright"),
+#     edgecolor="k",
+#     markers=markers,
+#     style="Nx",
+#     c="k",
+# )
+for cat, group in tmp.groupby("Nx"):
+    ax.scatter(
+        group["epsilon"],
+        group["critical equilibrium radius (min)"],
+        edgecolors="k",
+        facecolors="none",
+        marker=markers[cat],
+        label=cat,
+    )
+
+
 print(h2l(0.0125, m, t, b))
 plt.title("Hyperbolic-to-Linear Fit of\n Critical Radius vs Epsilon")
-plt.xlabel("Epsilon")
-plt.ylabel("Critical Radius")
+plt.xlabel(r"Epsilon ($ \epsilon $)")
+plt.ylabel(r"Critical Equilibrium Radius ($R_c$)")
 plt.legend()
-# plt.savefig(
-#     f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256.png"
-# )
-# plt.close()
-plt.show()
+plt.tight_layout()
+plt.savefig(
+    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black.pdf"
+)
+plt.close()
+# plt.show()
 
 # %%
 
@@ -474,4 +494,53 @@ plt.savefig(
 plt.close()
 plt.show()
 
+
+# %%
+tmp = df.loc[df["alpha"] == 0]
+
+
+def crit_init_r_theory(e, V=1):
+    return np.cbrt((np.sqrt(6) / (8 * np.pi)) * V * e)
+
+
+f, ax = plt.subplots(figsize=(5, 4))
+
+plt.plot(
+    np.linspace(0, 0.09),
+    crit_init_r_theory(np.linspace(0, 0.09)),
+    "--",
+    label=f"Theory",
+    c="grey",
+    alpha=0.6,
+)
+
+markers = {128: "o", 256: "^"}
+
+# sns.scatterplot(
+#     data=tmp,
+#     x="epsilon",
+#     y="critical initial radius",
+#     # hue="Nx",
+#     palette=sns.color_palette("bright"),
+#     edgecolor="k",
+#     markers=markers,
+#     style="Nx",
+# )
+for cat, group in tmp.groupby("Nx"):
+    ax.scatter(
+        group["epsilon"],
+        group["critical initial radius"],
+        edgecolors="k",
+        facecolors="none",
+        marker=markers[cat],
+        label=cat,
+    )
+plt.legend()
+plt.title("Critical Initial Radius vs Epsilon")
+plt.xlabel(r"Epsilon ($ \epsilon $)")
+plt.ylabel(r"Critical Initial Radius ($R_0$)")
+plt.tight_layout()
+plt.savefig(f"Critical initial radius_vs_epsilon_w_theory_128_256_black.pdf")
+plt.close()
+# plt.show()
 # %%

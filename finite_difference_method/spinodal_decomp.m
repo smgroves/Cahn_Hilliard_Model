@@ -2,7 +2,7 @@
 % adapted to use same initial conditions as our method 
 % and to output energy, mass, and residual
 
-function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
+function [phi_t,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     % SPINODAL_DECOMP Generates and records Cahn-Hilliard spinodal
     % decomposition models using Euler's method.
     % 
@@ -96,6 +96,7 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     colormap(redblue(100));
     image(u,'CDataMapping','scaled'); colorbar; axis square;
     set(gca,'FontSize',16);title('t = 0'); xlabel('x'); ylabel('y');
+    colormap(interp1(1:100:1100,redbluecmap,1:1001)); %Expand redbluecmap to 1000 elements
 
     frame = getframe(fig);
 
@@ -111,7 +112,7 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     mass_t = zeros(options.NumIterations+1,1);
     nx = options.GridSize;
     ny = nx;
-    % phi_t = zeros(nx,ny,options.NumIterations+1); %Initialize outputs
+    phi_t = zeros(nx,ny,options.NumIterations+1); %Initialize outputs
     if options.write_phi
         writematrix(u,sprintf('%s_phi.csv', options.FileName)); %write IC to file
     end
@@ -121,7 +122,6 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
             i
         end
         curr_t=(i)*options.dt;
-        % phi_t(:,:,i) = u;
         mass_t(i) = sum(sum(u))/(h2*nx*ny);
         E_t(i) = discrete_energy(u,h2,nx,ny,gamma);
 
@@ -150,6 +150,8 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
         % Standard video mode
         else
             if (mod(i,options.FrameSpacing) == 0)
+                phi_t(:,:,i) = u;
+
                 if (strcmp(options.ImgStyle,'true'))
                     image(u,'CDataMapping','scaled');colorbar; axis square;
                 else
@@ -159,6 +161,8 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
                 if options.ConstantColorbar
                     clim([-1, 1]);
                 end
+                colormap(interp1(1:100:1100,redbluecmap,1:1001)); %Expand redbluecmap to 1000 elements
+
                 set(gca,'FontSize',16);title(['t = ',num2str(curr_t)]); xlabel('x'); ylabel('y');
                 frame = getframe(fig);
                 writeVideo(writer,frame);
@@ -166,8 +170,8 @@ function [final_phi,mass_t,E_t] = spinodal_decomp(D,gamma,options)
         end
     end
 
-    % phi_t(:,:,options.NumIterations+1) = u;
-    final_phi = u;
+    phi_t(:,:,options.NumIterations+1) = u;
+    % final_phi = u;
     mass_t(options.NumIterations+1) = sum(sum(u))/(h2*nx*ny);
     E_t(options.NumIterations+1) = discrete_energy(u,h2,nx,ny,gamma);
 

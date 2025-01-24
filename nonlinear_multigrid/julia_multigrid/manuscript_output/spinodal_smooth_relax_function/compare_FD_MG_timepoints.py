@@ -36,7 +36,8 @@ phi_SAV = phi_SAV.reshape(-1, 128, 128).transpose(1, 2, 0)
 # %% save individual plots
 indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
 
-timepoints = [0, 10, 20, 100, 1000, 2000]
+# timepoints = [0, 10, 20, 100, 1000, 2000]
+timepoints = [200, 400]
 dt_out = 1
 dt = 5.5e-6
 for timepoint in timepoints:
@@ -60,6 +61,7 @@ for timepoint in timepoints:
         dpi=300,
     )
     plt.close()
+    # plt.show()
 
 # %% zoom in to timepoint 10:
 timepoint = 1
@@ -146,7 +148,8 @@ plt.savefig(
 plt.close()
 # %% save individual plots
 
-timepoints = [1, 2, 10, 100, 200]
+# timepoints = [1, 2, 10, 100, 200]
+timepoints = [40]
 dt_out = 10
 dt = 5.5e-6
 for timepoint in timepoints:
@@ -280,15 +283,37 @@ e_NMG = get_energy(
     indir_MG, phi_name_MG, dt=5.5e-6, dt_out=1, suffix="txt", title="NMG"
 )
 e_FD = get_energy(indir_FD, phi_name_FD, dt=5.5e-8, dt_out=1, title="FD")
+e_FD_big = get_energy(indir_FD, phi_name_FD_big, dt=5.5e-7, dt_out=1, title="FD_big")
+
 e_SAV = get_energy(indir_SAV, phi_name_SAV, dt=5.5e-6, dt_out=10, title="SAV")
 
 # %%
-for e in [e_NMG, e_FD, e_SAV]:
-    sns.lineplot(x=e["time"], y=e.iloc[:, 0], label=e.columns[0], alpha=0.6)
-plt.ylabel("Normalized Energy")
-plt.xlabel(r"Time ($t_{char}$)")
-plt.title("Normalized (Modified) Energy for Spinodal Decomposition")
-plt.savefig(f"{outdir}/FD_NMG_SAV_energy.pdf")
+for i, e in enumerate([e_NMG, e_FD, e_SAV, e_FD_big]):
+    plt.figure(figsize=(6, 2))
+    ax = sns.lineplot(x=e["time"], y=e.iloc[:, 0], c=sns.color_palette()[i])
+    plt.ylabel("Normalized Energy")
+    plt.xlabel(r"Time ($t_{char}$)")
+    plt.ylim(0.23, 1.05)
+    # ax.set(xscale="log")
+    # ax.set(xticks = np.arange(0, 0.012, 0.002))
+    # plt.title("Normalized (Modified) Energy for Spinodal Decomposition")
+    if e.iloc[:, 0].name == "FD":
+        title = "FD, dt = 5.5e-8"
+        plt.title(title)
+        plt.xlim(-0.001, 0.012)
+
+    elif e.iloc[:, 0].name == "FD_big":
+        title = "FD, dt = 5.5e-7"
+        plt.title(title)
+    else:
+        title = f"{e.iloc[:, 0].name}, dt=5.5e-6"
+        plt.title(title)
+        plt.xlim(-0.001, 0.012)
+    plt.ticklabel_format(style="plain", axis="x")
+
+    # plt.show()
+
+    plt.savefig(f"{outdir}/{title}_energy.pdf")
 
 # %%
 for e in [e_NMG, e_FD, e_SAV]:
@@ -317,6 +342,12 @@ m_FD = get_energy(
 )
 m_FD["FD"] = m_FD["FD"] - m_FD["FD"].iloc[0]
 
+
+m_FD_big = get_energy(
+    indir_FD, phi_name_FD_big, dt=5.5e-7, variable="mass", dt_out=1, title="FD_big"
+)
+m_FD_big["FD_big"] = m_FD_big["FD_big"] - m_FD_big["FD_big"].iloc[0]
+
 m_SAV = get_energy(
     indir_SAV, phi_name_SAV, dt=5.5e-6, variable="mass", dt_out=10, title="SAV"
 )
@@ -327,4 +358,34 @@ plt.ylabel("Normalized Average Mass")
 plt.xlabel(r"Time ($t_{char}$)")
 plt.title("Normalized Average Mass for Spinodal Decomposition")
 plt.savefig(f"{outdir}/FD_NMG_SAV_mass.pdf")
+# %%
+for i, e in enumerate([m_NMG, m_FD, m_SAV, m_FD_big]):
+    plt.figure(figsize=(6, 2))
+    ax = sns.lineplot(x=e["time"], y=e.iloc[:, 0], c=sns.color_palette()[i])
+    plt.ylabel("Normalized Mass")
+    plt.xlabel(r"Time ($t_{char}$)")
+    # ax.set(xscale="log")
+    # ax.set(xticks = np.arange(0, 0.012, 0.002))
+    # plt.title("Normalized (Modified) Energy for Spinodal Decomposition")
+    if e.iloc[:, 0].name == "FD":
+        title = "FD, dt = 5.5e-8"
+        plt.title(title)
+        # plt.xlim(-0.001, 0.012)
+        plt.ylim(-1e-6, 1e-6)
+
+    elif e.iloc[:, 0].name == "FD_big":
+        title = "FD, dt = 5.5e-7"
+        plt.title(title)
+    else:
+        title = f"{e.iloc[:, 0].name}, dt=5.5e-6"
+        plt.title(title)
+        plt.xlim(-0.001, 0.012)
+        plt.ylim(-1e-6, 1e-6)
+
+
+    # plt.title(f"{e.iloc[:, 0].name}")
+    plt.ticklabel_format(style="plain", axis="x")
+
+    plt.savefig(f"{outdir}/{title}_mass_rescaled_Axis.pdf")
+
 # %%

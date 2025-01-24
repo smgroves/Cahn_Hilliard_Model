@@ -15,58 +15,62 @@ total_time = dt*2000;
 % total_time = 0.004;
 max_it = round(total_time / dt);
 FileName = sprintf("%s/FD_%d_dt_%.2e_Nx_%d_n_relax_%d_gam_%.2e_D_%g",outdir,max_it,dt, GridSize,n_relax, gamma,D);
+dt_out = 10;
 
 % max_it = 4000;
 % GridSize = 128;
-[final_phi,mass_t,E_t] = spinodal_decomp(D,gamma, ...
+[phi_t,mass_t,E_t] = spinodal_decomp(D,gamma, ...
                 "dt",dt,...
                 "GridSize",GridSize,...
                 "CaptureMode","standard",...
                 "NumIterations",max_it,...
-                "FrameSpacing",1,...
+                "FrameSpacing",dt_out,...
                 'ImgStyle','true',...
                 "InputMatrix",sprintf("%s/initial_phi_%d_smooth_n_relax_%d.csv",indir,GridSize,n_relax),...
                 "FileName",FileName,...
                 "InputType",'phi',...
                 "ConstantColorbar", true,...
                 "write_residual",false,...
-                "write_phi",true);
-writematrix(final_phi,sprintf('%s_final_phi.csv', FileName));
-writematrix(mass_t,sprintf('%s_mass.csv', FileName));
-writematrix(E_t,sprintf('%s_energy.csv', FileName));
+                "write_phi",false);
+% writematrix(final_phi,sprintf('%s_final_phi.csv', FileName));
+% writematrix(mass_t,sprintf('%s_mass.csv', FileName));
+% writematrix(E_t,sprintf('%s_energy.csv', FileName));
+% filename = strcat(FileName, "movie");
+% t_out = (0:dt_out:max_it)*dt;
+% ch_movie(phi_t,t_out, filename = filename);
 
-fig = figure('visible', 'off');
-image(final_phi,'CDataMapping','scaled'); colorbar; axis square;
-set(gca,'FontSize',16);title(['t = ',num2str(total_time)]); xlabel('x'); ylabel('y');
-clim([-1, 1]);
-colormap(redblue(100));
-saveas(gca,sprintf('%s_final_phi.png', FileName))
+% fig = figure('visible', 'off');
+% image(final_phi,'CDataMapping','scaled'); colorbar; axis square;
+% set(gca,'FontSize',16);title(['t = ',num2str(total_time)]); xlabel('x'); ylabel('y');
+% clim([-1, 1]);
+% colormap(redblue(100));
+% saveas(gca,sprintf('%s_final_phi.png', FileName))
 
-function c = redblue(m)
-    %   Adam Auton, 9th October 2009
+% function c = redblue(m)
+%     %   Adam Auton, 9th October 2009
     
-    if nargin < 1, m = size(get(gcf,'colormap'),1); end
+%     if nargin < 1, m = size(get(gcf,'colormap'),1); end
     
-    if (mod(m,2) == 0)
-        % From [0 0 1] to [1 1 1], then [1 1 1] to [1 0 0];
-        m1 = m*0.5;
-        r = (0:m1-1)'/max(m1-1,1);
-        g = r;
-        r = [r; ones(m1,1)];
-        g = [g; flipud(g)];
-        b = flipud(r);
-    else
-        % From [0 0 1] to [1 1 1] to [1 0 0];
-        m1 = floor(m*0.5);
-        r = (0:m1-1)'/max(m1,1);
-        g = r;
-        r = [r; ones(m1+1,1)];
-        g = [g; 1; flipud(g)];
-        b = flipud(r);
-    end
+%     if (mod(m,2) == 0)
+%         % From [0 0 1] to [1 1 1], then [1 1 1] to [1 0 0];
+%         m1 = m*0.5;
+%         r = (0:m1-1)'/max(m1-1,1);
+%         g = r;
+%         r = [r; ones(m1,1)];
+%         g = [g; flipud(g)];
+%         b = flipud(r);
+%     else
+%         % From [0 0 1] to [1 1 1] to [1 0 0];
+%         m1 = floor(m*0.5);
+%         r = (0:m1-1)'/max(m1,1);
+%         g = r;
+%         r = [r; ones(m1+1,1)];
+%         g = [g; 1; flipud(g)];
+%         b = flipud(r);
+%     end
     
-    c = [r g b]; 
-end    
+%     c = [r g b]; 
+% end    
 
 
 % /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "run_fd_droplets();quit;"
