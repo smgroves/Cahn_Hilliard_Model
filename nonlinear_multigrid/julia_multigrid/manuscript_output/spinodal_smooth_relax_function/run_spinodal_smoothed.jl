@@ -169,7 +169,7 @@ outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigr
 
 include("../../CH_multigrid_solver.jl")
 nx = 128
-dt = 5.5e-5
+dt = 5.5e-6
 n_relax = 4
 ny = nx
 tol = 1e-5
@@ -182,5 +182,9 @@ total_time = max_it * dt
 date_time = now()
 name = "MG_$(max_it)_dt_$(dt)_Nx_$(nx)_n_relax_$(n_relax)_eps_$(epsilon)"
 phi = initialization_from_file("$(indir)initial_phi_$(nx)_smooth_n_relax_$(n_relax).csv", nx, nx)
-final_phi = multigrid_solver(phi, nx, tol, outdir, ns=1, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=true, print_e=true, overwrite=false, print_r=false, print_phi=true, suffix=name, check_dir=false)
-writedlm("$(outdir)/$(name)_final_phi.csv", final_phi, ',')
+date_time = now()
+time_passed = @elapsed multigrid_solver(phi, nx, tol, outdir, ns=10, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, print_r=false, print_phi=false, suffix=name, check_dir=false)
+open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Job_specs.csv", "a", lock=false) do f
+    writedlm(f, [date_time "spinodal_smoothed_no_print" "Julia" nx epsilon dt tol max_it 10000 time_passed], ",")
+end
+# writedlm("$(outdir)/$(name)_final_phi.csv", final_phi, ',')

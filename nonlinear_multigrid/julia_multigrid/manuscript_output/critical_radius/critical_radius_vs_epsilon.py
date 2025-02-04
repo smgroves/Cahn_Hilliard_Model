@@ -43,23 +43,27 @@ indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigri
 # %%
 ## Reuse this one
 # alpha = "0.5"
+plt.rcParams["font.family"] = "Arial"
+
 level_set_radius = "0.5"  # the default from Min-Jhe's code was to use phi = 0 or psi = 0.5, so for the plotting without alpha it will be 0.5
 Nx = 128
+alpha = 0
 # for epsilon in ["0.011257", "0.0037523","0.0056285", "0.0075047"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
 for epsilon in [
-    "0.015009",
-    "0.030019",
+    "0.011257"
+    # "0.015009",
+    # "0.030019",
     # "0.045028",
     # "0.0075046",
     # "0.075047",
-    "0.060037",
+    # "0.060037",
     # "0.090056",
 ]:
 
     # for epsilon in ["0.0037523", "0.0075046", "0.0018761", "0.015009"]:
     folder = f"critical_radius"
     tmp = pd.read_csv(
-        f"{indir}/{folder}/periodic_BC_single_drop/radius_{level_set_radius}_level_set_epsilon_{epsilon}.txt",
+        f"{indir}/{folder}/alpha_0.0/radius_{level_set_radius}_level_set_epsilon_{epsilon}_alpha_0.0.txt",
         header=0,
         index_col=None,
         sep=",",
@@ -71,20 +75,73 @@ for epsilon in [
     # index_col=None,
     # sep=",",
     # on_bad_lines='skip')
-    # tmp = tmp.drop(tmp[tmp["R0"].isin([0.1,0.11, 0.1111, 0.1112, 0.1113, 0.1114, 0.1115])].index)
+
+    # what to keep
+    tmp = tmp.drop(
+        tmp[
+            ~tmp["R0"].isin(
+                # [0.111, 0.11155, 0.113, 0.1116, 0.112, 0.114, 0.11675, 0.117]
+                [0.09, 0.1, 0.105, 0.11, 0.12]
+            )
+        ].index
+    )
+    # tmp = tmp.drop(tmp[tmp["time"] > 0.011].index)
     print(tmp.shape)
-    tmp = tmp.sort_values("R0")
+    # tmp.fillna(0, inplace=True)
 
-    sns.lineplot(data=tmp, x="time", y="radius", hue="R0", palette="tab20")
-    plt.legend(loc="center left", title="R0", bbox_to_anchor=(1, 0.5), fontsize="small")
-
+    tmp = tmp.sort_values("R0", ascending=False)
+    meta = pd.read_csv(
+        f"{indir}/{folder}/critical_radii_epsilon copy.csv", header=0, index_col=None
+    )
+    crit_rad = meta.loc[
+        (meta["alpha"] == float(alpha))
+        & (meta["epsilon"] == float(epsilon))
+        & (meta["Nx"] == Nx)
+    ]["critical equilibrium radius (min)"].iloc[0]
+    crit_rad_init = meta.loc[
+        (meta["alpha"] == float(alpha))
+        & (meta["epsilon"] == float(epsilon))
+        & (meta["Nx"] == Nx)
+    ]["critical initial radius"].iloc[0]
+    plt.axhline(crit_rad, linestyle="--", color="lightgrey")
+    plt.axhline(crit_rad_init, linestyle="--", color="lightgrey")
+    # sns.lineplot(data=tmp, x="time", y="radius", hue="R0", palette="tab20")
+    for i, r in enumerate(np.unique(tmp["R0"])):
+        tmp_r = tmp.loc[tmp["R0"] == r].sort_values("time")
+        last = tmp_r["radius"].last_valid_index()
+        print(last)
+        tmp_r.loc[last + 1, "radius"] = 0
+        plt.plot(
+            tmp_r["time"],
+            tmp_r["radius"],
+            color=sns.color_palette()[i],
+            label=r,
+        )
+    plt.legend(
+        loc="center left",
+        title="R0",
+        bbox_to_anchor=(1, 0.5),
+        fontsize="large",
+        reverse=True,
+    )
+    plt.xscale("log")
     plt.title(f"Epsilon = {epsilon}")
     # plt.axhline(0.07, linestyle="--", color="gray")
+    plt.ylim(0, 0.14)
+    plt.xlim(1e-3, 1e-2)
+    plt.xlabel(r"$log_{10}$(Time) ($t_{char}$)")
+    plt.ylabel("Radius (R)")
     plt.tight_layout()
     plt.savefig(
-        f"{indir}/{folder}/periodic_BC_single_drop/critical_radius_vs_epsilon_{epsilon}_radius_{level_set_radius}.pdf"
+        f"{indir}/{folder}/alpha_0.0/critical_radius_vs_epsilon_{epsilon}_subset_log_cropped.pdf"
     )
     plt.close()
+    plt.show()
+# %%
+
+
+# %%
+
 # %% With a linear color mapping
 alpha = "0.0"
 level_set_radius = "0.5"
@@ -138,7 +195,7 @@ for epsilon in [
     # norm = Normalize(vmin=0, vmax=0.2)
 
     colormap = cm.jet
-
+    tmp.fillna(0, inplace=True)
     for r in np.unique(tmp["R0"]):
         tmp_r = tmp.loc[tmp["R0"] == r].sort_values("time")
         color = colormap(norm(r))
@@ -156,16 +213,15 @@ for epsilon in [
     # tick_positions = norm(ticks)
     cbar.set_ticks(ticks)
     # plt.clim(np.min(color_values), np.max(color_values))
-
     plt.axhline(crit_rad, linestyle="--", color="lightgrey")
     plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
     # plt.axhline(0.07, linestyle="--", color="gray")
     plt.tight_layout()
-    # plt.show()
+    plt.show()
     plt.savefig(
         f"{indir}/{folder}/alpha_{alpha}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}_nx_{Nx}_radius_{level_set_radius}_.pdf"
     )
-    plt.close()
+    # plt.close()
 
 
 # %%
