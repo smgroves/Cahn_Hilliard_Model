@@ -7,9 +7,10 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function"
-
-indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
-phi_name_MG = "MG_2000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi.txt"
+indir_MG = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output"
+phi_name_MG = "NMG_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
+# indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
+# phi_name_MG = "MG_2000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi.txt"
 
 phi_MG = np.genfromtxt(
     f"{indir_MG}/{phi_name_MG}",
@@ -18,16 +19,20 @@ phi_MG = np.genfromtxt(
 phi_MG = phi_MG.reshape(-1, 128, 128).transpose(1, 2, 0)
 
 # %%
-indir_FD = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/spinodal_smooth_relax_function"
-phi_name_FD = "FD_2000_dt_5.50e-08_Nx_128_n_relax_4_gam_3.69e+00_D_16384_phi.csv"
+indir_FD = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output"
+phi_name_FD = "FD_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
+# indir_FD = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/finite_difference_method/output/spinodal_smooth_relax_function"
+# phi_name_FD = "FD_2000_dt_5.50e-08_Nx_128_n_relax_4_gam_3.69e+00_D_16384_phi.csv"
 
 phi_FD = np.genfromtxt(f"{indir_FD}/{phi_name_FD}", delimiter=",")
 
 phi_FD = phi_FD.reshape(-1, 128, 128).transpose(1, 2, 0)
 
 # %%
-indir_SAV = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/SAV/output/spinodal_smooth_relax_function"
+indir_SAV = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output"
 phi_name_SAV = "SAV_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
+# indir_SAV = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/SAV/output/spinodal_smooth_relax_function"
+# phi_name_SAV = "SAV_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
 
 phi_SAV = np.genfromtxt(f"{indir_SAV}/{phi_name_SAV}", delimiter=",")
 
@@ -381,7 +386,6 @@ for i, e in enumerate([m_NMG, m_FD, m_SAV, m_FD_big]):
         plt.title(title)
         plt.xlim(-0.001, 0.012)
         plt.ylim(-1e-6, 1e-6)
-
 
     # plt.title(f"{e.iloc[:, 0].name}")
     plt.ticklabel_format(style="plain", axis="x")

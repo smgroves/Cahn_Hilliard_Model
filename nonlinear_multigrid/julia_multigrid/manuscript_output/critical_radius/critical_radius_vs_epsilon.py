@@ -128,12 +128,12 @@ for epsilon in [
     plt.title(f"Epsilon = {epsilon}")
     # plt.axhline(0.07, linestyle="--", color="gray")
     plt.ylim(0, 0.14)
-    plt.xlim(1e-3, 1e-2)
+    plt.xlim(1e-3, 1e1)
     plt.xlabel(r"$log_{10}$(Time) ($t_{char}$)")
     plt.ylabel("Radius (R)")
     plt.tight_layout()
     plt.savefig(
-        f"{indir}/{folder}/alpha_0.0/critical_radius_vs_epsilon_{epsilon}_subset_log_cropped.pdf"
+        f"{indir}/{folder}/alpha_0.0/critical_radius_vs_epsilon_{epsilon}_subset_log_v2.pdf"
     )
     plt.close()
     plt.show()

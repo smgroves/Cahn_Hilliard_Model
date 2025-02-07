@@ -204,11 +204,12 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
 
 # add_images_to_pdf_sorted_grid(image_paths, pdf_path)
 
-indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/plotting/"
-sim = "domain_0_2_eps_0.0075_crosshair_kymographs"
-paths = glob(f"{indir}radii_over_time_level_set_plots/{sim}/*/")
+indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/"
+# sim = "domain_0_2_eps_0.0075_crosshair_kymographs"
+sim = "domain_0_2_e_0.0067"
+paths = glob(f"{indir}radii_lineplots_kymographs/{sim}/*/")
 image_paths = []
-epsilon = "0.0075"
+epsilon = "0.0067"
 Nx = 512
 for p in paths:
     eps_match = re.search(r"eps_(\d*\.?\d*)", p)
