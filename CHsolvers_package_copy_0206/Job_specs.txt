@@ -1,0 +1,1 @@
+07-Feb-2025 16:22:25,FD_spinodal_decomp_smoothed_print,MATLAB,FD,256,0.0067,1e-05,NaN,2000,NaN,118.0721,/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/image_to_CH/output/HeLa_SAV_MATLAB_2000_dt_1.00e-05_Nx_256_eps_0.00670_

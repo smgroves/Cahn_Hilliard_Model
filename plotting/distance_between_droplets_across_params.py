@@ -180,6 +180,28 @@ plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
 plt.tight_layout()
 plt.show()
 
+# %%
+
+long_dist_df5 = make_long_dist_df(
+    indir,
+    file="simulated_droplet_distributions/simulated_droplet_distances_e_0.0067_noisy_cohesin_chr_lengths.csv",
+)
+sns.histplot(
+    data=long_dist_df5,
+    x="distance",
+    palette=sns.color_palette("muted"),
+    binwidth=0.1,
+    stat="probability",
+    common_norm=False,
+    kde=True,
+)
+
+# sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
+plt.title("Distances between droplets by CPC radius and Cohesin width")
+plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
+plt.tight_layout()
+plt.show()
+
 # %% compare two simulation types
 outdir = f"{indir}/radii_lineplots_kymographs/domain_0_2_noisy_cohesin_sd_0.11"
 
@@ -188,9 +210,10 @@ long_dist_df["Category"] = "eps = 0.01"
 long_dist_df2["Category"] = "eps = 0.0075"
 # long_dist_df3["Category"] = "eps = 0.005"
 long_dist_df4["Category"] = "eps = 0.008"
+long_dist_df5["Category"] = "eps = 0.0067"
 
 long_dist_df = pd.concat(
-    [long_dist_df, long_dist_df2, long_dist_df4], ignore_index=True
+    [long_dist_df, long_dist_df2, long_dist_df4, long_dist_df5], ignore_index=True
 )
 sns.histplot(
     data=long_dist_df,
@@ -221,6 +244,7 @@ plt.show()
 # plt.show()
 
 # %%
+# TODO: redo this section to use bootstrapping on all images
 
 
 # the below code is pulled from distances_between_droplets.py in the CPC_condensate_images folder on Box.
@@ -331,11 +355,11 @@ for i, j in list(combinations(long_dist_df["Category"].unique(), 2)):
 mask = np.triu(np.ones_like(distances))
 
 # plotting a triangle correlation heatmap
-#%%
+# %%
 dataplot = sns.heatmap(distances, cmap="Reds_r", annot=True, mask=mask)
 plt.tight_layout()
-# plt.show()
-plt.savefig(f"{outdir}/wasserstein_distance_image_vs_sim_wMCF10A.png")
+plt.show()
+# plt.savefig(f"{outdir}/wasserstein_distance_image_vs_sim_wMCF10A.png")
 # plt.show()
 # %%
 # dist_df = pd.DataFrame(columns=['distance', 'chr'])
@@ -365,9 +389,9 @@ plt.title(
 plt.xlabel("Distance (um)")
 plt.xlim(0, 3.2)
 plt.ylim(0, 0.2)
-plt.savefig(
-    f"{outdir}/distances_between_droplets_histplot_image_vs_sim_{binwidth}_v3.png"
-)
+# plt.savefig(
+#     f"{outdir}/distances_between_droplets_histplot_image_vs_sim_{binwidth}_v3.png"
+# )
 plt.show()
 # plt.close()
 
@@ -389,6 +413,15 @@ plt.show()
 # plt.xlabel("Distance (um)")
 # # plt.savefig(f"{outdir}distances_between_droplets_histplot_image_{binwidth}.png")
 # plt.show()
+# %%
+sns.kdeplot(
+    data=long_dist_df,
+    x="distance",
+    hue="Category",
+    common_norm=False,
+)
+plt.show()
+
 # %%
 outdir = f"{indir}/radii_lineplots_kymographs/domain_0_2_noisy_cohesin_sd_0.11"
 
@@ -475,7 +508,6 @@ plt.title(
 plt.xlabel("Distance (um)")
 plt.ylabel("Frequency")
 # plt.show()
-plt.savefig(
-    f"{outdir}distances_between_droplets_kdeplot_image_vs_sim_grouped.png")
+plt.savefig(f"{outdir}distances_between_droplets_kdeplot_image_vs_sim_grouped.png")
 
 # %%

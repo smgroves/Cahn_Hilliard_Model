@@ -8,7 +8,6 @@
 # [ ] Use in-place operations and @. for broadcasting.
 # [ ] Add @inbounds and @simd for loop optimization.
 # [ ] Use StaticArrays for small fixed-size arrays.
-# [ ] Use @threads for multithreading.
 # [ ] Replace global constants with function arguments.
 # [ ] Use @views to avoid array copying.
 # [ ] Profile and benchmark to identify bottlenecks.
@@ -25,7 +24,6 @@ using BenchmarkTools
 using StaticArrays
 using Printf
 import Random
-using Base.Threads
 
 Random.seed!(1234) #note that when using a random seed, you must RESTART the REPL or run in a new instance for the runs to be the same. 
 
@@ -39,7 +37,7 @@ const yright = 1.0  # right y-coordinate defined as a global variable
 function laplace!(lap_a, a, nxt, nyt)
 
     ht2 = ((xright - xleft) / nxt)^2
-    Threads.@threads for i in 1:nxt
+    for i in 1:nxt
         for j in 1:nyt
             if i > 1
                 dadx_L = (a[i, j] - a[i-1, j])
@@ -94,7 +92,7 @@ function relax!(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, dt, Cah
     a = MVector{4,Float64}(undef)
     f = MVector{2,Float64}(undef)
     for iter in 1:c_relax
-        Threads.@threads for i in 1:nxt
+        for i in 1:nxt
             for j in 1:nyt
                 if i > 1 && i < nxt
                     x_fac = 2.0

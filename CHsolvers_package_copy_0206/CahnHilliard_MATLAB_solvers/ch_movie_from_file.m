@@ -80,7 +80,7 @@ open(phi_movie);
 % need to know correct size of phi_t, dtframes, dt_out
 
 for i = 1:dtframes:size(t_out,2)
-    phi_temp = readmatrix(phi_file, 'Range', [(i-1)*ny+1, 1, i*ny, 128]);
+    phi_temp = readmatrix(phi_file, 'Range', [(i-1)*ny+1, 1, i*ny, ny]);
 % for i = 1:dtframes:size(phi_t,3)
     h = figure('visible','off');
     image(phi_temp,'CDataMapping','scaled');
