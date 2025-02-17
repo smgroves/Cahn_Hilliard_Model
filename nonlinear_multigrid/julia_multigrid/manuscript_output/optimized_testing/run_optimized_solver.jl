@@ -17,8 +17,8 @@ total_time = 0.01
 max_it = Int.(total_time / dt)
 date_time = now()
 phi = initialization_from_file("$(indir)/initial_phi_$(nx)_mean_0_sd_0.2.csv", nx, nx)
-mem_allocated = @allocated multigrid_solver(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, print_r=false, suffix="dt_$(dt)_mean_$(mean)_sd_$(std_dev)", check_dir=false)
+result, elapsed_time, mem_allocated, gc_time, memory_counters = @timed multigrid_solver(phi, nx, tol, outdir, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=false, print_r=false, suffix="dt_$(dt)_mean_$(mean)_sd_$(std_dev)", check_dir=false)
 open("$(outdir)Job_specs_mem_allocation_optimization.csv", "a", lock=false) do f
-    writedlm(f, [date_time "Original code" "Julia" nx epsilon dt tol max_it 10000 mem_allocated / 1e6], ",")
+    writedlm(f, [date_time "Original code" "Julia" nx epsilon dt tol max_it 10000 mem_allocated / 1e6 elapsed_time], ",")
 end
 

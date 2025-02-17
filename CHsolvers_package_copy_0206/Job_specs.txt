@@ -1,1 +1,4 @@
 07-Feb-2025 16:22:25,FD_spinodal_decomp_smoothed_print,MATLAB,FD,256,0.0067,1e-05,NaN,2000,NaN,118.0721,/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/image_to_CH/output/HeLa_SAV_MATLAB_2000_dt_1.00e-05_Nx_256_eps_0.00670_
+14-Feb-2025 13:12:43,FD_spinodal_decomp_smoothed_print,MATLAB,FD,256,0.0067,1e-05,NaN,2000,NaN,123.379,/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/image_to_CH/output/MCF10A_SAV_MATLAB_2000_dt_1.00e-05_Nx_256_eps_0.00670_
+14-Feb-2025 13:32:00,FD_spinodal_decomp_smoothed_print,MATLAB,FD,256,0.0067,1e-05,NaN,4000,NaN,479.2204,/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/image_to_CH/output/HeLa_SAV_MATLAB_4000_dt_1.00e-05_Nx_256_eps_0.00670_
+14-Feb-2025 14:18:36,FD_spinodal_decomp_smoothed_print,MATLAB,FD,256,0.0067,1e-05,NaN,8000,NaN,458.7039,/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/image_to_CH/output/HeLa_SAV_MATLAB_8000_dt_1.00e-05_Nx_256_eps_0.00670_

@@ -7,10 +7,10 @@ ny = GridSize;
 h = 1/GridSize;
 % epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9));
 dt = 1e-5;
-max_it = 2000;
+max_it = 12000;
 boundary = 'neumann';
-init_file = sprintf("%s/input/MCF10A_T6I8_chromosome_phi_IC_256.csv",indir);
-% init_file = sprintf("%s/input/figure_5_chromosome_phi_IC.csv",indir);
+% init_file = sprintf("%s/input/MCF10A_T6I8_chromosome_phi_IC_256.csv",indir);
+init_file = sprintf("%s/input/figure_5_chromosome_phi_IC.csv",indir);
 
 phi0 = readmatrix(init_file);
 print_phi = true;
@@ -24,7 +24,7 @@ epsilon = 0.0067;
 domain = [domain_size 0 domain_size 0];
 
 cd ../CHsolvers_package_copy_0206/CahnHilliard_MATLAB_solvers;
-pathname = sprintf("%s/MCF10A_SAV_MATLAB_%d_dt_%.2e_Nx_%d_eps_%.5f_",outdir,max_it,dt, GridSize, epsilon);
+pathname = sprintf("%s/HeLa_SAV_MATLAB_%d_dt_%.2e_Nx_%d_eps_%.5f_",outdir,max_it,dt, GridSize, epsilon);
 fprintf("Running SAV solver with parameters: %s\n", pathname);
 tStart_SAV = tic;
 [t_out, phi_t, delta_mass_t, E_t] = CahnHilliard_SAV_SMG(phi0,...
@@ -50,7 +50,7 @@ fclose(fid);
 fprintf("Creating movie\n");
 filename = strcat(pathname, "movie");
 if print_phi
-    ch_movie_from_file(strcat(pathname,"phi.csv"), t_out, ny,filename = filename)
+    ch_movie_from_file(strcat(pathname,"phi.csv"), t_out, ny,filename = filename, dtframes = 10)
 else
     ch_movie(phi_t,t_out, filename = filename);
 end
