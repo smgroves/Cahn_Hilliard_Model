@@ -9,14 +9,16 @@ h = 1/GridSize;
 dt = 1e-5;
 max_it = 12000;
 boundary = 'neumann';
-% init_file = sprintf("%s/input/MCF10A_T6I8_chromosome_phi_IC_256.csv",indir);
-init_file = sprintf("%s/input/figure_5_chromosome_phi_IC.csv",indir);
-
+init_file = sprintf("%s/input/MCF10A_T6I8_chromosome_phi_IC_256.csv",indir);
+% init_file = sprintf("%s/input/figure_5_chromosome_phi_IC.csv",indir);
 phi0 = readmatrix(init_file);
+psi0 = 2*phi0 - 1;
+total = sum(psi0,"all");
+psi0_uM = psi0 * total_uM/total;
 print_phi = true;
 dt_out = 10;
-domain_size = 4.4/3.2;
-% domain_size = 6.6/3.2;
+% domain_size = 4.4/3.2; %hela
+domain_size = 6.6/3.2; %mcf10a
 % grid_ratio = GridSize/128;
 epsilon = 0.0067;
 % *grid_ratio/domain_size;
@@ -24,7 +26,7 @@ epsilon = 0.0067;
 domain = [domain_size 0 domain_size 0];
 
 cd ../CHsolvers_package_copy_0206/CahnHilliard_MATLAB_solvers;
-pathname = sprintf("%s/HeLa_SAV_MATLAB_%d_dt_%.2e_Nx_%d_eps_%.5f_",outdir,max_it,dt, GridSize, epsilon);
+pathname = sprintf("%s/MCF10A_rescaled_SAV_MATLAB_%d_dt_%.2e_Nx_%d_eps_%.5f_",outdir,max_it,dt, GridSize, epsilon);
 fprintf("Running SAV solver with parameters: %s\n", pathname);
 tStart_SAV = tic;
 [t_out, phi_t, delta_mass_t, E_t] = CahnHilliard_SAV_SMG(phi0,...
@@ -38,10 +40,10 @@ tStart_SAV = tic;
                                     domain = domain);
 elapsedTime = toc(tStart_SAV);
 
-fid = fopen('../Job_specs.txt', 'a+');
-v = [string(datetime) "FD_spinodal_decomp_smoothed_print" "MATLAB" "FD" GridSize epsilon dt 'NaN' max_it 'NaN' elapsedTime, pathname];
-fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n', v);
-fclose(fid);
+% fid = fopen('../Job_specs.txt', 'a+');
+% v = [string(datetime) "SAV" "MATLAB" "FD" GridSize epsilon dt 'NaN' max_it 'NaN' elapsedTime, pathname];
+% fprintf(fid, '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n', v);
+% fclose(fid);
 
 % writematrix(phi_t(:,:,end),sprintf('%sfinal_phi.csv', pathname));
 % writematrix(delta_mass_t,sprintf('%smass.csv', pathname));

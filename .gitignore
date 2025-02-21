@@ -16,7 +16,13 @@ original_C_NMG/out/*.m
 **/phi*.txt
 *.gz
 *.zip
-*.csv
+nonlinear_multigrid/**/*.csv
+finite_difference_method/**/*.csv
+SAV/**/*.csv
+vcell_to_chsolver/**/*.csv
+image_to_CH/output/**/*.csv
+optimization_testing/**/*.csv
+original_C_NMG/**/*.csv
 .idea/*
 Code from Kevin/phi_CPC_big.m
 .DS_Store
