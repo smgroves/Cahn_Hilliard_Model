@@ -7,14 +7,13 @@ ny = GridSize;
 h = 1/GridSize;
 % epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9));
 dt = 1e-5;
-max_it = 12000;
+max_it = 8000;
 boundary = 'neumann';
-init_file = sprintf("%s/input/MCF10A_T6I8_chromosome_phi_IC_256.csv",indir);
+init_file = sprintf("%s/input/MCF10A_T6I8_chromosome_phi_IC_256.csv_C_um_Borealin.csv",indir);
 % init_file = sprintf("%s/input/figure_5_chromosome_phi_IC.csv",indir);
-phi0 = readmatrix(init_file);
-psi0 = 2*phi0 - 1;
-total = sum(psi0,"all");
-psi0_uM = psi0 * total_uM/total;
+psi0 = readmatrix(init_file);
+psi0 = psi0/10;
+phi0 = psi0*2 - 1;
 print_phi = true;
 dt_out = 10;
 % domain_size = 4.4/3.2; %hela
@@ -26,7 +25,7 @@ epsilon = 0.0067;
 domain = [domain_size 0 domain_size 0];
 
 cd ../CHsolvers_package_copy_0206/CahnHilliard_MATLAB_solvers;
-pathname = sprintf("%s/MCF10A_rescaled_SAV_MATLAB_%d_dt_%.2e_Nx_%d_eps_%.5f_",outdir,max_it,dt, GridSize, epsilon);
+pathname = sprintf("%s/MCF10A_Borealin_SAV_MATLAB_%d_dt_%.2e_Nx_%d_eps_%.5f_",outdir,max_it,dt, GridSize, epsilon);
 fprintf("Running SAV solver with parameters: %s\n", pathname);
 tStart_SAV = tic;
 [t_out, phi_t, delta_mass_t, E_t] = CahnHilliard_SAV_SMG(phi0,...

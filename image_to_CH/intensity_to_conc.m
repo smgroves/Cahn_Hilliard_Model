@@ -1,13 +1,13 @@
 indir= cd;
 
-init_file = sprintf("%s/input/MCF10A_T6I8_chromosome_phi_IC_256.csv",indir);
-% init_file = sprintf("%s/input/figure_5_chromosome_phi_IC.csv",indir);
+% init_file = sprintf("%s/input/MCF10A_T6I8_chromosome_phi_IC_256.csv",indir);
+init_file = sprintf("%s/input/figure_5_chromosome_phi_IC.csv",indir);
 phi0 = readmatrix(init_file);
 psi0 = (phi0 + 1)/2;
 %psi0 is 256X256 matrix with 0.5 for values with 64<x<192  and 0 otherwise
 % psi0 = zeros(256,256);
 % psi0(64:191,:) = 0.3;
-domain = 6.6;
+domain = 4.4;
 % C_avg = 3.968;
 C_avg = 2.757;
 % C_avg = 1;

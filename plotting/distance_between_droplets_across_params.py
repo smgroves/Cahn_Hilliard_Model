@@ -1,8 +1,12 @@
 # %%
+import ast
+from itertools import combinations
+import scipy.stats as ss
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+# %%
 
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting"
 
@@ -208,24 +212,32 @@ outdir = f"{indir}/radii_lineplots_kymographs/domain_0_2_noisy_cohesin_sd_0.11"
 binwidth = 0.05
 long_dist_df["Category"] = "eps = 0.01"
 long_dist_df2["Category"] = "eps = 0.0075"
-# long_dist_df3["Category"] = "eps = 0.005"
+long_dist_df3["Category"] = "eps = 0.005"
 long_dist_df4["Category"] = "eps = 0.008"
 long_dist_df5["Category"] = "eps = 0.0067"
 
 long_dist_df = pd.concat(
-    [long_dist_df, long_dist_df2, long_dist_df4, long_dist_df5], ignore_index=True
+    [long_dist_df, long_dist_df2, long_dist_df3,
+        long_dist_df4, long_dist_df5], ignore_index=True
 )
-sns.histplot(
+# sns.histplot(
+#     data=long_dist_df,
+#     x="distance",
+#     hue="Category",
+#     binwidth=binwidth,
+#     stat="probability",
+#     common_norm=False,
+#     kde=True,
+# )
+sns.kdeplot(
     data=long_dist_df,
     x="distance",
     hue="Category",
-    binwidth=binwidth,
-    stat="probability",
+    # stat="probability",
     common_norm=False,
-    kde=True,
 )
-# plt.savefig(f"{outdir}/distances_between_droplets_histplot_image_vs_sim_{binwidth}_v3.png")
-plt.show()
+plt.savefig(f"{outdir}/distances_between_droplets_histplot_sims_kdes_v4.png")
+# plt.show()
 # %%
 # outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_noisy_cohesin_sd_0.25/"
 
@@ -244,7 +256,6 @@ plt.show()
 # plt.show()
 
 # %%
-# TODO: redo this section to use bootstrapping on all images
 
 
 # the below code is pulled from distances_between_droplets.py in the CPC_condensate_images folder on Box.
@@ -254,7 +265,8 @@ def inter_droplet_distance(indir, image):
         f"{indir}/count_peaks_image{image}_.csv",
         header=0,
         index_col=0,
-        converters={"IC_peaks": pd.eval, "left_peaks": pd.eval, "right_peaks": pd.eval},
+        converters={"IC_peaks": pd.eval,
+                    "left_peaks": pd.eval, "right_peaks": pd.eval},
     )
     for i, r in tmp.iterrows():
         ic = list(r["IC_peaks"])
@@ -271,18 +283,89 @@ def inter_droplet_distance(indir, image):
     return distance_dict
 
 
-indir2 = "/Users/smgroves/Box/CPC_Model_Project/CPC_condensate_images/haspin_stripe_linescans/analysis"
+indir2 = "/Users/smgroves/Library/CloudStorage/Box-Box/CPC_Model_Project/CPC_condensate_images/haspin_stripe_linescans/analysis"
 all_images = []
+all_images_dict = {}
 for image in [0, 1, 2, 5, 7, 8, 9]:
     distance_dict = inter_droplet_distance(indir2, image=image)
-
+    # all_images_dict[image] = distance_dict
     all_ = []
     for k in distance_dict.keys():
         all_.extend(distance_dict[k])
+    all_images_dict[f"{image}"] = all_
     all_images.extend(all_)
 
-print(all_images)
+print(all_images_dict)
 
+# %%
+# TODO: redo this section to use bootstrapping on all images
+
+bootstrap_samples_file = "/Users/smgroves/Library/CloudStorage/Box-Box/CPC_Model_Project/CPC_condensate_images/manual_condensates/bootstrapped/remaining_no_replacement.txt"
+bootstrap_samples = []
+with open(bootstrap_samples_file, "r") as f:
+    for line in f:
+        # Strip newline characters and convert the string to a list
+        bootstrap_samples.append(ast.literal_eval(line.strip()))
+
+# make distributions
+bootstrapped_df = pd.DataFrame(
+    columns=["Category", "seed", "time", "cpc", "cohesin", "distance"])
+# bootstrap_samples = [["0", "1", "2", "5", "7",], ["0", "1", "2", "8", "9"]]
+for n, samples in enumerate(bootstrap_samples):
+    print(n/len(bootstrap_samples))
+    for s in samples:
+        try:
+            for d in all_images_dict[s]:
+                bootstrapped_df = pd.concat(
+                    [
+                        bootstrapped_df,
+                        pd.DataFrame(
+                            {
+                                "Category": [f"Bootstrap {n}"],
+                                "seed": [0],
+                                "time": [0],
+                                "cpc": [0],
+                                "cohesin": [0],
+                                "distance": [d],
+                            }
+                        ),
+                    ],
+                    ignore_index=True,
+                )
+        except KeyError:
+            pass
+
+# %%
+fig, axes = plt.subplots()
+sns.kdeplot(
+    data=bootstrapped_df,
+    x="distance",
+    hue="Category",
+    common_norm=False,
+    alpha=0.1,
+    legend=False,
+    palette=sns.color_palette("viridis", n_colors=100),
+    ax=axes
+)
+sns.kdeplot(
+    data=long_dist_df,
+    x="distance",
+    hue="Category",
+    common_norm=False,
+    # palette=sns.color_palette("Spectral", n_colors=100),
+    ax=axes,
+    linestyle="--",
+
+)
+plt.title(
+    "Droplet Distance Distributions: HeLa Images (100 bootstraps) vs Simulations")
+plt.xlabel("Distance (um)")
+plt.ylabel("Density")
+plt.savefig(
+    f"{outdir}/distances_between_droplets_kdeplot_HeLa_images_vs_sim_bootstrapped_v1.png")
+plt.show()
+
+# %% # use without bootstrapping
 # long_dist_df["Category"] = "Simulation"
 for d in all_images:
     long_dist_df = pd.concat(
@@ -302,7 +385,7 @@ for d in all_images:
         ignore_index=True,
     )
 
-# %%
+# %% # use without bootstrapping
 indir3 = "/Users/smgroves/Box/CPC_Model_Project/CPC_condensate_images/haspin_stripe_linescans/MCF10A"
 all_images = []
 for image in [10]:
@@ -336,8 +419,6 @@ for d in all_images:
 
 # %%
 # Earth movers distance
-import scipy.stats as ss
-from itertools import combinations
 
 distances = pd.DataFrame(
     np.zeros((5, 5)),
@@ -440,13 +521,14 @@ plt.savefig(
 
 
 # %%
-## Plot images by location of distance (IC-neighbor distance, outside IC-outside IC distance, or IC-IC distance)
+# Plot images by location of distance (IC-neighbor distance, outside IC-outside IC distance, or IC-IC distance)
 def inter_droplet_distance_with_meta(indir, image):
     tmp = pd.read_csv(
         f"{indir}/count_peaks_image{image}_.csv",
         header=0,
         index_col=0,
-        converters={"IC_peaks": pd.eval, "left_peaks": pd.eval, "right_peaks": pd.eval},
+        converters={"IC_peaks": pd.eval,
+                    "left_peaks": pd.eval, "right_peaks": pd.eval},
     )
     distances = pd.DataFrame(columns=["distance", "i"])
     for i, r in tmp.iterrows():
@@ -468,7 +550,8 @@ def inter_droplet_distance_with_meta(indir, image):
                 [
                     distances,
                     pd.DataFrame(
-                        {"distance": [d], "IC_distance": [IC_distance], "i": [i]}
+                        {"distance": [d], "IC_distance": [
+                            IC_distance], "i": [i]}
                     ),
                 ],
                 ignore_index=True,
@@ -488,7 +571,8 @@ for i, d in long_dist_df.iterrows():
     all_distances = pd.concat(
         [
             all_distances,
-            pd.DataFrame({"distance": d["distance"], "IC_distance": ["sim"], "i": 0}),
+            pd.DataFrame({"distance": d["distance"],
+                         "IC_distance": ["sim"], "i": 0}),
         ],
         ignore_index=True,
     )
@@ -497,7 +581,8 @@ for i, d in long_dist_df.iterrows():
 means = all_distances.groupby("IC_distance").distance.mean()
 
 print(means)
-sns.kdeplot(data=all_distances, x="distance", hue="IC_distance", common_norm=True)
+sns.kdeplot(data=all_distances, x="distance",
+            hue="IC_distance", common_norm=True)
 # plt.axvline(x=means.loc['IC distance'], c=sns.color_palette("deep")[1], linestyle="--")
 # plt.axvline(x = means.loc['Outside IC'], c=sns.color_palette("deep")[0], linestyle = "--")
 # plt.axvline(x = means.loc['inner-IC distance'], c=sns.color_palette("deep")[2], linestyle = "--")
@@ -508,6 +593,7 @@ plt.title(
 plt.xlabel("Distance (um)")
 plt.ylabel("Frequency")
 # plt.show()
-plt.savefig(f"{outdir}distances_between_droplets_kdeplot_image_vs_sim_grouped.png")
+plt.savefig(
+    f"{outdir}distances_between_droplets_kdeplot_image_vs_sim_grouped.png")
 
 # %%
