@@ -1,13 +1,14 @@
 # %%
 # Plot relationship between critical radius and epsilon values for a given alpha.
 # This gives a line plot that allows us to approximate the epsilon value we should use to get a critical radius equal to the CPC critical radius from images.
+import scipy.optimize
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 plt.rcParams["font.family"] = "Arial"
-
+plt.rcParams['pdf.use14corefonts'] = True
 # %%
 ########################################
 # Trend of R0 vs equilibrium radii
@@ -56,9 +57,9 @@ plt.text(
 plt.xlabel("R0")
 plt.ylabel("Final (Equilibrium) radius at T=10")
 plt.title(f"Epsilon: {epsilon}, alpha: {alpha}")
-plt.savefig(
-    f"{indir}/critical_radius/alpha_{alpha}/final_radius_vs_R0_eps_{epsilon}.pdf"
-)
+# plt.savefig(
+#     f"{indir}/critical_radius/alpha_{alpha}/final_radius_vs_R0_eps_{epsilon}.pdf"
+# )
 plt.show()
 print(y[0])
 # %%
@@ -163,7 +164,8 @@ poly1d_fn_max = np.poly1d(coef_max)
 # poly1d_fn is now a function which takes in x and returns an estimate for y
 f, ax = plt.subplots()
 plt.plot(xs, ys, "o", label="Minimum (inflection points)")
-plt.plot([0.030019, 0.09, 0.15], poly1d_fn([0.030019, 0.09, 0.15]), "-", c="#1f77b4")
+plt.plot([0.030019, 0.09, 0.15], poly1d_fn(
+    [0.030019, 0.09, 0.15]), "-", c="#1f77b4")
 plt.plot(xs_max, ys_max, "o", label="Maximum ($R_{eq}$ minimum)")
 plt.plot(
     [0.015009, 0.09, 0.15], poly1d_fn_max([0.015009, 0.09, 0.15]), "-", c="#ff7f0e"
@@ -186,7 +188,8 @@ plt.text(
     transform=ax.transAxes,
     c="#ff7f0e",
 )
-plt.axhline(y=0.108, label="Experimental CPC $R_{critical}$", c="k", linestyle="--")
+plt.axhline(
+    y=0.108, label="Experimental CPC $R_{critical}$", c="k", linestyle="--")
 plt.legend(loc="lower right")
 
 plt.title("Critical radius vs. epsilon, alpha = -0.5")
@@ -218,10 +221,10 @@ sns.lineplot(
 )
 plt.title(f"Critical radius vs. epsilon")
 plt.ylabel("Critical equilibrium radius")
-plt.savefig(
-    f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/cr_vs_epsilon_alpha_0.pdf"
-)
-plt.close()
+# plt.savefig(
+#     f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/cr_vs_epsilon_alpha_0.pdf"
+# )
+# plt.close()
 plt.show()
 
 # %%
@@ -270,7 +273,8 @@ plt.text(
 #          horizontalalignment='right',
 #       verticalalignment='center',
 #       transform = ax.transAxes, c = '#ff7f0e')
-plt.axhline(y=0.054, label="Experimental CPC $R_{critical}$", c="k", linestyle="--")
+plt.axhline(
+    y=0.054, label="Experimental CPC $R_{critical}$", c="k", linestyle="--")
 plt.legend(loc="lower right")
 
 plt.title(f"Critical radius vs. epsilon, alpha = {alpha}")
@@ -280,9 +284,8 @@ plt.show()
 # plt.savefig(f"Critical equilibrium radius (min)_vs_epsilon_alpha_{alpha}.png")
 # %% with hyperbolic to linear fit
 ########################################
-# FINAL FIGURE CR vs E
+# FINAL FIGURE CR vs E, FIGURE 3E
 ########################################
-import scipy.optimize
 
 df = pd.read_csv(
     "critical_radii_epsilon copy.csv",
@@ -302,7 +305,7 @@ print(df.head())
 def h2l(x, m, t, b):
     #     return m * np.exp(t * x) + b
     # b(1).*(b(2).*xdata./(b(3) + xdata) + xdata);
-    return m * (t * x / (b + x) + x)  ## HYPERBOLIC FIT
+    return m * (t * x / (b + x) + x)  # HYPERBOLIC FIT
     # return
 
 
@@ -318,7 +321,7 @@ squaredDiffsFromMean = np.square(ys - np.mean(ys))
 rSquared = 1 - np.sum(squaredDiffs) / np.sum(squaredDiffsFromMean)
 print(f"H2L R² = {rSquared}")
 
-# %%
+# %% FIGURE 3E
 # plot the results
 f, ax = plt.subplots(figsize=(5, 4))
 
@@ -375,6 +378,45 @@ plt.close()
 # plt.show()
 
 # %%
+# FIGURE 4D
+fig, ax = plt.subplots(1, 1)
+x = np.linspace(0, 0.06, 10000)
+y = 3.2*h2l(np.linspace(0, 0.06, 10000), m, t, b)
+plt.plot(
+    x, y,
+    "--",
+    label=" H2L Simulation Fit",
+    c="gray",
+)
+plt.ylabel(r"Critical Radius ($R_c$, $\mu m$)")
+plt.xlabel(r"Epsilon ($ \epsilon $)")
+# ax.fill_between(x, y, where=(y <= .1), color='C1', alpha=0.3,
+#                 interpolate=True)
+# Mask values to ensure filling is within y1 and y2
+# y1 and y2 come from CI of bootstrapping from 10 images (choose 5)
+mask = (y >= .166) & (y <= .17)
+y_fill = y[mask]
+x_fill = x[mask]
+ax.fill_betweenx(y_fill, 0, x_fill, color='gray', alpha=0.3,
+                 interpolate=True, label="25-75% CI")
+
+# mask2 = (x >= .015) & (x <= .02)
+# y_fill2 = y[mask]
+# x_fill2 = x[mask]
+ax.fill_between(x_fill, 0, y_fill, color='gray', alpha=0.3, interpolate=True)
+
+# convert ymax and xmax to 0-1, percentage of axis
+plt.axvline(ymin=0,  ymax=(3.2*h2l(0.0067, m, t, b)-.1)/.1,
+            x=0.0067, label="Experimental CPC $R_{critical}$", c="k", linestyle="--")
+plt.axhline(xmin=0,  xmax=0.0067/0.015,
+            y=3.2*h2l(0.0067, m, t, b), c="k", linestyle="--")
+plt.xlim(0, 0.015)
+plt.ylim(0.1, 0.2)
+plt.legend()
+# plt.show()
+plt.savefig(
+    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap.pdf")
+# %%
 
 
 def linFit(x, m, b):
@@ -386,7 +428,7 @@ def logFit(x, a, b):
 
 
 def hyperbolic(x, m, t, b):
-    return m * (t * x / (b + x))  ## HYPERBOLIC FIT
+    return m * (t * x / (b + x))  # HYPERBOLIC FIT
     # return
 
 
@@ -495,7 +537,7 @@ plt.close()
 plt.show()
 
 
-# %%
+# %% FIGURE 3D
 tmp = df.loc[df["alpha"] == 0]
 
 
@@ -536,6 +578,7 @@ for cat, group in tmp.groupby("Nx"):
         label=cat,
     )
 plt.legend()
+plt.xlim(0, 0.08)
 plt.title("Critical Initial Radius vs Epsilon")
 plt.xlabel(r"Epsilon ($ \epsilon $)")
 plt.ylabel(r"Critical Initial Radius ($R_0$)")

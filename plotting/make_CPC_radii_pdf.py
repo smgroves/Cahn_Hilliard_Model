@@ -45,7 +45,8 @@ def add_images_to_pdf_grid(image_paths, pdf_path, images_per_row=2):
     # Dimensions for the grid
     margin = 30
     padding = 10
-    img_width = (width - 2 * margin - (images_per_row - 1) * padding) / images_per_row
+    img_width = (width - 2 * margin - (images_per_row - 1)
+                 * padding) / images_per_row
 
     current_x = margin
     current_y = height - margin
@@ -85,7 +86,8 @@ def extract_variables(image_path):
     # Extract CPC and cohesin numbers using regex
     print(image_path)
     cpc_match = re.search(r"CPC_(\d*\.?\d*)", image_path)  # updated for um
-    cohesin_match = re.search(r"cohesin_(\d*\.?\d*)", image_path)  # updated for um
+    cohesin_match = re.search(r"cohesin_(\d*\.?\d*)",
+                              image_path)  # updated for um
 
     cpc = float(cpc_match.group(1)) if cpc_match else 0
     cohesin = float(cohesin_match.group(1)) if cohesin_match else 0
@@ -103,18 +105,21 @@ def draw_rotated_text(c, text, x, y, angle):
 def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
     # Extract CPC and cohesin numbers and sort based on them
     images_info = [(extract_variables(path), path) for path in image_paths]
-    images_info.sort(key=lambda x: (x[0][1], x[0][0]))  # Sort by cohesin, then CPC
+    # Sort by cohesin, then CPC
+    images_info.sort(key=lambda x: (x[0][1], x[0][0]))
 
     # Create a set of unique CPC and cohesin values
     unique_cpc = sorted({extract_variables(path)[0] for path in image_paths})
-    unique_cohesin = sorted({extract_variables(path)[1] for path in image_paths})
+    unique_cohesin = sorted(
+        {extract_variables(path)[1] for path in image_paths})
 
     c = canvas.Canvas(pdf_path, pagesize=landscape(letter))
     page_width, page_height = landscape(letter)
 
     # Create a set of unique CPC and cohesin values
     unique_cpc = sorted({extract_variables(path)[0] for path in image_paths})
-    unique_cohesin = sorted({extract_variables(path)[1] for path in image_paths})
+    unique_cohesin = sorted(
+        {extract_variables(path)[1] for path in image_paths})
 
     # Dimensions for the grid
     margin = 30
@@ -134,7 +139,8 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
 
     # Add labels for CPC columns
     c.drawString(
-        page_width / 2 - 50, page_height - 13, f"CPC radius in um [grid points]"
+        page_width / 2 - 50, page_height -
+        13, f"CPC radius in um [grid points]"
     )
 
     for cpc, x in cpc_to_x.items():
@@ -142,7 +148,8 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
 
     # Add labels for cohesin rows
     draw_rotated_text(
-        c, "(Full) cohesin width (um)", margin - 20, (page_height - margin) / 2 - 15, 90
+        c, "(Full) cohesin width (um)", margin -
+        20, (page_height - margin) / 2 - 15, 90
     )
 
     for cohesin, y in cohesin_to_y.items():
@@ -206,7 +213,7 @@ def add_images_to_pdf_sorted_grid(image_paths, pdf_path):
 
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/"
 # sim = "domain_0_2_eps_0.0075_crosshair_kymographs"
-sim = "domain_0_2_e_0.0067"
+sim = "domain_0_2_e_0.0067_t_0.04"
 paths = glob(f"{indir}radii_lineplots_kymographs/{sim}/*/")
 image_paths = []
 epsilon = "0.0067"

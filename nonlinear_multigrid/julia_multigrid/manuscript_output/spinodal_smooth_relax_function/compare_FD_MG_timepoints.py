@@ -1,4 +1,4 @@
-# %%
+# %% FIGURE 1 COMPARISONS
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,7 +7,7 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function"
-indir_MG = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output"
+indir_MG = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB"
 phi_name_MG = "NMG_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
 # indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
 # phi_name_MG = "MG_2000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi.txt"
@@ -29,7 +29,8 @@ phi_FD = np.genfromtxt(f"{indir_FD}/{phi_name_FD}", delimiter=",")
 phi_FD = phi_FD.reshape(-1, 128, 128).transpose(1, 2, 0)
 
 # %%
-indir_SAV = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output"
+indir_SAV = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB"
+
 phi_name_SAV = "SAV_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
 # indir_SAV = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/SAV/output/spinodal_smooth_relax_function"
 # phi_name_SAV = "SAV_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
@@ -153,14 +154,15 @@ plt.savefig(
 plt.close()
 # %% save individual plots
 
-# timepoints = [1, 2, 10, 100, 200]
-timepoints = [40]
+timepoints = [1, 2, 40, 100, 200]
+# timepoints = [40]
 dt_out = 10
 dt = 5.5e-6
 for timepoint in timepoints:
     normalize_phis = mcolors.TwoSlopeNorm(vcenter=0, vmin=-1, vmax=1)
     s = sns.heatmap(
-        phi_SAV[:, :, timepoint - 1],  # the first one saved by SAV is timestep = 10
+        # the first one saved by SAV is timestep = 0, so I updated this to no longer subtract 1
+        phi_SAV[:, :, timepoint],
         square=True,
         cmap=cm.RdBu_r,
         norm=normalize_phis,
@@ -172,7 +174,7 @@ for timepoint in timepoints:
     # plt.title(f"Time= {timepoint*dt}")
     plt.tight_layout()
     plt.savefig(
-        f"{indir_SAV}/SAV_2000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}.png",
+        f"{indir_SAV}/SAV_2000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}_neumann.png",
         bbox_inches="tight",
         pad_inches=0,
         dpi=300,
@@ -288,7 +290,8 @@ e_NMG = get_energy(
     indir_MG, phi_name_MG, dt=5.5e-6, dt_out=1, suffix="txt", title="NMG"
 )
 e_FD = get_energy(indir_FD, phi_name_FD, dt=5.5e-8, dt_out=1, title="FD")
-e_FD_big = get_energy(indir_FD, phi_name_FD_big, dt=5.5e-7, dt_out=1, title="FD_big")
+e_FD_big = get_energy(indir_FD, phi_name_FD_big,
+                      dt=5.5e-7, dt_out=1, title="FD_big")
 
 e_SAV = get_energy(indir_SAV, phi_name_SAV, dt=5.5e-6, dt_out=10, title="SAV")
 

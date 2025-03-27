@@ -508,3 +508,19 @@ dt=5.5e-6
 name="MG_2000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi"
 /Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '', $frame_rate, 'heatmap', 'red', 0);quit;"
 echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC/10_24_23_CPC_tensed_RefModel_128x64_post_transition_10_25_23_400s_post_transition_base_20Pac_0_256x256_0s_8.4max"
+dt=2.5e-6
+frame_rate=5
+dtout=10
+name="phi_256_8000_1.0e-5__eps_0.030019_alpha_-0.2"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '_framerate5', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/CPC_geometry/VCell_IC/10_16_23_CPC_relaxed_RefModel_128x64_10_16_23_relaxed_RefModel_Mps1_phos_Plk1a_20Pac_transactiv_100_256x256_100s_8.4max"
+dt=2.5e-6
+frame_rate=5
+dtout=10
+name="phi_256_8000_1.0e-5__eps_0.030019_alpha_-0.2"
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "CHplotting_function('$indir', '$name', $dt, $dtout, '_framerate5', $frame_rate, 'heatmap', 'red', 0);quit;"
+echo "Done."

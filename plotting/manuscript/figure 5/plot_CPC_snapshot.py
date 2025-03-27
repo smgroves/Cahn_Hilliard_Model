@@ -3,6 +3,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import itertools
+import os
+# Figure 5 snapshots
 
 
 def read_specific_lines(file_path, line_numbers):
@@ -61,20 +63,23 @@ def plot_snapshot(
 
     line_list = range(first_line, last_line)
 
-    fig = plt.figure(figsize=(3, 4), dpi=300)
+    # fig = plt.figure(figsize=(3, 4), dpi=300)
+    fig = plt.figure(figsize=(2, 4), dpi=300)
+
     snapshot = read_specific_lines(f"{indir}/{name}", line_list)
     sns.heatmap(
         snapshot[128:384].T,
         square=True,
         cmap=plt.cm.colors.ListedColormap(redblue(100)),
-        xticklabels=100,
-        yticklabels=100,
+        xticklabels=False,
+        yticklabels=False,
         linewidths=0,
+        cbar=False
     )
-    plt.title(f"t = {time}")
+    # plt.title(f"t = {time}")
     plt.tight_layout()
     if save:
-        plt.savefig(f"{outdir}/t={time}_{name}.png")
+        plt.savefig(f"{outdir}/t={time}_{name}_only_heatmap.png")
         plt.close()
     else:
         plt.show()
@@ -82,16 +87,21 @@ def plot_snapshot(
 
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/CPC_geometry"
 # name = "phi_512_19661_1.0e-5__CPC_0.173_cohesin_0.1_eps_0.0075_alpha_0_domain_0_2.txt"
-name = "phi_512_19661_1.0e-5__CPC_0.15_cohesin_0.08_eps_0.0067_domain_0_2.txt"
+# name = "phi_512_19661_1.0e-5__CPC_0.15_cohesin_0.08_eps_0.0067_domain_0_2.txt"
 Nx = 512
+CPC = "0.35"
+for cohesin in ["0.06", "0.12", "0.14", "0.09"]:
+    name = f"phi_{Nx}_19661_1.0e-5__CPC_{CPC}_cohesin_{cohesin}_eps_0.0067_domain_0_2.txt"
+    outdir = f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/manuscript/figure 5/snapshots_eps_0.0067/{'_'.join(name.split('_')[5:10])}"
+    os.makedirs(outdir) if not os.path.exists(outdir) else None
 
-for time in [0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03]:
-    plot_snapshot(
-        indir,
-        name,
-        Nx,
-        time=time,
-        dt=0.000001525878906,
-        save=True,
-        outdir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/plotting/manuscript/figure 5",
-    )
+    for time in [0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03]:
+        plot_snapshot(
+            indir,
+            name,
+            Nx,
+            time=time,
+            dt=0.000001525878906,
+            save=True,
+            outdir=outdir,
+        )
