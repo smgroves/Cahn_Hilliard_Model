@@ -288,7 +288,7 @@ plt.show()
 ########################################
 
 df = pd.read_csv(
-    "critical_radii_epsilon copy.csv",
+    "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv",
     header=0,
     index_col=None,
 )
@@ -371,11 +371,11 @@ plt.xlabel(r"Epsilon ($ \epsilon $)")
 plt.ylabel(r"Critical Equilibrium Radius ($R_c$)")
 plt.legend()
 plt.tight_layout()
-plt.savefig(
-    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black.pdf"
-)
-plt.close()
-# plt.show()
+# plt.savefig(
+# f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black.pdf"
+# )
+# plt.close()
+plt.show()
 
 # %%
 # FIGURE 4D

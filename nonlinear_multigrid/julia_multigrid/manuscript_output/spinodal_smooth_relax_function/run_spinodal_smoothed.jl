@@ -1,31 +1,29 @@
-#%%
-
-function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, dt, Cahn)
+#%% FIGURE 2 GENERATING DIFFERENT IC FOR SPINODAL DECOMPOSITION
+function relax!(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, yright, yleft, dt, epsilon2, boundary)
     ht2 = ((xright - xleft) / nxt)^2
-    # a = MVector{4,Float64}(undef)
-    # f = MVector{2,Float64}(undef)
-    a = zeros(Float64, 4)
-    f = zeros(Float64, 2)
+    a = MVector{4,Float64}(undef)
+    f = MVector{2,Float64}(undef)
     for iter in 1:c_relax
         for i in 1:nxt
             for j in 1:nyt
-                if i > 1 && i < nxt
+                if boundary == "neumann"
+                    if i > 1 && i < nxt
+                        x_fac = 2.0
+                    else
+                        x_fac = 1.0
+                    end
+                    if j > 1 && j < nyt
+                        y_fac = 2.0
+                    else
+                        y_fac = 1.0
+                    end
+                elseif boundary == "periodic"
                     x_fac = 2.0
-                else
-                    x_fac = 1.0
-                end
-                if j > 1 && j < nyt
                     y_fac = 2.0
-                else
-                    y_fac = 1.0
                 end
                 a[1] = 1 / dt
                 a[2] = (x_fac + y_fac) / ht2
-                #a[2] = -(x_fac + y_fac) * Cahn / ht2 - d2f(c_new[i][j]);
-                a[3] = -(x_fac + y_fac) * Cahn / ht2 - 3 * (c_new[i, j])^2
-                cnew_val = (c_new[i, j])
-                d2f = -3 * (c_new[i, j])^2
-
+                a[3] = -(x_fac + y_fac) * epsilon2 / ht2 - 3 * (c_new[i, j])^2
                 a[4] = 1.0
 
                 f[1] = su[i, j]
@@ -33,19 +31,31 @@ function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, dt, Cahn
 
                 if i > 1
                     f[1] += mu_new[i-1, j] / ht2
-                    f[2] -= Cahn * c_new[i-1, j] / ht2
+                    f[2] -= epsilon2 * c_new[i-1, j] / ht2
+                elseif boundary == "periodic"
+                    f[1] += mu_new[nxt-1, j] / ht2
+                    f[2] -= epsilon2 * c_new[nxt-1, j] / ht2
                 end
                 if i < nxt
                     f[1] += mu_new[i+1, j] / ht2
-                    f[2] -= Cahn * c_new[i+1, j] / ht2
+                    f[2] -= epsilon2 * c_new[i+1, j] / ht2
+                elseif boundary == "periodic"
+                    f[1] += mu_new[2, j] / ht2
+                    f[2] -= epsilon2 * c_new[2, j] / ht2
                 end
                 if j > 1
                     f[1] += mu_new[i, j-1] / ht2
-                    f[2] -= Cahn * c_new[i, j-1] / ht2
+                    f[2] -= epsilon2 * c_new[i, j-1] / ht2
+                elseif boundary == "periodic"
+                    f[1] += mu_new[i, nyt-1] / ht2
+                    f[2] -= epsilon2 * c_new[i, nyt-1] / ht2
                 end
                 if j < nyt
                     f[1] += mu_new[i, j+1] / ht2
-                    f[2] -= Cahn * c_new[i, j+1] / ht2
+                    f[2] -= epsilon2 * c_new[i, j+1] / ht2
+                elseif boundary == "periodic"
+                    f[1] += mu_new[i, 2] / ht2
+                    f[2] -= epsilon2 * c_new[i, 2] / ht2
                 end
                 det = a[1] * a[4] - a[2] * a[3]
                 c_new[i, j] = (a[4] * f[1] - a[2] * f[2]) / det
@@ -54,7 +64,7 @@ function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, dt, Cahn
             end
         end
     end
-    return c_new, mu_new
+    # return c_new, mu_new
 end
 
 function source(c_old, nx, ny, dt)
@@ -89,6 +99,11 @@ total_time = 0.06
 max_it = Int.(total_time / dt)
 date_time = now()
 phi = initialization_from_file("$(indir)/initial_phi_$(nx).csv", nx, nx)
+# the above phi was geenrated using:
+# nx = 512
+# outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output/"
+# phi = rand([-1.0, 1.0], nx, nx)
+# writedlm("$(outdir)initial_phi_$(nx).csv", phi, ',')
 
 sc, smu = source(phi, nx, ny, dt)
 
@@ -100,6 +115,49 @@ domain_right = 1
 n_relax = 8
 phi_smooth, mu_smooth = relax(phi, mu, sc, smu, nx, nx, n_relax, domain_right, domain_left, dt, Cahn)
 writedlm("$(outdir)initial_phi_$(nx)_smooth_n_relax_$(n_relax).csv", phi, ',')
+
+#%%
+# build smaller grid-size ICs from 512 gridsize
+indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/IC/"
+using DelimitedFiles
+using DataFrames
+function restrict_ch(uf, vf, nxc, nyc)
+    uc = zeros(Float64, round(Int64, nxc), round(Int64, nyc))
+    vc = zeros(Float64, round(Int64, nxc), round(Int64, nyc))
+    for i in 1:nxc
+        for j in 1:nyc
+            uc[i, j] = 0.25 * (uf[round(Int, 2 * i - 1), round(Int, 2 * j - 1)] + uf[round(Int, 2 * i - 1), round(Int, 2 * j)] + uf[round(Int, 2 * i), round(Int, 2 * j - 1)] + uf[round(Int, 2 * i), round(Int, 2 * j)])
+            vc[i, j] = 0.25 * (vf[round(Int, 2 * i - 1), round(Int, 2 * j - 1)] + vf[round(Int, 2 * i - 1), round(Int, 2 * j)] + vf[round(Int, 2 * i), round(Int, 2 * j - 1)] + vf[round(Int, 2 * i), round(Int, 2 * j)])
+        end
+    end
+    return uc, vc
+end
+function initialization_from_file(file, nx, ny; delim=',', transpose_matrix=false)
+    phi = readdlm(file, delim, Float64)
+    if size(phi) != (nx, ny)
+        print("Warning: phi from file is wrong size: $(size(phi)) Expected: $(nx), $(ny)")
+    end
+    if transpose_matrix
+        phi = transpose(phi)
+    end
+    return phi
+end
+
+nx = 512
+ny = nx
+n_relax = 4
+phi = initialization_from_file("$(indir)initial_phi_$(nx)_smooth_n_relax_$(n_relax).csv", nx, nx)
+mu = zeros(Float64, nx, ny)
+
+new_nx = 256
+phi_small, mu_small = restrict_ch(phi, mu, new_nx, new_nx)
+writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512.csv", phi_small, ',')
+new_nx = 128
+phi_small, mu_small = restrict_ch(phi_small, mu_small, new_nx, new_nx)
+writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512.csv", phi_small, ',')
+new_nx = 64
+phi_small, mu_small = restrict_ch(phi_small, mu_small, new_nx, new_nx)
+writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512.csv", phi_small, ',')
 
 #%%
 using DelimitedFiles

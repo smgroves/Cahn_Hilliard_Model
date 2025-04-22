@@ -8,6 +8,7 @@ import matplotlib.colors as mcolors
 
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function"
 indir_MG = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB"
+# %%
 phi_name_MG = "NMG_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
 # indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
 # phi_name_MG = "MG_2000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi.txt"
@@ -273,6 +274,7 @@ plt.savefig(f"{outdir}/FD_dt5.5e-8_v2.png")
 
 
 # %% comparing energy and mass
+# FIGURE S1
 def get_energy(indir, phi_name, dt, dt_out, variable="energy", suffix="csv", title=""):
     e_name = "_".join(phi_name.split("_")[:-1])
     e_name = e_name + f"_{variable}.{suffix}"

@@ -74,7 +74,9 @@ open(phi_movie);
 
 for i = 1:dtframes:size(phi_t,3)
     h = figure('visible','off');
-    image(phi_t(:,:,i),'CDataMapping','scaled');
+    imAlpha=ones(size(phi_t(:,:,i)));
+    imAlpha(isnan(phi_t(:,:,i)))=0;
+    image(phi_t(:,:,i),'CDataMapping','scaled','AlphaData',imAlpha);
     colorbar; 
     axis square;
     if colorbar_type == "default"

@@ -77,6 +77,8 @@ function [phi_t,mass_t,E_t] = spinodal_decomp(D,gamma,options)
     options.write_phi = true
     options.write_residual = true
     options.ns = 1
+    options.frame_stretch = 1 %default no frame stretching
+    options.frame_per_sec = false % if true, each frame is 1 sec long * frame_stretch. If false, each frame is 1 frame length (30fps is default for MP4)
     end
 
     % Random Starting Concentrations (-1 and 1 represent different species)
@@ -88,6 +90,8 @@ function [phi_t,mass_t,E_t] = spinodal_decomp(D,gamma,options)
 
 
     writer = VideoWriter(options.FileName,'MPEG-4');
+    writer.FrameRate = 30; % 30 frames per second
+
     open(writer);
     % figure(1)
     fig = figure('visible', 'off');
@@ -151,12 +155,13 @@ function [phi_t,mass_t,E_t] = spinodal_decomp(D,gamma,options)
         else
             if (mod(i,options.FrameSpacing) == 0)
                 phi_t(:,:,i) = u;
-
+                imAlpha=ones(size(u));
+                imAlpha(isnan(u))=0;
                 if (strcmp(options.ImgStyle,'true'))
-                    image(u,'CDataMapping','scaled');colorbar; axis square;
+                    image(u,'CDataMapping','scaled','AlphaData',imAlpha);colorbar; axis square;
                 else
                     uMod = round((u+1)/2);
-                    image(uMod,'CDataMapping','scaled');colorbar; axis square;
+                    image(uMod,'CDataMapping','scaled','AlphaData',imAlpha);colorbar; axis square;
                 end
                 if options.ConstantColorbar
                     clim([-1, 1]);
@@ -164,8 +169,18 @@ function [phi_t,mass_t,E_t] = spinodal_decomp(D,gamma,options)
                 colormap(interp1(1:100:1100,redbluecmap,1:1001)); %Expand redbluecmap to 1000 elements
 
                 set(gca,'FontSize',16);title(['t = ',num2str(curr_t)]); xlabel('x'); ylabel('y');
+                set(gca,'color',0*[1 1 1]);
+
                 frame = getframe(fig);
-                writeVideo(writer,frame);
+                % Write this frame multiple times to stretch its duration
+                if options.frame_per_sec
+                    for repeat = 1:(options.frame_stretch * writer.FrameRate)
+                        writeVideo(writer, frame);
+                    end
+                else
+                    writeVideo(writer, frame);
+                end
+
             end
         end
     end

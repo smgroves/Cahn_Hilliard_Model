@@ -1,4 +1,5 @@
 # %%
+from scipy.stats import gaussian_kde
 import ast
 from itertools import combinations
 import scipy.stats as ss
@@ -206,6 +207,26 @@ plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
 plt.tight_layout()
 plt.show()
 
+# %%
+long_dist_df6 = make_long_dist_df(
+    indir,
+    file="simulated_droplet_distributions/simulated_droplet_distances_e_0.0089_noisy_cohesin_chr_lengths_MCF10A.csv",
+)
+sns.histplot(
+    data=long_dist_df6,
+    x="distance",
+    palette=sns.color_palette("muted"),
+    binwidth=0.1,
+    stat="probability",
+    common_norm=False,
+    kde=True,
+)
+
+# sns.swarmplot(data= long_dist_df, x = 'cohesin', y = 'distance', hue = 'cpc', palette=sns.color_palette("muted"), size = 4)
+plt.title("Distances between droplets by CPC radius and Cohesin width")
+plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0)
+plt.tight_layout()
+plt.show()
 # %% compare two simulation types
 outdir = f"{indir}/radii_lineplots_kymographs/domain_0_2_noisy_cohesin_sd_0.11"
 
@@ -215,10 +236,11 @@ long_dist_df2["Category"] = "eps = 0.0075"
 long_dist_df3["Category"] = "eps = 0.005"
 long_dist_df4["Category"] = "eps = 0.008"
 long_dist_df5["Category"] = "eps = 0.0067"
+long_dist_df6["Category"] = "eps = 0.0089"
 
 long_dist_df = pd.concat(
-    [long_dist_df, long_dist_df2, long_dist_df3,
-        long_dist_df4, long_dist_df5], ignore_index=True
+    [long_dist_df, long_dist_df2,  # long_dist_df3,
+        long_dist_df4, long_dist_df5, long_dist_df6], ignore_index=True
 )
 # sns.histplot(
 #     data=long_dist_df,
@@ -236,8 +258,8 @@ sns.kdeplot(
     # stat="probability",
     common_norm=False,
 )
-plt.savefig(f"{outdir}/distances_between_droplets_histplot_sims_kdes_v4.png")
-# plt.show()
+# plt.savefig(f"{outdir}/distances_between_droplets_histplot_sims_kdes_v4.png")
+plt.show()
 # %%
 # outdir = f"{indir}/radii_over_time_level_set_plots/domain_0_2_noisy_cohesin_sd_0.25/"
 
@@ -298,7 +320,6 @@ for image in [0, 1, 2, 5, 7, 8, 9]:
 print(all_images_dict)
 
 # %%
-# TODO: redo this section to use bootstrapping on all images
 
 bootstrap_samples_file = "/Users/smgroves/Library/CloudStorage/Box-Box/CPC_Model_Project/CPC_condensate_images/manual_condensates/bootstrapped/remaining_no_replacement.txt"
 bootstrap_samples = []
@@ -361,10 +382,124 @@ plt.title(
     "Droplet Distance Distributions: HeLa Images (100 bootstraps) vs Simulations")
 plt.xlabel("Distance (um)")
 plt.ylabel("Density")
-plt.savefig(
-    f"{outdir}/distances_between_droplets_kdeplot_HeLa_images_vs_sim_bootstrapped_v1.png")
+# plt.savefig(
+# f"{outdir}/distances_between_droplets_kdeplot_HeLa_images_vs_sim_bootstrapped_v1.png")
 plt.show()
 
+# %%
+#########################################################
+# MCF10A bootstrapping
+#########################################################
+
+
+indir_MCF10A = "/Users/smgroves/Library/CloudStorage/Box-Box/CPC_Model_Project/CPC_condensate_images/MCF10A/MCF10A_CPC_analysis/analysis/linescans/"
+all_images_MCF10A = []
+all_images_dict_MCF10A = {}
+for image in range(1, 50):
+    try:
+        distance_dict = inter_droplet_distance(indir_MCF10A, image=image)
+        # all_images_dict[image] = distance_dict
+        all_ = []
+        for k in distance_dict.keys():
+            all_.extend(distance_dict[k])
+        all_images_dict_MCF10A[f"{image}"] = all_
+        all_images_MCF10A.extend(all_)
+    except FileNotFoundError:
+        print(f"File not found for image {image}.")
+
+print(all_images_dict_MCF10A)
+
+# %%
+bootstrap_samples_file = "/Users/smgroves/Library/CloudStorage/Box-Box/CPC_Model_Project/CPC_condensate_images/MCF10A/MCF10A_CPC_analysis/analysis/bootstrapped/remaining_no_replacement.txt"
+bootstrap_samples = []
+with open(bootstrap_samples_file, "r") as f:
+    for line in f:
+        # Strip newline characters and convert the string to a list
+        bootstrap_samples.append(ast.literal_eval(line.strip()))
+
+# make distributions
+bootstrapped_df_MCF10A = pd.DataFrame(
+    columns=["Category", "seed", "time", "cpc", "cohesin", "distance"])
+for n, samples in enumerate(bootstrap_samples):
+    print(n/len(bootstrap_samples))
+    for s in samples:
+        # try:
+        for d in all_images_dict_MCF10A[f"{s}"]:
+            bootstrapped_df_MCF10A = pd.concat(
+                [
+                    bootstrapped_df_MCF10A,
+                    pd.DataFrame(
+                        {
+                            "Category": [f"Bootstrap {n}"],
+                            "seed": [0],
+                            "time": [0],
+                            "cpc": [0],
+                            "cohesin": [0],
+                            "distance": [d],
+                        }
+                    ),
+                ],
+                ignore_index=True,
+            )
+        # except KeyError:
+            # pass
+
+# %%
+fig, axes = plt.subplots()
+sns.kdeplot(
+    data=bootstrapped_df_MCF10A,
+    x="distance",
+    hue="Category",
+    common_norm=False,
+    alpha=0.1,
+    legend=False,
+    palette=sns.color_palette("viridis", n_colors=101),
+    ax=axes
+)
+sns.kdeplot(
+    data=long_dist_df.loc[(long_dist_df["Category"] == "eps = 0.0089") | (
+        long_dist_df["Category"] == "eps = 0.01") |
+        (long_dist_df["Category"] == "eps = 0.0067")],
+    x="distance",
+    hue="Category",
+    common_norm=False,
+    # palette=sns.color_palette("Spectral", n_colors=100),
+    ax=axes,
+    linestyle="--",
+
+)
+
+plt.title(
+    "Droplet Distance Distributions: MCF10A Images (100 bootstraps) vs Simulations")
+plt.xlabel("Distance (um)")
+plt.ylabel("Density")
+plt.savefig(
+    f"{outdir}/distances_between_droplets_kdeplot_MCF10A_images_vs_sim_bootstrapped_v2.png")
+# plt.show()
+
+# %%
+
+fig, axes = plt.subplots(1, 1)
+sns.kdeplot(
+    data=bootstrapped_df_MCF10A,
+    x="distance",
+    hue="Category",
+    common_norm=False,
+    alpha=0.1,
+    legend=False,
+    palette=sns.color_palette("viridis", n_colors=101),
+    ax=axes
+)
+sns.kdeplot(
+    data=bootstrapped_df,
+    x="distance",
+    hue="Category",
+    common_norm=False,
+    alpha=0.1,
+    legend=False,
+    palette=sns.color_palette("Reds", n_colors=101),
+    ax=axes
+)
 # %% # use without bootstrapping
 # long_dist_df["Category"] = "Simulation"
 for d in all_images:
@@ -418,28 +553,73 @@ for d in all_images:
     )
 
 # %%
-# Earth movers distance
+# KDE-based average distributions for HeLa and MCF10A
 
-distances = pd.DataFrame(
-    np.zeros((5, 5)),
-    index=long_dist_df["Category"].unique(),
-    columns=long_dist_df["Category"].unique(),
+# # df should be your DataFrame with "Category" and "distance"
+# categories = bootstrapped_df_MCF10A["Category"].unique()
+
+# # Common evaluation grid
+# all_distances = bootstrapped_df_MCF10A["distance"].values
+# x_eval = np.linspace(np.min(all_distances), np.max(all_distances), 500)
+
+# # Compute KDE for each bootstrap category
+# kde_vals = []
+
+# for cat in categories:
+#     sample = bootstrapped_df_MCF10A[bootstrapped_df_MCF10A["Category"]
+#                                     == cat]["distance"].values
+#     kde = gaussian_kde(sample)
+#     kde_vals.append(kde(x_eval))
+
+# kde_vals = np.array(kde_vals)  # shape: (n_bootstraps, 500)
+
+# # Average the KDEs
+# avg_kde = np.mean(kde_vals, axis=0)
+
+
+# %%
+########################
+# Earth movers distance
+########################
+# Including averaged bootstrapped distribution for MCF10A and HeLa
+
+long_dist_df_with_cells = pd.concat(
+    [long_dist_df, bootstrapped_df_MCF10A.loc[bootstrapped_df_MCF10A['Category']
+                                              == "Bootstrap 0"], bootstrapped_df.loc[bootstrapped_df['Category']
+                                                                                     == "Bootstrap 1"]], ignore_index=True
 )
 
-for i, j in list(combinations(long_dist_df["Category"].unique(), 2)):
-    i_dist = long_dist_df.loc[long_dist_df["Category"] == i]["distance"].values
-    j_dist = long_dist_df.loc[long_dist_df["Category"] == j]["distance"].values
+for i, r in long_dist_df_with_cells.iterrows():
+    if r['Category'] == "Bootstrap 0":
+        long_dist_df_with_cells.loc[i, 'Category'] = "Experiment_MCF10A"
+    elif r['Category'] == "Bootstrap 1":
+        long_dist_df_with_cells.loc[i, 'Category'] = "Experiment_HeLa"
 
-    distance = ss.wasserstein_distance(i_dist, j_dist)
-    distances.loc[j, i] = distance
 
-mask = np.triu(np.ones_like(distances))
+def plot_earth_movers(df):
+    num_cat = len(df["Category"].unique())
+    distances = pd.DataFrame(
+        np.zeros((num_cat, num_cat)),
+        index=df["Category"].unique(),
+        columns=df["Category"].unique(),
+    )
 
-# plotting a triangle correlation heatmap
-# %%
-dataplot = sns.heatmap(distances, cmap="Reds_r", annot=True, mask=mask)
-plt.tight_layout()
-plt.show()
+    for i, j in list(combinations(df["Category"].unique(), 2)):
+        i_dist = df.loc[df["Category"] == i]["distance"].values
+        j_dist = df.loc[df["Category"] == j]["distance"].values
+
+        distance = ss.wasserstein_distance(i_dist, j_dist)
+        distances.loc[j, i] = distance
+
+    mask = np.triu(np.ones_like(distances))
+
+    # plotting a triangle correlation heatmap
+    dataplot = sns.heatmap(distances, cmap="viridis_r", annot=True, mask=mask)
+    plt.tight_layout()
+    plt.show()
+
+
+plot_earth_movers(long_dist_df_with_cells)
 # plt.savefig(f"{outdir}/wasserstein_distance_image_vs_sim_wMCF10A.png")
 # plt.show()
 # %%
