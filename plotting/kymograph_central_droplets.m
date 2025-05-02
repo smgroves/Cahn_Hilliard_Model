@@ -57,7 +57,7 @@ function [] = kymograph_central_droplets(indir, outdir, name, dt, dtout, transpo
     h.YLabel = sprintf("Y (Central axis at x = %d)",x );
     h.Title = name;
 
-    print(gcf,sprintf('%s/kymograph_x_%d_redblue.png', outdir, x),"-dpng")
+    print(gcf,sprintf('%s/kymograph_x_%d_redblue.pdf', outdir, x),"-dpdf")
 end
 
 function c = redblue(m)

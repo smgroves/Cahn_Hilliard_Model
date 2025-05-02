@@ -1,5 +1,5 @@
 #%% FIGURE 2 GENERATING DIFFERENT IC FOR SPINODAL DECOMPOSITION
-function relax!(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, yright, yleft, dt, epsilon2, boundary)
+function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, yright, yleft, dt, epsilon2, boundary)
     ht2 = ((xright - xleft) / nxt)^2
     a = MVector{4,Float64}(undef)
     f = MVector{2,Float64}(undef)
@@ -64,7 +64,7 @@ function relax!(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, yright,
             end
         end
     end
-    # return c_new, mu_new
+    return c_new, mu_new
 end
 
 function source(c_old, nx, ny, dt)
@@ -88,23 +88,43 @@ indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigri
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/IC/"
 
 include("../../CH_multigrid_solver.jl")
+#%%
 # tol = 1e-6
 nx = 512
 ny = nx
 tol = 1e-6
 dt = 6.25e-6
 m = 8
+boundary = "neumann"
 epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
 total_time = 0.06
 max_it = Int.(total_time / dt)
 date_time = now()
-phi = initialization_from_file("$(indir)/initial_phi_$(nx).csv", nx, nx)
+# phi = initialization_from_file("$(indir)/initial_phi_$(nx).csv", nx, nx)
 # the above phi was geenrated using:
 # nx = 512
 # outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output/"
 # phi = rand([-1.0, 1.0], nx, nx)
 # writedlm("$(outdir)initial_phi_$(nx).csv", phi, ',')
+using Random
 
+function biased_spin_matrix(nx, p_plus=0.75)
+    total = nx * nx
+    n_plus = round(Int, p_plus * total)
+    n_minus = total - n_plus
+
+    # Create the array
+    values = vcat(fill(1.0, n_plus), fill(-1.0, n_minus))
+    shuffle!(values)
+
+    # Reshape into matrix
+    return reshape(values, nx, nx)
+end
+
+phi = biased_spin_matrix(nx, 0.25)
+writedlm("$(outdir)initial_phi_$(nx)_25p.csv", phi, ',')
+
+#%%
 sc, smu = source(phi, nx, ny, dt)
 
 mu = zeros(Float64, nx, ny)
@@ -112,9 +132,9 @@ Cahn = epsilon^2  # ϵ^2 defined as a global variable
 
 domain_left = 0
 domain_right = 1
-n_relax = 8
-phi_smooth, mu_smooth = relax(phi, mu, sc, smu, nx, nx, n_relax, domain_right, domain_left, dt, Cahn)
-writedlm("$(outdir)initial_phi_$(nx)_smooth_n_relax_$(n_relax).csv", phi, ',')
+n_relax = 4
+phi_smooth, mu_smooth = relax(phi, mu, sc, smu, nx, nx, n_relax, domain_right, domain_left, domain_right, domain_left, dt, Cahn, boundary)
+writedlm("$(outdir)initial_phi_$(nx)_smooth_n_relax_$(n_relax)_25p.csv", phi, ',')
 
 #%%
 # build smaller grid-size ICs from 512 gridsize
@@ -146,18 +166,18 @@ end
 nx = 512
 ny = nx
 n_relax = 4
-phi = initialization_from_file("$(indir)initial_phi_$(nx)_smooth_n_relax_$(n_relax).csv", nx, nx)
+phi = initialization_from_file("$(indir)initial_phi_$(nx)_smooth_n_relax_$(n_relax)_25p.csv", nx, nx)
 mu = zeros(Float64, nx, ny)
 
 new_nx = 256
 phi_small, mu_small = restrict_ch(phi, mu, new_nx, new_nx)
-writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512.csv", phi_small, ',')
+writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512_25p.csv", phi_small, ',')
 new_nx = 128
 phi_small, mu_small = restrict_ch(phi_small, mu_small, new_nx, new_nx)
-writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512.csv", phi_small, ',')
+writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512_25p.csv", phi_small, ',')
 new_nx = 64
 phi_small, mu_small = restrict_ch(phi_small, mu_small, new_nx, new_nx)
-writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512.csv", phi_small, ',')
+writedlm("$(indir)initial_phi_$(new_nx)_smooth_n_relax_$(n_relax)_from512_25p.csv", phi_small, ',')
 
 #%%
 using DelimitedFiles

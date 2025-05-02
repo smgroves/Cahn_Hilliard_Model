@@ -323,3 +323,14 @@ do
 done
 
 
+
+indir="/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/radii_lineplots_kymographs/domain_0_2_noisy_cohesin_sd_0.11_eps_0.0067"
+dtout=10
+dt=0.000001525878906
+name="phi_512_19661_1.0e-5__CPC_0.15_cohesin_0.09_eps_0.0067_alpha_0_domain_0_2"
+echo $name 
+outdir="$indir/$name"
+echo $outdir
+/Applications/MATLAB_R2023a.app/bin/matlab -nodisplay -nosplash -r "kymograph_central_droplets_domain('$indir', '$outdir','$name', $dt, $dtout, false, 0, 6.4);quit;"
+echo "Done."
+

@@ -63,7 +63,7 @@ function [] = kymograph_central_droplets_domain(indir, outdir, name, dt, dtout, 
     h.YLabel = "Y (um)";
     h.Title = name;
 
-    print(gcf,sprintf('%s/kymograph_x_%d_redblue_um.png', outdir, x),"-dpng")
+    print(gcf,sprintf('%s/kymograph_x_%d_redblue_um.pdf', outdir, x),"-dpdf")
 end
 
 function c = redblue(m)
