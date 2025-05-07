@@ -1168,10 +1168,79 @@ def exp_hist_vs_sim_kde(bootstrapped_df, long_dist_df, category, n_chr_sim, n_ti
 #                        n_chr_sim67, n_timepoints67, title="Simulations (0.0067) vs. HeLa Bootstraps, 30 bins", bin_num=30, outdir=outdir, save=True)
 # exp_hist_vs_sim_kde_CI(bootstrapped_df_MCF10A, long_dist_df,
 #                        category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 30 bins", outdir=outdir, bin_num=30, save=True)
-exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category67,
-                       n_chr_sim67, n_timepoints67, title="Simulations (0.0067) vs. HeLa Bootstraps, 60 bins", bin_num=60, outdir=outdir, save=True)
+# exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category67,
+                    #    n_chr_sim67, n_timepoints67, title="Simulations (0.0067) vs. HeLa Bootstraps, 35 bins", bin_num=35, outdir=outdir, save=True)
 exp_hist_vs_sim_kde_CI(bootstrapped_df_MCF10A, long_dist_df,
-                       category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 60 bins", outdir=outdir, bin_num=60, save=True)
+                       category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 55 bins", outdir=outdir, bin_num=55, save=True)
+
+
+# %% Choosing bin width for bootstrap histogram based on average experimental KDE
+def choose_bins_exp_hist_CI(bootstrapped_df, bin_nums=[40]):
+    num_col = 4
+    num_row = int(np.ceil(len(bin_nums) / num_col))
+    fig, axes = plt.subplots(num_row, num_col, figsize=(20, 5 * num_row))
+    for i, bin_num in enumerate(bin_nums):
+        # Assume df has columns: "Bootstrap" and "Value"
+        boot_ids = bootstrapped_df["Category"].unique()
+        all_values = bootstrapped_df["distance"].values
+        bins = np.histogram_bin_edges(all_values, bins=bin_num)
+        bin_centers = (bins[:-1] + bins[1:]) / 2
+
+        # Compute histogram for each bootstrap
+        histograms = []
+        # plt.figure(figsize=(10, 6))
+
+        for b in boot_ids:
+            values = bootstrapped_df[bootstrapped_df["Category"]
+                                     == b]["distance"].values
+            counts, _ = np.histogram(values, bins=bins, density=True)
+            histograms.append(counts)
+
+        hist_array = np.array(histograms)  # shape: (n_bootstraps, n_bins)
+
+        # Compute mean and standard deviation across bootstraps
+        mean_density = hist_array.mean(axis=0)
+        lower_ci = np.percentile(hist_array, 2.5, axis=0)
+        upper_ci = np.percentile(hist_array, 97.5, axis=0)
+
+        ci = np.array([lower_ci, upper_ci])
+        # make sure to turn ci into error bars (i.e. distance from mean to lower and upper ci)
+        y_err = np.abs(ci - mean_density)
+
+        x_eval, avg_kde = compute_kde(bootstrapped_df)
+        sns.lineplot(x=x_eval, y=avg_kde, color="navy",
+                     label=f"Average KDE for Images", ax=axes[i//num_col, i % num_col])
+        # Plot mean histogram with error bars
+        axes[i//num_col, i % num_col].bar(
+            bin_centers,
+            mean_density,
+            width=np.diff(bins),
+            align='center',
+            alpha=0.4,
+            color='gray',
+            edgecolor='black',
+            label="Experimental Mean Density (Bootstraps)",
+        )
+        axes[i//num_col, i % num_col].errorbar(
+            bin_centers,
+            mean_density,
+            yerr=y_err,
+            fmt='none',
+            ecolor='black',
+            capsize=2,
+            label="Bootstrap CI",
+        )
+
+        # axes[i//num_col, i % num_col].xlabel("Distance")
+        # axes[i//num_col, i % num_col].ylabel("Density")
+        axes[i//num_col, i % num_col].set_title(f"bins = {bin_num}")
+        axes[i//num_col, i % num_col].legend()
+    plt.tight_layout()
+    plt.show()
+
+
+choose_bins_exp_hist_CI(bootstrapped_df_MCF10A, bin_nums=[
+                        20, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80])
 
 # %%
 sns.histplot(data=bootstrapped_df, x="distance", hue="Category", element='poly', bins=30, fill=False,
