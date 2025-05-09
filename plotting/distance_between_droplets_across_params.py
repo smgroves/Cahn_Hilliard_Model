@@ -1023,12 +1023,17 @@ sns.lineplot(x=x_eval, y=cdf, color="navy",
 # %% HELA vs SIMS 0.0067 histogram with CI
 
 
-def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n_timepoints, title=None, bin_num=40, save=False, outdir=""):
+def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n_timepoints, title=None, bin_num=40, save=False, outdir="", bin_centers=[], xmax=3.5, bins=[]):
     # Assume df has columns: "Bootstrap" and "Value"
     boot_ids = bootstrapped_df["Category"].unique()
     all_values = bootstrapped_df["distance"].values
-    bins = np.histogram_bin_edges(all_values, bins=bin_num)
-    bin_centers = (bins[:-1] + bins[1:]) / 2
+    if len(bin_centers) != 0:
+        pass
+    elif bin_num != None:
+        bins = np.histogram_bin_edges(all_values, bins=bin_num)
+        bin_centers = (bins[:-1] + bins[1:]) / 2
+    else:
+        print("Must set either bin_num or bin_centers")
 
     # Compute histogram for each bootstrap
     histograms = []
@@ -1052,7 +1057,7 @@ def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n
     ci = np.array([lower_ci, upper_ci])
     # make sure to turn ci into error bars (i.e. distance from mean to lower and upper ci)
     y_err = np.abs(ci - mean_density)
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(6, 4))
 
     sns.kdeplot(data=long_dist_df.loc[long_dist_df["Category"] == category], x="distance",
                 color="navy",
@@ -1077,7 +1082,7 @@ def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n
         capsize=2,
         label="Bootstrap CI"
     )
-
+    plt.xlim(0, xmax)
     plt.xlabel("Distance")
     plt.ylabel("Density")
     if title == None:
@@ -1086,13 +1091,13 @@ def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n
     else:
         plt.title(title)
     plt.legend()
-    plt.grid(True)
     plt.tight_layout()
     if save:
         plt.savefig(f"{outdir}/{title}.pdf")
         plt.close()
     else:
         plt.show()
+    return bins, bin_centers
 
 
 def exp_hist_vs_sim_kde(bootstrapped_df, long_dist_df, category, n_chr_sim, n_timepoints, title=None, bin_num=40):
@@ -1168,10 +1173,11 @@ def exp_hist_vs_sim_kde(bootstrapped_df, long_dist_df, category, n_chr_sim, n_ti
 #                        n_chr_sim67, n_timepoints67, title="Simulations (0.0067) vs. HeLa Bootstraps, 30 bins", bin_num=30, outdir=outdir, save=True)
 # exp_hist_vs_sim_kde_CI(bootstrapped_df_MCF10A, long_dist_df,
 #                        category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 30 bins", outdir=outdir, bin_num=30, save=True)
-# exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category67,
-                    #    n_chr_sim67, n_timepoints67, title="Simulations (0.0067) vs. HeLa Bootstraps, 35 bins", bin_num=35, outdir=outdir, save=True)
-exp_hist_vs_sim_kde_CI(bootstrapped_df_MCF10A, long_dist_df,
-                       category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 55 bins", outdir=outdir, bin_num=55, save=True)
+# share bins
+bins_MCF10A, bin_centers_MCF10A = exp_hist_vs_sim_kde_CI(bootstrapped_df_MCF10A, long_dist_df,
+                                                         category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 55 bins", outdir=outdir, bin_num=55, save=True)
+exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category67,
+                       n_chr_sim67, n_timepoints67, title="Simulations (0.0067) vs. HeLa Bootstraps, 55 MCF10A bins", bin_centers=bin_centers_MCF10A, bins=bins_MCF10A, outdir=outdir, save=True)
 
 
 # %% Choosing bin width for bootstrap histogram based on average experimental KDE
