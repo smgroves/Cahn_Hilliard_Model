@@ -7,7 +7,7 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function"
-indir_MG = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB"
+indir_MG = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_Julia"
 # %%
 phi_name_MG = "NMG_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_phi.csv"
 # indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
