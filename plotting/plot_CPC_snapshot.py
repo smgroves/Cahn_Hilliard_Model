@@ -85,7 +85,7 @@ def plot_snapshot(
     # plt.title(f"t = {time}")
     plt.tight_layout()
     if save:
-        plt.savefig(f"{outdir}/t={time}_{name}_only_heatmap.png")
+        plt.savefig(f"{outdir}/t={time}_{name}_only_heatmap_matlab_colors.png")
         plt.close()
     else:
         plt.show()
@@ -98,8 +98,8 @@ indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigri
 Nx = 512
 CPC = "0.15"
 for cohesin in ["0.09"]:
-    name = f"phi_{Nx}_19661_1.0e-5__CPC_{CPC}_cohesin_{cohesin}_eps_0.0067_domain_0_2.txt"
-    outdir = f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/manuscript/figure 6/snapshots_eps_0.0067/{'_'.join(name.split('_')[5:11])}"
+    name = f"phi_{Nx}_19661_1.0e-5__CPC_{CPC}_cohesin_{cohesin}_eps_0.0067_domain_0_2_noisy.txt"
+    outdir = f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/manuscript/figure 6/snapshots_eps_0.0067/{'_'.join(name.split('_')[5:12])}"
     os.makedirs(outdir) if not os.path.exists(outdir) else None
 
     # for time in [0, 0.01, 0.02, 0.03, 0.04
