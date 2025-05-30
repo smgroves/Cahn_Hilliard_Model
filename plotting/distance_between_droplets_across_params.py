@@ -1,4 +1,5 @@
 # %%
+from scipy.stats import kstest
 from scipy.integrate import cumtrapz
 from matplotlib import cm
 from matplotlib.legend_handler import HandlerBase
@@ -991,6 +992,8 @@ plt.tight_layout()
 plt.show()
 
 # %% CDF plots sims
+plt.rcParams["font.family"] = "Arial"
+plt.rcParams['pdf.use14corefonts'] = True
 sns.kdeplot(data=long_dist_df.loc[long_dist_df["Category"] == category89], x="distance",
             color="navy",
             # binwidth=0.05, common_norm=False,  alpha=0.2, kde=True,stat='density',
@@ -1002,6 +1005,10 @@ sns.kdeplot(data=long_dist_df.loc[long_dist_df["Category"] == category67], x="di
 plt.legend()
 plt.title("Simulations")
 plt.show()
+# plt.savefig(f"{outdir}/simulation_CDFs.pdf")
+
+kstest(long_dist_df.loc[long_dist_df["Category"] == category89]['distance'].values,
+       long_dist_df.loc[long_dist_df["Category"] == category67]['distance'].values)
 
 # %% CDF plots experiments
 
@@ -1011,19 +1018,23 @@ cdf = cumtrapz(avg_kde, x_eval, initial=0)
 cdf /= cdf[-1]
 sns.lineplot(x=x_eval, y=cdf, color="DarkRed",
              label="Average KDE for HeLa Images")
-
 x_eval, avg_kde = compute_kde(bootstrapped_df_MCF10A)
 cdf = cumtrapz(avg_kde, x_eval, initial=0)
 # Normalize to ensure CDF ends at 1
 cdf /= cdf[-1]
 sns.lineplot(x=x_eval, y=cdf, color="navy",
              label="Average KDE for MCF10A Images")
+plt.legend()
+# plt.savefig(f"{outdir}/HeLa_vs_MCF10A_bootstrapped_CDFs.pdf")
+plt.show()
+kstest(bootstrapped_df_MCF10A['distance'].values,
+       bootstrapped_df['distance'].values)
 
 # %%
 # %% HELA vs SIMS 0.0067 histogram with CI
 
 
-def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n_timepoints, title=None, bin_num=40, save=False, outdir="", bin_centers=[], xmax=3.5, bins=[]):
+def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n_timepoints, title=None, bin_num=40, save=False, outdir="", bin_centers=[], xmax=3.5, ymax=3, bins=[]):
     # Assume df has columns: "Bootstrap" and "Value"
     boot_ids = bootstrapped_df["Category"].unique()
     all_values = bootstrapped_df["distance"].values
@@ -1083,6 +1094,7 @@ def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n
         label="Bootstrap CI"
     )
     plt.xlim(0, xmax)
+    plt.ylim(0, ymax)
     plt.xlabel("Distance")
     plt.ylabel("Density")
     if title == None:
@@ -1453,4 +1465,53 @@ plt.show()
 # plt.savefig(
 #     f"{outdir}distances_between_droplets_kdeplot_image_vs_sim_grouped.png")
 
+# %% aggregated bootstraps percent above 1.5um
+percent_above_threshold = 100 * \
+    sum(bootstrapped_df["distance"].values > 1.5) / \
+    len(bootstrapped_df["distance"].values)
+percent_above_threshold_MCF10A = 100 * \
+    sum(bootstrapped_df_MCF10A["distance"].values > 1.5) / \
+    len(bootstrapped_df_MCF10A["distance"].values)
+print(
+    f"Percent of distances above 1.5 um for HeLa bootstraps: {percent_above_threshold}")
+print(
+    f"Percent of distances above 1.5 um for MCF10A bootstraps: {percent_above_threshold_MCF10A}")
+
+# %% ave with interval bootstraps percent above 1.5um
+percent = []
+for b in bootstrapped_df["Category"].unique():
+    percent.append(100 * sum(
+        bootstrapped_df.loc[bootstrapped_df["Category"] == b]['distance'].values > 1.5) / len(bootstrapped_df.loc[bootstrapped_df["Category"] == b]['distance'].values))
+print(
+    f"Percent of distances above 1.5 um for HeLa bootstraps by category:")
+print("Mean:", np.mean(percent))
+print("SEM:", np.std(percent) / np.sqrt(len(percent)))
+print("95% CI:", np.percentile(percent, 2.5),
+      np.percentile(percent, 97.5))
+# MCF10A bootstraps percent above 1.5um
+percent_MCF10A = []
+for b in bootstrapped_df_MCF10A["Category"].unique():
+    percent_MCF10A.append(100 * sum(
+        bootstrapped_df_MCF10A.loc[bootstrapped_df_MCF10A["Category"] == b]['distance'].values > 1.5) / len(bootstrapped_df_MCF10A.loc[bootstrapped_df_MCF10A["Category"] == b]['distance'].values))
+print(
+    f"Percent of distances above 1.5 um for MCF10A bootstraps by category:")
+print("Mean:", np.mean(percent_MCF10A))
+print("SEM:", np.std(percent_MCF10A) / np.sqrt(len(percent_MCF10A)))
+print("95% CI:", np.percentile(percent_MCF10A, 2.5),
+      np.percentile(percent_MCF10A, 97.5))
+
+
+# %% simulations percent above 1.5um
+percent_above_threshold_67 = 100 * \
+    sum(long_dist_df.loc[long_dist_df["Category"] == category67]['distance'].values > 1.5) / \
+    len(long_dist_df.loc[long_dist_df["Category"]
+        == category67]['distance'].values)
+percent_above_threshold_89 = 100 * \
+    sum(long_dist_df.loc[long_dist_df["Category"] == category89]['distance'].values > 1.5) / \
+    len(long_dist_df.loc[long_dist_df["Category"]
+        == category89]['distance'].values)
+print(
+    f"Percent of distances above 1.5 um for 0.0067 Sims: {percent_above_threshold_67}")
+print(
+    f"Percent of distances above 1.5 um for 0.0089 Sims: {percent_above_threshold_89}")
 # %%

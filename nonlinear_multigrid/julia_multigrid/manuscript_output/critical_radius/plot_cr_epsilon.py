@@ -314,6 +314,7 @@ def h2l(x, m, t, b):
 p0 = (0, 0, 0)  # start with values near those we expect
 params, cv = scipy.optimize.curve_fit(h2l, xs, ys, p0)
 print(params)
+# 1.06258065 0.06720503 0.00389349
 m, t, b = params
 # determine quality of the fit
 squaredDiffs = np.square(ys - h2l(xs, m, t, b))
@@ -337,8 +338,8 @@ plt.text(
 # plt.plot(xs, ys, '.', label="Simulation results")
 markers = {128: "o", 256: "^"}
 plt.plot(
-    np.linspace(0, 0.09),
-    h2l(np.linspace(0, 0.09), m, t, b),
+    np.linspace(0, 0.1),
+    h2l(np.linspace(0, 0.1), m, t, b),
     "--",
     label="Fit",
     c="gray",
@@ -370,12 +371,14 @@ plt.title("Hyperbolic-to-Linear Fit of\n Critical Radius vs Epsilon")
 plt.xlabel(r"Epsilon ($ \epsilon $)")
 plt.ylabel(r"Critical Equilibrium Radius ($R_c$)")
 plt.legend()
+plt.xlim(0, 0.1)
+plt.ylim(0, 0.18)
 plt.tight_layout()
-# plt.savefig(
-# f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black.pdf"
-# )
-# plt.close()
-plt.show()
+plt.savefig(
+    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black_v2.pdf"
+)
+plt.close()
+# plt.show()
 
 # %%
 # FIGURE 4D
@@ -388,13 +391,13 @@ plt.plot(
     label=" H2L Simulation Fit",
     c="gray",
 )
-plt.ylabel(r"Critical Radius ($R_c$, $\mu m$)")
-plt.xlabel(r"Epsilon ($ \epsilon $)")
+plt.ylabel(r"Critical Radius ($R_c$, $nm$)")
+plt.xlabel(r"Epsilon ($ \epsilon $, nm)")
 # ax.fill_between(x, y, where=(y <= .1), color='C1', alpha=0.3,
 #                 interpolate=True)
 # Mask values to ensure filling is within y1 and y2
 # y1 and y2 come from CI of bootstrapping from 10 images (choose 5)
-mask = (y >= .166) & (y <= .17)
+mask = (y >= .166) & (y <= .17)  # um values
 y_fill = y[mask]
 x_fill = x[mask]
 ax.fill_betweenx(y_fill, 0, x_fill, color='gray', alpha=0.3,
@@ -406,16 +409,95 @@ ax.fill_betweenx(y_fill, 0, x_fill, color='gray', alpha=0.3,
 ax.fill_between(x_fill, 0, y_fill, color='gray', alpha=0.3, interpolate=True)
 
 # convert ymax and xmax to 0-1, percentage of axis
-plt.axvline(ymin=0,  ymax=(3.2*h2l(0.0067, m, t, b)-.1)/.1,
-            x=0.0067, label="Experimental CPC $R_{critical}$", c="k", linestyle="--")
-plt.axhline(xmin=0,  xmax=0.0067/0.015,
-            y=3.2*h2l(0.0067, m, t, b), c="k", linestyle="--")
+# approx_Rc = 3.2*h2l(0.0067, m, t, b)
+approx_e = 0.00676  # unitless value
+plt.axvline(ymin=0,  ymax=(0.168-.1)/.1,
+            x=0.00676, label="Experimental CPC $R_{critical}$", c="k", linestyle="--")
+plt.axhline(xmin=0,  xmax=0.00676/0.015,
+            y=0.168, c="k", linestyle="--")
+
 plt.xlim(0, 0.015)
 plt.ylim(0.1, 0.2)
+
+# convert um to nm
+plt.yticks(
+    plt.yticks()[0][1:-1],
+    [round(j * 1000, 3) for j in plt.yticks()[0][1:-1]],
+    fontsize=8,
+)
+
+# convert unitless to nm
+plt.xticks(
+    plt.xticks()[0][1:-1],
+    [round(j * 3200, 3) for j in plt.xticks()[0][1:-1]],
+    fontsize=8,
+)
+plt.title(
+    rf"HeLa; $R_c$= 168 nm, IQR = 166-170 nm\n $\epsilon$ = {round(3200*0.00676,2)} nm, IQR = {round(3200*x_fill.min(),2)}-{round(3200*x_fill.max(),2)} nm")
 plt.legend()
 # plt.show()
 plt.savefig(
-    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap.pdf")
+    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap_nm_fixedx3200nm.pdf")
+
+
+# %% MCF10A supplement
+# FIGURE 4D
+fig, ax = plt.subplots(1, 1)
+x = np.linspace(0, 0.06, 10000)
+y = 3.2*h2l(np.linspace(0, 0.06, 10000), m, t, b)
+plt.plot(
+    x, y,
+    "--",
+    label=" H2L Simulation Fit",
+    c="gray",
+)
+plt.ylabel(r"Critical Radius ($R_eq$, $nm$)")
+plt.xlabel(r"Epsilon ($ \epsilon $, nm)")
+# ax.fill_between(x, y, where=(y <= .1), color='C1', alpha=0.3,
+#                 interpolate=True)
+# Mask values to ensure filling is within y1 and y2
+# y1 and y2 come from CI of bootstrapping from 10 images (choose 5)
+mask = (y >= .1864) & (y <= .1922)
+y_fill = y[mask]
+x_fill = x[mask]
+ax.fill_betweenx(y_fill, 0, x_fill, color='gray', alpha=0.3,
+                 interpolate=True, label="25-75% CI")
+
+# mask2 = (x >= .015) & (x <= .02)
+# y_fill2 = y[mask]
+# x_fill2 = x[mask]
+ax.fill_between(x_fill, 0, y_fill, color='gray', alpha=0.3, interpolate=True)
+
+# convert ymax and xmax to 0-1, percentage of axis
+# approx_Rc = 3.2*h2l(0.0067, m, t, b)
+approx_e = 0.00676
+plt.axvline(ymin=0,  ymax=(0.1892-.1)/.1,
+            x=0.0089, label="Experimental CPC $R_{eq}$", c="k", linestyle="--")
+plt.axhline(xmin=0,  xmax=0.0089/0.015,
+            y=0.1892, c="k", linestyle="--")
+
+plt.xlim(0, 0.015)
+plt.ylim(0.1, 0.2)
+
+# convert um to nm
+plt.yticks(
+    plt.yticks()[0][1:-1],
+    [round(j * 1000, 3) for j in plt.yticks()[0][1:-1]],
+    fontsize=8,
+)
+
+plt.xticks(
+    plt.xticks()[0][1:-1],
+    [round(j * 3200, 3) for j in plt.xticks()[0][1:-1]],
+    fontsize=8,
+)
+plt.legend()
+plt.title(
+    rf"MCF10A; $R_c$= 189.2 nm, IQR = 186.4-192.2 nm\n $\epsilon$ = {0.0089*3200} nm, IQR = {round(3200*x_fill.min(),2)}-{round(3200*x_fill.max(),2)} nm")
+# plt.show()
+plt.savefig(
+    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap_nm_MCF10A_fixed3200nm.pdf")
+# print(x_fill)
 # %%
 
 
@@ -472,10 +554,10 @@ print("Linear", results["bic"])
 plt.plot(
     np.linspace(0, 0.09),
     linFit(np.linspace(0, 0.09), *results["best_fit_parameters"]),
-    "--",
+    # "--",
     label=f"Linear Fit, BIC = {round(results['bic'],2)}",
-    c=sns.color_palette()[3],
-    alpha=0.6,
+    c=sns.color_palette()[0],
+    # alpha=0.6,
 )
 initial_guess = [0.0, 0.0, 0.0]
 results = calculate_bic(xs, ys, h2l, initial_guess)
@@ -483,10 +565,10 @@ print("H2L", results["bic"])
 plt.plot(
     np.linspace(0, 0.09),
     h2l(np.linspace(0, 0.09), *results["best_fit_parameters"]),
-    "--",
+    # "--",
     label=f"H2L Fit, BIC = {round(results['bic'],2)}",
-    c=sns.color_palette()[4],
-    alpha=0.6,
+    c=sns.color_palette()[1],
+    # alpha=0.6,
 )
 
 initial_guess = [1, 0.0, 0.0]
@@ -495,10 +577,10 @@ print("Hyperbolic", results["bic"])
 plt.plot(
     np.linspace(0, 0.09),
     hyperbolic(np.linspace(0, 0.09), *results["best_fit_parameters"]),
-    "--",
+    # "--",
     label=f"Hyperbolic Fit, BIC = {round(results['bic'],2)}",
-    c=sns.color_palette()[5],
-    alpha=0.6,
+    c=sns.color_palette()[2],
+    # alpha=0.6,
 )
 
 initial_guess = [1.0, 0.0]
@@ -507,49 +589,71 @@ print("Log", results["bic"])
 plt.plot(
     np.linspace(0, 0.09),
     logFit(np.linspace(0, 0.09), *results["best_fit_parameters"]),
-    "--",
+    # "--",
     label=f"Log Fit, BIC = {round(results['bic'],2)}",
-    c=sns.color_palette()[6],
-    alpha=0.6,
+    c=sns.color_palette()[3],
+    # alpha=0.6,
 )
 
-markers = {128: "o", 256: "X"}
+markers = {128: "o", 256: "^"}
 
 sns.scatterplot(
     data=tmp,
     x="epsilon",
     y="critical equilibrium radius (min)",
-    hue="Nx",
+    # hue="Nx",
     palette=sns.color_palette("bright"),
-    edgecolor="k",
+    edgecolors="k",
+    facecolors="none",
     markers=markers,
     style="Nx",
+    alpha=1,
+    zorder=10,
+    linewidth=1
+)
+
+# convert um to nm
+plt.yticks(
+    plt.yticks()[0][1:-1],
+    [round(j * 1000, 3) for j in plt.yticks()[0][1:-1]],
+    fontsize=8,
+)
+
+plt.xticks(
+    plt.xticks()[0][1:-1],
+    [round(j * 1000, 3) for j in plt.xticks()[0][1:-1]],
+    fontsize=8,
 )
 print(h2l(0.0125, m, t, b))
 plt.title("Different Fits of\n Critical Radius vs Epsilon")
-plt.xlabel("Epsilon")
-plt.ylabel("Critical Radius")
+plt.xlabel("$\epsilon$ ($nm$)")
+plt.ylabel("$R_{eq}$ ($nm$)")
 plt.legend()
 plt.savefig(
-    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_128_256.png"
+    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_128_256_v2.pdf"
 )
 plt.close()
 plt.show()
 
 
-# %% FIGURE 3D
+# %% FIGURE 3C
 tmp = df.loc[df["alpha"] == 0]
+
+fig = plt.figure(figsize=(5, 4))
 
 
 def crit_init_r_theory(e, V=1):
     return np.cbrt((np.sqrt(6) / (8 * np.pi)) * V * e)
 
 
+plt.rcParams["mathtext.fontset"] = "cm"
+
+
 f, ax = plt.subplots(figsize=(5, 4))
 
 plt.plot(
-    np.linspace(0, 0.09),
-    crit_init_r_theory(np.linspace(0, 0.09)),
+    np.linspace(0, 0.10),
+    crit_init_r_theory(np.linspace(0, 0.10)),
     "--",
     label=f"Theory",
     c="grey",
@@ -578,12 +682,13 @@ for cat, group in tmp.groupby("Nx"):
         label=cat,
     )
 plt.legend()
-plt.xlim(0, 0.08)
+plt.xlim(0, 0.10)
+plt.ylim(0, 0.25)
 plt.title("Critical Initial Radius vs Epsilon")
 plt.xlabel(r"Epsilon ($ \epsilon $)")
 plt.ylabel(r"Critical Initial Radius ($R_0$)")
 plt.tight_layout()
-plt.savefig(f"Critical initial radius_vs_epsilon_w_theory_128_256_black.pdf")
+plt.savefig(f"Critical initial radius_vs_epsilon_w_theory_128_256_black_v2.pdf")
 plt.close()
 # plt.show()
 # %%

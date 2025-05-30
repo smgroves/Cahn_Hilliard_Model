@@ -651,3 +651,4 @@ finite_difference_method/output/spinodal_+1_-1/obsolete_laplace/FE_1200_dt_5.00e
 finite_difference_method/output/spinodal_+1_-1/obsolete_laplace/FE_4800_dt_1.25e-05_Nx_256_gam_1.48e+01_D_65536_phi.csv
 finite_difference_method/output/spinodal_+1_-1/obsolete_laplace/FE_9600_dt_6.25e-06_Nx_512_gam_5.91e+01_D_262144_phi.csv
 original_C_NMG/example_code/phi_spinodal.txt
+*.avi
