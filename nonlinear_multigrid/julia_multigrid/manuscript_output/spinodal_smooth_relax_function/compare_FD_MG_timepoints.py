@@ -50,11 +50,11 @@ phi_FD = phi_FD.reshape(-1, 128, 128).transpose(1, 2, 0)
 
 # indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
 
-# timepoints = [0, 10, 20, 100, 1000, 2000]
-timepoints = [1, 2, 40, 100, 200]
+timepoints = [10, 20, 400, 1000, 2000]
+# timepoints = [1, 2, 40, 100, 200]
 
 # timepoints = [200, 400]
-dt_out = 10
+dt_out = 1
 dt = 5.5e-6
 for timepoint in timepoints:
     normalize_phis = mcolors.TwoSlopeNorm(vcenter=0, vmin=-1, vmax=1)
@@ -319,7 +319,7 @@ e_NMG['NMG'] = e_NMG['NMG'] / e_NMG['NMG'].iloc[0]
 
 
 # %% four separate energy figures
-for i, e in enumerate([e_NMG, e_SAV, e_FD, e_FD_big]):
+for i, e in enumerate([e_NMG, e_SAV]):  # , e_FD, e_FD_big]):
     plt.figure(figsize=(4, 3))
     ax = sns.lineplot(x=e["time"], y=e.iloc[:, 0],
                       markers=True, c=sns.color_palette()[i])
@@ -389,23 +389,25 @@ plt.ylim(0.255, 0.27)
 plt.ylabel("")
 plt.xlabel("")
 # plt.title("Normalized (Modified) Energy for Spinodal Decomposition")
-plt.savefig(f"{outdir}/FD_NMG_SAV_energy_zoom_end.pdf")
+# plt.savefig(f"{outdir}/FD_NMG_SAV_energy_zoom_end.pdf")
+plt.show()
 # %% MASS COMPARISONS
 
 m_NMG = get_energy(indir_MG, phi_name_MG, dt=5.5e-6, dt_out=1, variable="mass", title="NMG",
                    )
 m_SAV = get_energy(indir_SAV, phi_name_SAV, dt=5.5e-6, variable="mass", dt_out=1, title="SAV"
                    )
-# m_FD = get_energy(indir_FD, phi_name_FD, dt=5.5e-8, variable="mass", dt_out=1, title="FD"
-#                   )
-# m_FD_big = get_energy(indir_FD, phi_name_FD_big, dt=5.5e-7, variable="mass", dt_out=1, title="FD_big"
-#                       )
+m_FD = get_energy(indir_FD, phi_name_FD, dt=5.5e-8, variable="mass", dt_out=1, title="FD"
+                  )
+m_FD_big = get_energy(indir_FD, phi_name_FD_big, dt=5.5e-7, variable="mass", dt_out=1, title="FD_big"
+                      )
 
-
-# m_FD["FD"] = m_FD["FD"] - m_FD["FD"].iloc[0]
-# m_FD_big["FD_big"] = m_FD_big["FD_big"] - m_FD_big["FD_big"].iloc[0]
+# %%%
+m_FD["FD"] = m_FD["FD"] - m_FD["FD"].iloc[0]
+m_FD_big["FD_big"] = m_FD_big["FD_big"] - m_FD_big["FD_big"].iloc[0]
 
 # m_NMG["NMG"] = m_NMG["NMG"] - m_NMG["NMG"].iloc[0]
+# m_SAV["SAV"] = m_SAV["SAV"] - m_SAV["SAV"].iloc[0]
 
 # %%
 # for m in [m_NMG, m_FD, m_SAV]:
@@ -416,7 +418,7 @@ m_SAV = get_energy(indir_SAV, phi_name_SAV, dt=5.5e-6, variable="mass", dt_out=1
 # # plt.savefig(f"{outdir}/FD_NMG_SAV_mass.pdf")
 # plt.show()
 # %%
-for i, e in enumerate([m_NMG, m_SAV]):  # , m_FD, m_FD_big]):
+for i, e in enumerate([m_NMG, m_SAV, m_FD, m_FD_big]):
     plt.figure(figsize=(4, 3))
     ax = sns.lineplot(x=e["time"], y=e.iloc[:, 0], c=sns.color_palette()[i])
     plt.ylabel("Centered Mass")
@@ -438,20 +440,20 @@ for i, e in enumerate([m_NMG, m_SAV]):  # , m_FD, m_FD_big]):
         title = f"{e.iloc[:, 0].name}, dt=5.5e-6"
         plt.title(title)
         plt.xlim(0, 0.011)
-    # plt.ylim(-1e-6, 1e-6)
+    plt.ylim(-1e-5, 1e-5)
     # plt.title(f"{e.iloc[:, 0].name}")
     # plt.ticklabel_format(style="plain", axis="x")
     plt.tight_layout()
     # plt.show()
 
-    plt.savefig(f"{outdir}/{title}_mass_periodic.pdf")
+    plt.savefig(f"{outdir}/{title}_mass_neumann.pdf")
     plt.close()
 
 # %%
 
 plt.figure(figsize=(8, 3))
 
-for i, e in enumerate([m_NMG, m_SAV]):  # , m_FD, m_FD_big]):
+for i, e in enumerate([m_NMG, m_SAV, m_FD, m_FD_big]):
 
     plt.ylabel("Mass - Mass[0]")
     plt.xlabel(r"Time ($t_{char}$)")
@@ -470,13 +472,13 @@ for i, e in enumerate([m_NMG, m_SAV]):  # , m_FD, m_FD_big]):
         g = sns.lineplot(x=e["time"], y=e.iloc[:, 0],
                          markers=True, c=sns.color_palette()[i], label=f"{e.iloc[:, 0].name}, dt=5.5e-6")
     plt.xlim(0, 0.011)
-    # plt.ylim(-1e-6, 1e-6)
+    plt.ylim(-1e-5, 1e-5)
 
     plt.ticklabel_format(style="plain", axis="x")
 
     plt.tight_layout()
 
-plt.savefig(f"{outdir}/all_solvers_T_0.011_mass_periodic.pdf")
+plt.savefig(f"{outdir}/all_solvers_T_0.011_mass_neumann.pdf")
 plt.show()
 # %%
 l2err_t = []
