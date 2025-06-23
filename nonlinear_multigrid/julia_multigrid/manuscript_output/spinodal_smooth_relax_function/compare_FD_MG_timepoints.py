@@ -1,16 +1,32 @@
 # %% FIGURE 1 COMPARISONS
+import matplotlib.font_manager as fm
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
-plt.rcParams["font.family"] = "Arial"
+from matplotlib import font_manager
+from matplotlib import rcParams
+
+# for f in fm.findSystemFonts(fontpaths=None, fontext='ttf'):
+#     if 'arial' in f.lower():
+#         print(f)
+
+
+# arial_path = "/System/Library/Fonts/Supplemental/Arial.ttf"  # e.g., from Step 1
+# arial_font = font_manager.FontProperties(fname=arial_path)
+# rcParams["font.family"] = arial_font.get_name()
 plt.rcParams['pdf.use14corefonts'] = True
 
-outdir = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-periodic"
-indir_MG = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-periodic"
-indir_SAV = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-periodic"
+boundary = "periodic"
+outdir = f"/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-{boundary}"
+indir_MG = f"/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-{boundary}"
+indir_SAV = f"/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-{boundary}"
+
+# %%
+
+# %%
 
 # %% LOAD NMG
 phi_name_MG = "NMG_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_dtout_1_phi.csv"
@@ -164,10 +180,11 @@ plt.savefig(
 plt.close()
 # %% save individual plots SAV
 ###############################################
+timepoints = [10, 20, 400, 1000, 2000]
 
-timepoints = [1, 2, 40, 100, 200]
+# timepoints = [1, 2, 40, 100, 200]
 # timepoints = [40]
-dt_out = 10
+dt_out = 1
 dt = 5.5e-6
 for timepoint in timepoints:
     normalize_phis = mcolors.TwoSlopeNorm(vcenter=0, vmin=-1, vmax=1)
@@ -321,10 +338,10 @@ e_NMG['NMG'] = e_NMG['NMG'] / e_NMG['NMG'].iloc[0]
 # %% four separate energy figures
 for i, e in enumerate([e_NMG, e_SAV]):  # , e_FD, e_FD_big]):
     plt.figure(figsize=(4, 3))
-    ax = sns.lineplot(x=e["time"], y=e.iloc[:, 0],
+    ax = sns.lineplot(x=np.log10(e["time"]+1e-8), y=e.iloc[:, 0],
                       markers=True, c=sns.color_palette()[i])
     plt.ylabel("Normalized Energy")
-    plt.xlabel(r"Time ($t_{char}$)")
+    plt.xlabel(r"Time ($log_{10}(t_{char})$)")
     plt.ylim(0.0, 1)
     # ax.set(xscale="log")
     # ax.set(xticks = np.arange(0, 0.012, 0.002))
@@ -332,22 +349,24 @@ for i, e in enumerate([e_NMG, e_SAV]):  # , e_FD, e_FD_big]):
     if e.iloc[:, 0].name == "FD":
         title = "FD, dt = 5.5e-8"
         plt.title(title)
-        plt.xlim(0, 0.00011)
+        plt.xlim(-8, -2)
 
     elif e.iloc[:, 0].name == "FD_big":
         title = "FD, dt = 5.5e-7"
         plt.title(title)
-        plt.xlim(0, 0.00011)
+        plt.xlim(-8, -2)
 
     else:
         title = f"{e.iloc[:, 0].name}, dt=5.5e-6"
         plt.title(title)
-        plt.xlim(0, 0.011)
+        plt.xlim(-8, -2)
     plt.ticklabel_format(style="plain", axis="x")
     plt.tight_layout()
     # plt.show()
 
-    plt.savefig(f"{outdir}/{title}_energy_periodic.pdf")
+    plt.savefig(f"{outdir}/{title}_energy_{boundary}_log.pdf")
+
+# %%
 
 # %% all-in-one energy figure
 outdir = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/energy_mass_comparisons"
@@ -393,21 +412,25 @@ plt.xlabel("")
 plt.show()
 # %% MASS COMPARISONS
 
-m_NMG = get_energy(indir_MG, phi_name_MG, dt=5.5e-6, dt_out=1, variable="mass", title="NMG",
+m_NMG = get_energy(indir_MG, phi_name_MG, dt=5.5e-6, dt_out=1, variable="mass_uncentered", title="NMG",
                    )
-m_SAV = get_energy(indir_SAV, phi_name_SAV, dt=5.5e-6, variable="mass", dt_out=1, title="SAV"
+m_SAV = get_energy(indir_SAV, phi_name_SAV, dt=5.5e-6, variable="mass_uncentered", dt_out=1, title="SAV"
                    )
-m_FD = get_energy(indir_FD, phi_name_FD, dt=5.5e-8, variable="mass", dt_out=1, title="FD"
-                  )
-m_FD_big = get_energy(indir_FD, phi_name_FD_big, dt=5.5e-7, variable="mass", dt_out=1, title="FD_big"
-                      )
+# m_FD = get_energy(indir_FD, phi_name_FD, dt=5.5e-8, variable="mass", dt_out=1, title="FD"
+#                   )
+# m_FD_big = get_energy(indir_FD, phi_name_FD_big, dt=5.5e-7, variable="mass", dt_out=1, title="FD_big"
+#                       )
+
+# %%
 
 # %%%
-m_FD["FD"] = m_FD["FD"] - m_FD["FD"].iloc[0]
-m_FD_big["FD_big"] = m_FD_big["FD_big"] - m_FD_big["FD_big"].iloc[0]
+# m_FD["FD"] = m_FD["FD"] - m_FD["FD"].iloc[0]
+# m_FD_big["FD_big"] = m_FD_big["FD_big"] - m_FD_big["FD_big"].iloc[0]
 
-# m_NMG["NMG"] = m_NMG["NMG"] - m_NMG["NMG"].iloc[0]
-# m_SAV["SAV"] = m_SAV["SAV"] - m_SAV["SAV"].iloc[0]
+m_NMG["NMG"] = m_NMG["NMG"] - m_NMG["NMG"].iloc[0]
+m_SAV["SAV"] = m_SAV["SAV"] - m_SAV["SAV"].iloc[0]
+
+# %%
 
 # %%
 # for m in [m_NMG, m_FD, m_SAV]:
@@ -418,39 +441,51 @@ m_FD_big["FD_big"] = m_FD_big["FD_big"] - m_FD_big["FD_big"].iloc[0]
 # # plt.savefig(f"{outdir}/FD_NMG_SAV_mass.pdf")
 # plt.show()
 # %%
-for i, e in enumerate([m_NMG, m_SAV, m_FD, m_FD_big]):
+for i, e in enumerate([m_NMG, m_SAV]):  # , m_FD, m_FD_big]):
     plt.figure(figsize=(4, 3))
-    ax = sns.lineplot(x=e["time"], y=e.iloc[:, 0], c=sns.color_palette()[i])
-    plt.ylabel("Centered Mass")
-    plt.xlabel(r"Time ($t_{char}$)")
+    plt.axhline(y=0, c="gray", linewidth=.75)
+
+    ax = sns.lineplot(x=np.log10(e["time"]+1e-8),
+                      y=e.iloc[:, 0], c=sns.color_palette()[i])
+    ax.ticklabel_format(axis='y', style='sci', scilimits=(-2, 2))
+
+    plt.axhline(y=1e-5, xmin=0, xmax=1,  c='gray',
+                linestyle="--", linewidth=.75)
+    plt.axhline(y=-1e-5, xmin=0, xmax=1,  c='gray',
+                linestyle="--", linewidth=.75)
+    plt.ylabel("M - M[0]")
+    plt.xlabel(r"Time ($log_{10}(t_{char})$)")
     # ax.set(xscale="log")
     # ax.set(xticks = np.arange(0, 0.012, 0.002))
     # plt.title("Normalized (Modified) Energy for Spinodal Decomposition")
     if e.iloc[:, 0].name == "FD":
         title = "FD, dt = 5.5e-8"
         plt.title(title)
-        plt.xlim(0, 0.00011)
+        plt.xlim(-8, -2)
 
     elif e.iloc[:, 0].name == "FD_big":
         title = "FD, dt = 5.5e-7"
-        plt.xlim(0, 0.00011)
-
         plt.title(title)
+        plt.xlim(-8, -2)
+
     else:
         title = f"{e.iloc[:, 0].name}, dt=5.5e-6"
         plt.title(title)
-        plt.xlim(0, 0.011)
-    plt.ylim(-1e-5, 1e-5)
+        plt.xlim(-8, -2)    # ax.set(xscale="log")
+    # ax.set(xticks = np.arange(0, 0.012, 0.002))
+    # plt.title("Normalized (Modified) Energy for Spinodal Decomposition")
+
+    plt.ylim(-1e-4, 1e-4)
     # plt.title(f"{e.iloc[:, 0].name}")
     # plt.ticklabel_format(style="plain", axis="x")
     plt.tight_layout()
     # plt.show()
 
-    plt.savefig(f"{outdir}/{title}_mass_neumann.pdf")
+    plt.savefig(f"{outdir}/{title}_mass_{boundary}_log.pdf")
     plt.close()
 
-# %%
 
+# %%
 plt.figure(figsize=(8, 3))
 
 for i, e in enumerate([m_NMG, m_SAV, m_FD, m_FD_big]):

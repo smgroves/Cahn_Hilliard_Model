@@ -1,4 +1,5 @@
 #%% FIGURE 2 GENERATING DIFFERENT IC FOR SPINODAL DECOMPOSITION
+import Dates
 function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, yright, yleft, dt, epsilon2, boundary)
     ht2 = ((xright - xleft) / nxt)^2
     a = MVector{4,Float64}(undef)
@@ -84,29 +85,20 @@ end
 using DelimitedFiles
 using Dates
 
-indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output/"
-outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/IC/"
+# indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output/"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/IC_FIGURE1_FIGURE2/"
 
 include("../../CH_multigrid_solver.jl")
 #%%
 # tol = 1e-6
-nx = 512
+nx = 128
 ny = nx
-tol = 1e-6
-dt = 6.25e-6
-m = 8
-boundary = "neumann"
-epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
-total_time = 0.06
-max_it = Int.(total_time / dt)
+perc = "50p"
+
 date_time = now()
-# phi = initialization_from_file("$(indir)/initial_phi_$(nx).csv", nx, nx)
-# the above phi was geenrated using:
-# nx = 512
-# outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output/"
-# phi = rand([-1.0, 1.0], nx, nx)
-# writedlm("$(outdir)initial_phi_$(nx).csv", phi, ',')
+
 using Random
+Random.seed!(1234)
 
 function biased_spin_matrix(nx, p_plus=0.75)
     total = nx * nx
@@ -121,10 +113,20 @@ function biased_spin_matrix(nx, p_plus=0.75)
     return reshape(values, nx, nx)
 end
 
-phi = biased_spin_matrix(nx, 0.25)
-writedlm("$(outdir)initial_phi_$(nx)_25p.csv", phi, ',')
-
+if perc == "25p"
+    p_plus = 0.25
+elseif perc == "50p"
+    p_plus = 0.5
+elseif perc == "75p"
+    p_plus = 0.75
+end
+phi = biased_spin_matrix(nx, p_plus)
+writedlm("$(outdir)$(perc)/initial_phi_$(nx)_$(perc).csv", phi, ',')
 #%%
+
+boundary = "periodic"
+
+
 sc, smu = source(phi, nx, ny, dt)
 
 mu = zeros(Float64, nx, ny)
@@ -132,9 +134,36 @@ Cahn = epsilon^2  # ϵ^2 defined as a global variable
 
 domain_left = 0
 domain_right = 1
-n_relax = 4
+n_relax = 16
+tol = 1e-6
+dt = 6.25e-6
+m = 8
+epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
+total_time = 0.06
+max_it = Int.(total_time / dt)
 phi_smooth, mu_smooth = relax(phi, mu, sc, smu, nx, nx, n_relax, domain_right, domain_left, domain_right, domain_left, dt, Cahn, boundary)
-writedlm("$(outdir)initial_phi_$(nx)_smooth_n_relax_$(n_relax)_25p.csv", phi, ',')
+writedlm("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary).csv", phi, ',')
+
+
+#%% visualize the initial condition from file
+# import Pkg;
+# Pkg.add("Plots");
+using Plots
+using DelimitedFiles
+perc = "50p"
+nx = 128
+boundary = "periodic"
+n_relax = 4
+phi_smooth = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary).csv", nx, nx)
+gr()
+heatmap(1:size(phi_smooth, 1),
+    1:size(phi_smooth, 2), phi_smooth,
+    c=cgrad([:blue, :white, :red]),
+    title="Initial condition for phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary)",
+    aspect_ratio=1,
+    clim=(-1, 1),
+    xlims=(1, nx),
+    ylims=(1, nx))
 
 #%%
 # build smaller grid-size ICs from 512 gridsize
