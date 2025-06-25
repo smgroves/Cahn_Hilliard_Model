@@ -1,6 +1,10 @@
-### Plotting for each individual alpha and epsilon. This will plot the radius over time to figure out what the critical radius for each epsilon is.
+# Plotting for each individual alpha and epsilon. This will plot the radius over time to figure out what the critical radius for each epsilon is.
 # After this, use the plot_inflection_pt.m code to find the inflection points, and record these in critical_radii_epsilon.csv.
+###############################
+#  FIGURE 3B and 3C, S3A and B
+###############################
 # %%
+from sklearn.linear_model import LinearRegression
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -8,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 from matplotlib.colors import ListedColormap, BoundaryNorm
+# indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/radii_lineplots_kymographs/alt_IC_periodic_BC_split_droplet"
 
 indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output"
 # #%%
@@ -41,11 +46,12 @@ indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigri
 # plt.savefig(f"{indir}/critical_radius_vs_epsilon_0.060037.pdf")
 # # plt.show()
 # %%
-## Reuse this one
+# Reuse this one
 # alpha = "0.5"
 plt.rcParams["font.family"] = "Arial"
 
-level_set_radius = "0.5"  # the default from Min-Jhe's code was to use phi = 0 or psi = 0.5, so for the plotting without alpha it will be 0.5
+# the default from Min-Jhe's code was to use phi = 0 or psi = 0.5, so for the plotting without alpha it will be 0.5
+level_set_radius = "0.5"
 Nx = 128
 alpha = 0
 # for epsilon in ["0.011257", "0.0037523","0.0056285", "0.0075047"]:#,"0.060037"]:#,"0.04","0.075047","0.090056"
@@ -62,8 +68,10 @@ for epsilon in [
 
     # for epsilon in ["0.0037523", "0.0075046", "0.0018761", "0.015009"]:
     folder = f"critical_radius"
+    indir_radius = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/radii_lineplots_kymographs/alt_IC_periodic_BC_split_droplet/"
     tmp = pd.read_csv(
-        f"{indir}/{folder}/alpha_0.0/radius_{level_set_radius}_level_set_epsilon_{epsilon}_alpha_0.0.txt",
+        # f"{indir}/{folder}/alpha_0.0/radius_{level_set_radius}_level_set_epsilon_{epsilon}_alpha_0.0.txt",
+        f"{indir_radius}/radius_{level_set_radius}_level_set_epsilon_{epsilon}_twohalves.txt",
         header=0,
         index_col=None,
         sep=",",
@@ -129,14 +137,16 @@ for epsilon in [
     # plt.axhline(0.07, linestyle="--", color="gray")
     plt.ylim(0, 0.14)
     plt.xlim(1e-3, 1e1)
-    plt.xlabel(r"$log_{10}$(Time) ($t_{char}$)")
+    plt.xlabel("Time (tchar)")
     plt.ylabel("Radius (R)")
     plt.tight_layout()
+    # plt.savefig(
+    #     f"{indir}/{folder}/alpha_0.0/critical_radius_vs_epsilon_{epsilon}_subset_log_v2.pdf"
+    # )
     plt.savefig(
-        f"{indir}/{folder}/alpha_0.0/critical_radius_vs_epsilon_{epsilon}_subset_log_v2.pdf"
-    )
+        f"{indir_radius}/critical_radius_vs_epsilon_{epsilon}_twohalves_log_v2.pdf")
     plt.close()
-    plt.show()
+    # plt.show()
 # %%
 
 
@@ -279,7 +289,6 @@ plt.savefig(f"{indir}/r0_{radius}_new_old_IC.pdf")
 epsilon = np.array([0.015009, 0.030019, 0.060037])
 critical_radius = np.array([0.07, 0.095, 0.14])
 plt.plot(epsilon, critical_radius, marker="o", label="Data")
-from sklearn.linear_model import LinearRegression
 
 x = epsilon.reshape((-1, 1))
 y = critical_radius
@@ -315,7 +324,7 @@ tmp = pd.read_csv(
     on_bad_lines="warn",
 )
 print(tmp.shape)
-## USE WARN TO DELETE THOSE ROWS
+# USE WARN TO DELETE THOSE ROWS
 
 # %%
 g = sns.lineplot(data=tmp, x="time", y="radius", hue="R0", palette="tab20")
@@ -325,7 +334,8 @@ g.set_yticks([tmp["radius"].min(), tmp["radius"].max()])
 plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), fontsize="small")
 plt.title(f"Epsilon = {epsilon}, alpha = {alpha}")
 plt.tight_layout()
-plt.savefig(f"{indir}/{folder}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}.pdf")
+plt.savefig(
+    f"{indir}/{folder}/critical_radius_vs_epsilon_{epsilon}_alpha_{alpha}.pdf")
 plt.close()
 # %%
 for i, r in tmp.iterrows():
@@ -335,7 +345,7 @@ for i, r in tmp.iterrows():
         print(i)
         print(r)
 
-##### OUTPUT FOR TIME
+# OUTPUT FOR TIME
 # 34654 X
 # radius       NaN
 # time      5..061
@@ -347,7 +357,7 @@ for i, r in tmp.iterrows():
 # R0              NaN
 # Name: 35695, dtype: object
 
-###### OUTPUT FOR RADIUS
+# OUTPUT FOR RADIUS
 # 34134 X
 # radius     NaaN
 # time       0.62
@@ -364,7 +374,7 @@ for i, r in tmp.iterrows():
 # R0          NaN
 # Name: 38034, dtype: object
 
-###### OUTPUT FOR R0
+# OUTPUT FOR R0
 # 36737 X
 # radius        NaN
 # time       8.0625

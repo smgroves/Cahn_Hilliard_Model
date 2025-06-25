@@ -1,94 +1,99 @@
 #%% FIGURE 2 GENERATING DIFFERENT IC FOR SPINODAL DECOMPOSITION
-import Dates
-function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, yright, yleft, dt, epsilon2, boundary)
-    ht2 = ((xright - xleft) / nxt)^2
-    a = MVector{4,Float64}(undef)
-    f = MVector{2,Float64}(undef)
-    for iter in 1:c_relax
-        for i in 1:nxt
-            for j in 1:nyt
-                if boundary == "neumann"
-                    if i > 1 && i < nxt
-                        x_fac = 2.0
-                    else
-                        x_fac = 1.0
-                    end
-                    if j > 1 && j < nyt
-                        y_fac = 2.0
-                    else
-                        y_fac = 1.0
-                    end
-                elseif boundary == "periodic"
-                    x_fac = 2.0
-                    y_fac = 2.0
-                end
-                a[1] = 1 / dt
-                a[2] = (x_fac + y_fac) / ht2
-                a[3] = -(x_fac + y_fac) * epsilon2 / ht2 - 3 * (c_new[i, j])^2
-                a[4] = 1.0
+# import Dates
+# function relax(c_new, mu_new, su, sw, nxt, nyt, c_relax, xright, xleft, yright, yleft, dt, epsilon2, boundary)
+#     ht2 = ((xright - xleft) / nxt)^2
+#     a = MVector{4,Float64}(undef)
+#     f = MVector{2,Float64}(undef)
+#     for iter in 1:c_relax
+#         for i in 1:nxt
+#             for j in 1:nyt
+#                 if boundary == "neumann"
+#                     if i > 1 && i < nxt
+#                         x_fac = 2.0
+#                     else
+#                         x_fac = 1.0
+#                     end
+#                     if j > 1 && j < nyt
+#                         y_fac = 2.0
+#                     else
+#                         y_fac = 1.0
+#                     end
+#                 elseif boundary == "periodic"
+#                     x_fac = 2.0
+#                     y_fac = 2.0
+#                 end
+#                 a[1] = 1 / dt
+#                 a[2] = (x_fac + y_fac) / ht2
+#                 a[3] = -(x_fac + y_fac) * epsilon2 / ht2 - 3 * (c_new[i, j])^2
+#                 a[4] = 1.0
 
-                f[1] = su[i, j]
-                f[2] = sw[i, j] - 2 * (c_new[i, j])^3
+#                 f[1] = su[i, j]
+#                 f[2] = sw[i, j] - 2 * (c_new[i, j])^3
 
-                if i > 1
-                    f[1] += mu_new[i-1, j] / ht2
-                    f[2] -= epsilon2 * c_new[i-1, j] / ht2
-                elseif boundary == "periodic"
-                    f[1] += mu_new[nxt, j] / ht2
-                    f[2] -= epsilon2 * c_new[nxt, j] / ht2
-                end
-                if i < nxt
-                    f[1] += mu_new[i+1, j] / ht2
-                    f[2] -= epsilon2 * c_new[i+1, j] / ht2
-                elseif boundary == "periodic"
-                    f[1] += mu_new[1, j] / ht2
-                    f[2] -= epsilon2 * c_new[1, j] / ht2
-                end
-                if j > 1
-                    f[1] += mu_new[i, j-1] / ht2
-                    f[2] -= epsilon2 * c_new[i, j-1] / ht2
-                elseif boundary == "periodic"
-                    f[1] += mu_new[i, nyt] / ht2
-                    f[2] -= epsilon2 * c_new[i, nyt] / ht2
-                end
-                if j < nyt
-                    f[1] += mu_new[i, j+1] / ht2
-                    f[2] -= epsilon2 * c_new[i, j+1] / ht2
-                elseif boundary == "periodic"
-                    f[1] += mu_new[i, 1] / ht2
-                    f[2] -= epsilon2 * c_new[i, 1] / ht2
-                end
-                det = a[1] * a[4] - a[2] * a[3]
-                c_new[i, j] = (a[4] * f[1] - a[2] * f[2]) / det
-                mu_new[i, j] = (-a[3] * f[1] + a[1] * f[2]) / det
+#                 if i > 1
+#                     f[1] += mu_new[i-1, j] / ht2
+#                     f[2] -= epsilon2 * c_new[i-1, j] / ht2
+#                 elseif boundary == "periodic"
+#                     f[1] += mu_new[nxt, j] / ht2
+#                     f[2] -= epsilon2 * c_new[nxt, j] / ht2
+#                 end
+#                 if i < nxt
+#                     f[1] += mu_new[i+1, j] / ht2
+#                     f[2] -= epsilon2 * c_new[i+1, j] / ht2
+#                 elseif boundary == "periodic"
+#                     f[1] += mu_new[1, j] / ht2
+#                     f[2] -= epsilon2 * c_new[1, j] / ht2
+#                 end
+#                 if j > 1
+#                     f[1] += mu_new[i, j-1] / ht2
+#                     f[2] -= epsilon2 * c_new[i, j-1] / ht2
+#                 elseif boundary == "periodic"
+#                     f[1] += mu_new[i, nyt] / ht2
+#                     f[2] -= epsilon2 * c_new[i, nyt] / ht2
+#                 end
+#                 if j < nyt
+#                     f[1] += mu_new[i, j+1] / ht2
+#                     f[2] -= epsilon2 * c_new[i, j+1] / ht2
+#                 elseif boundary == "periodic"
+#                     f[1] += mu_new[i, 1] / ht2
+#                     f[2] -= epsilon2 * c_new[i, 1] / ht2
+#                 end
+#                 det = a[1] * a[4] - a[2] * a[3]
+#                 c_new[i, j] = (a[4] * f[1] - a[2] * f[2]) / det
+#                 mu_new[i, j] = (-a[3] * f[1] + a[1] * f[2]) / det
 
-            end
-        end
-    end
-    return c_new, mu_new
-end
+#             end
+#         end
+#     end
+#     return c_new, mu_new
+# end
 
-function source(c_old, nx, ny, dt)
-    src_mu = zeros(Float64, nx, ny)
-    src_c = zeros(Float64, nx, ny)
-    ct = laplace(c_old, nx, ny)
-    for i in 1:nx
-        for j in 1:ny
-            src_c[i, j] = c_old[i, j] / dt - ct[i, j]
-            src_mu[i, j] = 0
-        end
-    end
-    return src_c, src_mu
-end
+# function source(c_old, nx, ny, dt)
+#     src_mu = zeros(Float64, nx, ny)
+#     src_c = zeros(Float64, nx, ny)
+#     ct = laplace(c_old, nx, ny)
+#     for i in 1:nx
+#         for j in 1:ny
+#             src_c[i, j] = c_old[i, j] / dt - ct[i, j]
+#             src_mu[i, j] = 0
+#         end
+#     end
+#     return src_c, src_mu
+# end
 
 #%%
 using DelimitedFiles
 using Dates
 
+#use the official final code for smoothing
+include("/Users/smgroves/Documents/GitHub/CHsolvers_package/CahnHilliard_Julia_solvers/nmg_solver.jl")
+include("/Users/smgroves/Documents/GitHub/CHsolvers_package/CahnHilliard_Julia_solvers/relax.jl")
+
 # indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_+1_-1_IC/output/"
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/IC_FIGURE1_FIGURE2/"
 
-include("../../CH_multigrid_solver.jl")
+#%%
+# include("../../CH_multigrid_solver.jl")
 #%%
 # tol = 1e-6
 nx = 128
@@ -120,29 +125,27 @@ elseif perc == "50p"
 elseif perc == "75p"
     p_plus = 0.75
 end
-phi = biased_spin_matrix(nx, p_plus)
-writedlm("$(outdir)$(perc)/initial_phi_$(nx)_$(perc).csv", phi, ',')
+# phi = biased_spin_matrix(nx, p_plus)
+# writedlm("$(outdir)$(perc)/initial_phi_$(nx)_$(perc).csv", phi, ',')
 #%%
-
+n_relax = 4
 boundary = "periodic"
-
-
-sc, smu = source(phi, nx, ny, dt)
-
-mu = zeros(Float64, nx, ny)
-Cahn = epsilon^2  # ϵ^2 defined as a global variable
 
 domain_left = 0
 domain_right = 1
-n_relax = 16
 tol = 1e-6
 dt = 6.25e-6
 m = 8
 epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
-total_time = 0.06
-max_it = Int.(total_time / dt)
-phi_smooth, mu_smooth = relax(phi, mu, sc, smu, nx, nx, n_relax, domain_right, domain_left, domain_right, domain_left, dt, Cahn, boundary)
-writedlm("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary).csv", phi, ',')
+Cahn = epsilon^2  # ϵ^2 defined as a global variable
+
+phi = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_$(perc).csv", nx, nx)
+sc, smu = source(phi, nx, ny, dt, domain_right, domain_left, domain_right, domain_left, boundary)
+mu = zeros(Float64, nx, ny)
+relax!(phi, mu, sc, smu, nx, nx, n_relax, domain_right, domain_left, domain_right, domain_left, dt, Cahn, boundary)
+
+# phi_smooth, mu_smooth = relax(phi, mu, sc, smu, nx, nx, n_relax, domain_right, domain_left, domain_right, domain_left, dt, Cahn, boundary)
+writedlm("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary)_v2.csv", phi, ',')
 
 
 #%% visualize the initial condition from file
@@ -153,13 +156,52 @@ using DelimitedFiles
 perc = "50p"
 nx = 128
 boundary = "periodic"
-n_relax = 4
-phi_smooth = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary).csv", nx, nx)
+n_relax = 16
+phi_smooth = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary)_v2.csv", nx, nx)
 gr()
 heatmap(1:size(phi_smooth, 1),
     1:size(phi_smooth, 2), phi_smooth,
     c=cgrad([:blue, :white, :red]),
     title="Initial condition for phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary)",
+    aspect_ratio=1,
+    clim=(-1, 1),
+    xlims=(1, nx),
+    ylims=(1, nx))
+
+#%% comparing v1 and v2 for different levels of smoothing
+using Plots
+using DelimitedFiles
+perc = "50p"
+nx = 128
+boundary = "periodic"
+n_relax = 4
+phi_smooth_v1 = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary).csv", nx, nx)
+phi_smooth_v2 = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary)_v2.csv", nx, nx)
+
+gr()
+heatmap(phi_smooth_v1 - phi_smooth_v2,
+    c=cgrad([:blue, :white, :red]),
+    title="Initial condition for phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary)",
+    aspect_ratio=1,
+    clim=(-1, 1),
+    xlims=(1, nx),
+    ylims=(1, nx))
+
+#RESULT: n_relax = 4 and n_relax = 8 were correct. I just need to rerun n=2 and n = 16 to get L2 error.
+
+#%% compare different levels of smoothing
+perc = "50p"
+nx = 128
+boundary = "neumann"
+smooth1 = 1
+smooth2 = 16
+phi_smooth_1 = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(smooth1)_$(perc)_$(boundary)_v2.csv", nx, nx)
+phi_smooth_2 = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(smooth2)_$(perc)_$(boundary)_v2.csv", nx, nx)
+
+gr()
+heatmap(phi_smooth_1 - phi_smooth_2,
+    c=cgrad([:blue, :white, :red]),
+    title="n = $(smooth1) - n = $(smooth2)",
     aspect_ratio=1,
     clim=(-1, 1),
     xlims=(1, nx),

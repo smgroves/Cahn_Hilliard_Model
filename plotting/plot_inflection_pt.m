@@ -4,19 +4,21 @@
 alpha = "0.5";
 level_set_r ="0.5";
 Nx = "128";
-indir =sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/periodic_BC_single_drop");
+% indir =sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/periodic_BC_single_drop");
+indir=sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/radii_lineplots_kymographs/alt_IC_periodic_BC_split_droplet");
 % epsilon ="0.015009";
 
 % for epsilon = ["0.0037523","0.0075046","0.0018761","0.015009",]
 
 % for epsilon = [ "0.045028", "0.0075046", "0.075047","0.090056"]
 % for epsilon = ["0.015009","0.030019","0.045028", "0.090056","0.0075046", "0.060038"]
-for epsilon = ["0.015009","0.030019","0.060037"]
+% for epsilon = ["0.015009","0.030019","0.060037"]
+for epsilon =["0.011257"]
     plot_inflection(epsilon, indir, alpha,level_set_r,Nx);
 end
 
 function [] = plot_inflection(epsilon, indir, alpha, level_set_r,Nx)
-    path = sprintf("%s/radius_%s_level_set_epsilon_%s.txt", indir,level_set_r,epsilon);
+    path = sprintf("%s/radius_%s_level_set_epsilon_%s_twohalves.txt", indir,level_set_r,epsilon);
     all_data = readtable(path);
     % Predefine colors for each dataset for consistency in plotting
     colors = {'b', 'r', 'g', 'c', 'm', 'y', 'k',"#d142f5","#f542b6","#f59e42","#42f5d7","#42b3f5"};
