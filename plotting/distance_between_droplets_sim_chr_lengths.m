@@ -19,7 +19,7 @@ cohesin = "0.09";
 chr_lengths = load(sprintf("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/image_analysis/chromosome_lengths_%s_v2.csv", cell_line));
 num_chr = floor(length(chr_lengths)/2); %chr_lengths is 2x the number of chromosomes because it is counting each arm
 % num_sims = length(sim_list);
-num_sims = 20; %number of simulations to match
+num_sims = 50; %number of simulations to match
 num_samples = ceil(num_chr/num_sims); %divide by the number of simulations 
 
 % seed = "1111";
@@ -43,10 +43,10 @@ for i = 1:length(sim_list)
     %     fprintf('No match for file: %s\n', folderName);
     end
 
-    if str2num(random_num) > 20
-        fprintf('Skipping file: %s\n', folderName);
-        continue
-    end
+    % if str2num(random_num) > 20
+    %     fprintf('Skipping file: %s\n', folderName);
+    %     continue
+    % end
     sampled_times = datasample(x, num_samples, 'Replace', false);
 
     Nx = 512;

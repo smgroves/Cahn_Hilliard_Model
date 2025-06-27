@@ -994,15 +994,20 @@ plt.show()
 # %% CDF plots sims
 plt.rcParams["font.family"] = "Arial"
 plt.rcParams['pdf.use14corefonts'] = True
-sns.kdeplot(data=long_dist_df.loc[long_dist_df["Category"] == category89], x="distance",
-            color="navy",
-            # binwidth=0.05, common_norm=False,  alpha=0.2, kde=True,stat='density',
-            label=f"Simulations e = 0.0089 (n = {n_chr_sim89} chr, {n_timepoints89} timepoints per chr)", cumulative=True)
+plt.figure(figsize=(4, 3))
+ax = sns.kdeplot(data=long_dist_df.loc[long_dist_df["Category"] == category89], x="distance",
+                 color="DarkRed",
+                 # binwidth=0.05, common_norm=False,  alpha=0.2, kde=True,stat='density',
+                 label=f"Simulations e = 0.0089 (n = {n_chr_sim89} chr, {n_timepoints89} timepoints per chr)", cumulative=True)
 sns.kdeplot(data=long_dist_df.loc[long_dist_df["Category"] == category67], x="distance",
-            color="DarkRed",
+            color="DarkRed", linestyle="--",
             # binwidth=0.05, common_norm=False,   alpha=0.2, kde=True,stat='density',
             label=f"Simulations e = 0.0067 (n = {n_chr_sim67} chr, {n_timepoints67} timepoints per chr)", cumulative=True)
+ax.spines[['right', 'top']].set_visible(False)
+
 plt.legend()
+plt.xlim(0, 3.5)
+plt.ylim(0, 1)
 plt.title("Simulations")
 plt.show()
 # plt.savefig(f"{outdir}/simulation_CDFs.pdf")
@@ -1010,25 +1015,184 @@ plt.show()
 kstest(long_dist_df.loc[long_dist_df["Category"] == category89]['distance'].values,
        long_dist_df.loc[long_dist_df["Category"] == category67]['distance'].values)
 
+# %%
+
 # %% CDF plots experiments
+plt.figure(figsize=(4, 3))
 
 x_eval, avg_kde = compute_kde(bootstrapped_df)
 cdf = cumtrapz(avg_kde, x_eval, initial=0)
 # Normalize to ensure CDF ends at 1
 cdf /= cdf[-1]
-sns.lineplot(x=x_eval, y=cdf, color="DarkRed",
-             label="Average KDE for HeLa Images")
+ax = sns.lineplot(x=x_eval, y=cdf, color="grey", linestyle="--",
+                  label="Average KDE for HeLa Images")
 x_eval, avg_kde = compute_kde(bootstrapped_df_MCF10A)
 cdf = cumtrapz(avg_kde, x_eval, initial=0)
 # Normalize to ensure CDF ends at 1
 cdf /= cdf[-1]
-sns.lineplot(x=x_eval, y=cdf, color="navy",
+sns.lineplot(x=x_eval, y=cdf, color="grey",
              label="Average KDE for MCF10A Images")
+plt.xlim(0, 3.5)
+plt.ylim(0, 1)
+ax.spines[['right', 'top']].set_visible(False)
+
 plt.legend()
 # plt.savefig(f"{outdir}/HeLa_vs_MCF10A_bootstrapped_CDFs.pdf")
 plt.show()
-kstest(bootstrapped_df_MCF10A['distance'].values,
-       bootstrapped_df['distance'].values)
+
+# %%
+# ks test for each bootstrap
+stats = []
+ps = []
+n_samples_hela = []
+n_samples_mcf10a = []
+for b in bootstrapped_df['Category'].unique():
+    print(b)
+    hela_tmp = bootstrapped_df.loc[bootstrapped_df['Category']
+                                   == b]['distance'].values
+    # print(len(hela_tmp))
+    mcf10a_tmp = bootstrapped_df_MCF10A.loc[bootstrapped_df_MCF10A['Category']
+                                            == b]['distance'].values
+    s, p = kstest(hela_tmp, mcf10a_tmp)
+    stats.append(s)
+    ps.append(p)
+    n_samples_hela.append(len(hela_tmp))
+    n_samples_mcf10a.append(len(mcf10a_tmp))
+
+print("Mean(ks stat)+/- SEM:", np.mean(stats), ss.sem(stats))
+print("Mean(ks P)+/- SEM:", np.mean(ps), ss.sem(ps))
+print("Mean number of samples per bootstrap", np.mean(
+    n_samples_hela), np.mean(n_samples_mcf10a))
+
+# average values
+
+# kstest(bootstrapped_df_MCF10A['distance'].values,
+#        bootstrapped_df['distance'].values)
+
+# %% CDF plots: median with CI / IQR plotted
+
+
+def get_percentile_bs(bootstrapped_df, perc=50):
+    df = pd.DataFrame(
+        {
+            "Category": bootstrapped_df['Category'].unique(),
+            "ks_statistic": stats,
+            "p_value": ps,
+            "n_samples_hela": n_samples_hela,
+            "n_samples_mcf10a": n_samples_mcf10a,
+        }
+    )
+
+    df.sort_values(by="p_value", inplace=True)
+    ind = int(perc / 100 * len(df)) - 1
+    print(df.iloc[ind])
+    return df.iloc[ind]
+
+
+def compute_kde_CI(bootstrapped_df, percentiles=[2.5, 97.5]):
+    # df should be your DataFrame with "Category" and "distance"
+    categories = bootstrapped_df["Category"].unique()
+
+    # Common evaluation grid
+    all_distances = bootstrapped_df["distance"].values
+    x_eval = np.linspace(np.min(all_distances), np.max(all_distances), 500)
+
+    # Compute KDE for each bootstrap category
+    kde_vals = []
+
+    for cat in categories:
+        sample = bootstrapped_df[bootstrapped_df["Category"]
+                                 == cat]["distance"].values
+        kde = gaussian_kde(sample)
+        kde_vals.append(kde(x_eval))
+
+    kde_vals = np.array(kde_vals)  # shape: (n_bootstraps, 500)
+
+    # percentiles of the KDEs
+    lb_kde = np.percentile(kde_vals, percentiles[0], axis=0)
+    ub_kde = np.percentile(kde_vals, percentiles[1], axis=0)
+    return x_eval, ub_kde, lb_kde
+
+
+median_bs = get_percentile_bs(bootstrapped_df)
+median_bs_cat = median_bs['Category']
+
+plt.figure(figsize=(4, 3))
+#################
+# HELA
+ax = sns.kdeplot(data=bootstrapped_df.loc[bootstrapped_df['Category'] == median_bs_cat], x="distance",
+                 color="grey", linestyle="--",
+                 # binwidth=0.05, common_norm=False,   alpha=0.2, kde=True,stat='density',
+                 label=f"HeLa", cumulative=True)
+
+x_eval, ub_kde, lb_kde = compute_kde_CI(bootstrapped_df)
+ub_cdf = cumtrapz(ub_kde, x_eval, initial=0)
+# Normalize to ensure CDF ends at 1
+ub_cdf /= ub_cdf[-1]
+# ax = sns.lineplot(x=x_eval, y=ub_cdf, color="lightgrey", linestyle="--",
+#   label="UB KDE for HeLa Images")
+lb_cdf = cumtrapz(lb_kde, x_eval, initial=0)
+# Normalize to ensure CDF ends at 1
+lb_cdf /= lb_cdf[-1]
+# ax = sns.lineplot(x=x_eval, y=lb_cdf, color="lightgrey", linestyle="--",
+#   label="LB KDE for HeLa Images")
+
+plt.fill_between(x_eval, ub_cdf, lb_cdf, color="lightgrey", alpha=0.5,
+                 label="KDE CI for HeLa Images")
+
+
+#################
+# MCF10A
+sns.kdeplot(data=bootstrapped_df_MCF10A.loc[bootstrapped_df_MCF10A['Category'] == median_bs_cat], x="distance",
+            color="blue",
+            # binwidth=0.05, common_norm=False,   alpha=0.2, kde=True,stat='density',
+            label=f"MCF10A", cumulative=True)
+x_eval, ub_kde, lb_kde = compute_kde_CI(bootstrapped_df_MCF10A)
+ub_cdf = cumtrapz(ub_kde, x_eval, initial=0)
+# Normalize to ensure CDF ends at 1
+ub_cdf /= ub_cdf[-1]
+# ax = sns.lineplot(x=x_eval, y=ub_cdf, color="lightgrey", linestyle="--",
+#   label="UB KDE for HeLa Images")
+lb_cdf = cumtrapz(lb_kde, x_eval, initial=0)
+# Normalize to ensure CDF ends at 1
+lb_cdf /= lb_cdf[-1]
+# ax = sns.lineplot(x=x_eval, y=lb_cdf, color="lightgrey", linestyle="--",
+#                   label="LB KDE for HeLa Images")
+
+plt.fill_between(x_eval, ub_cdf, lb_cdf, color="lightblue", alpha=0.5,
+                 label="KDE CI for HeLa Images")
+
+##################
+# Annotate plot
+plt.annotate(xy=(0, 0), xytext=(2.5, .3),
+             text=f"Median Bootstrap: {median_bs_cat}\n95% CI for each cell line\nKS Statistic: {np.round(median_bs['ks_statistic'], 4)}\np-value: {np.round(median_bs['p_value'], 4)}\nSamples HeLa: {int(median_bs['n_samples_hela'])}\nSamples MCF10A: {int(median_bs['n_samples_mcf10a'])}",
+             ha='center', va='center', fontsize=10, bbox=dict(boxstyle="round", fc="w"))
+ax.spines[['right', 'top']].set_visible(False)
+plt.xlim(0, 3.5)
+plt.ylim(0, 1)
+# plt.show()
+plt.savefig(f"{outdir}/HeLa_vs_MCF10A_bootstrapped_CDFs_medians_with_CI.pdf")
+
+# %% check what CDF plots of each bootstrap look like
+for cat in bootstrapped_df['Category'].unique():
+    sns.kdeplot(
+        data=bootstrapped_df.loc[bootstrapped_df['Category'] == cat], x="distance", cumulative=True)
+# plt.show()
+
+# %%
+highest_bs = get_percentile_bs(bootstrapped_df, perc=100)
+highest_ind = highest_bs['Category']
+
+sns.kdeplot(data=bootstrapped_df.loc[bootstrapped_df['Category'] == highest_ind], x="distance",
+            color="grey", linestyle="--",
+            # binwidth=0.05, common_norm=False,   alpha=0.2, kde=True,stat='density',
+            label=f"HeLa", cumulative=True)
+
+sns.kdeplot(data=bootstrapped_df_MCF10A.loc[bootstrapped_df_MCF10A['Category'] == highest_ind], x="distance",
+            color="blue",
+            # binwidth=0.05, common_norm=False,   alpha=0.2, kde=True,stat='density',
+            label=f"MCF10A", cumulative=True)
+plt.title(f"Highest P Value Bootstrap = {round(highest_bs['p_value'], 3)}")
 
 # %%
 # %% HELA vs SIMS 0.0067 histogram with CI
@@ -1062,12 +1226,13 @@ def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n
 
     # Compute mean and standard deviation across bootstraps
     mean_density = hist_array.mean(axis=0)
+    median_density = np.median(hist_array, axis=0)
     lower_ci = np.percentile(hist_array, 2.5, axis=0)
     upper_ci = np.percentile(hist_array, 97.5, axis=0)
 
     ci = np.array([lower_ci, upper_ci])
     # make sure to turn ci into error bars (i.e. distance from mean to lower and upper ci)
-    y_err = np.abs(ci - mean_density)
+    y_err = np.abs(ci - median_density)
     plt.figure(figsize=(6, 4))
 
     sns.kdeplot(data=long_dist_df.loc[long_dist_df["Category"] == category], x="distance",
@@ -1076,17 +1241,17 @@ def exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category, n_chr_sim, n
     # Plot mean histogram with error bars
     plt.bar(
         bin_centers,
-        mean_density,
+        median_density,
         width=np.diff(bins),
         align='center',
         alpha=0.4,
         color='gray',
         edgecolor='black',
-        label="Experimental Mean Density (Bootstraps)",
+        label="Experimental Median Density (Bootstraps)",
     )
     plt.errorbar(
         bin_centers,
-        mean_density,
+        median_density,
         yerr=y_err,
         fmt='none',
         ecolor='black',
@@ -1187,9 +1352,9 @@ def exp_hist_vs_sim_kde(bootstrapped_df, long_dist_df, category, n_chr_sim, n_ti
 #                        category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 30 bins", outdir=outdir, bin_num=30, save=True)
 # share bins
 bins_MCF10A, bin_centers_MCF10A = exp_hist_vs_sim_kde_CI(bootstrapped_df_MCF10A, long_dist_df,
-                                                         category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 55 bins", outdir=outdir, bin_num=55, save=True)
+                                                         category89, n_chr_sim89, n_timepoints89, title="Simulations (0.0089) vs. MCF10A Bootstraps, 55 bins,median", outdir=outdir, bin_num=55, save=True)
 exp_hist_vs_sim_kde_CI(bootstrapped_df, long_dist_df, category67,
-                       n_chr_sim67, n_timepoints67, title="Simulations (0.0067) vs. HeLa Bootstraps, 55 MCF10A bins", bin_centers=bin_centers_MCF10A, bins=bins_MCF10A, outdir=outdir, save=True)
+                       n_chr_sim67, n_timepoints67, title="Simulations (0.0067) vs. HeLa Bootstraps, 55 MCF10A bins,median", bin_centers=bin_centers_MCF10A, bins=bins_MCF10A, outdir=outdir, save=True)
 
 
 # %% Choosing bin width for bootstrap histogram based on average experimental KDE
@@ -1514,4 +1679,30 @@ print(
     f"Percent of distances above 1.5 um for 0.0067 Sims: {percent_above_threshold_67}")
 print(
     f"Percent of distances above 1.5 um for 0.0089 Sims: {percent_above_threshold_89}")
+# %% count chromosomes
+
+
+def count_chromosomes(indir, image):
+    tmp = pd.read_csv(
+        f"{indir}/count_peaks_image{image}_.csv",
+        header=0,
+        index_col=0,
+        converters={"IC_peaks": pd.eval,
+                    "left_peaks": pd.eval, "right_peaks": pd.eval},
+    )
+    return len(tmp.index)
+
+
+indir_MCF10A = "/Users/smgroves/Library/CloudStorage/Box-Box/CPC_Model_Project/CPC_condensate_images/MCF10A/MCF10A_CPC_analysis/analysis/linescans/"
+num_chr = 0
+for image in range(50):
+    try:
+        print(image)
+        num_chr += count_chromosomes(indir_MCF10A, image=image)
+    except FileNotFoundError:
+        print(f"File not found for image {image}.")
+
+
+print("MCF10A chromosome number", num_chr)
+
 # %%
