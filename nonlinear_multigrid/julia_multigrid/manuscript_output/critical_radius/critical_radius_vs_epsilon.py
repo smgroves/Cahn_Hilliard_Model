@@ -65,13 +65,12 @@ for epsilon in [
     # "0.060037",
     # "0.090056",
 ]:
-
     # for epsilon in ["0.0037523", "0.0075046", "0.0018761", "0.015009"]:
     folder = f"critical_radius"
-    indir_radius = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/radii_lineplots_kymographs/alt_IC_periodic_BC_split_droplet/"
+    indir_radius = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/radii_lineplots_kymographs/offcenter_IC_droplet/"
     tmp = pd.read_csv(
         # f"{indir}/{folder}/alpha_0.0/radius_{level_set_radius}_level_set_epsilon_{epsilon}_alpha_0.0.txt",
-        f"{indir_radius}/radius_{level_set_radius}_level_set_epsilon_{epsilon}_twohalves.txt",
+        f"{indir_radius}/radius_{level_set_radius}_level_set_epsilon_{epsilon}_128__periodic_offcenterphi.txt",
         header=0,
         index_col=None,
         sep=",",
@@ -144,7 +143,7 @@ for epsilon in [
     #     f"{indir}/{folder}/alpha_0.0/critical_radius_vs_epsilon_{epsilon}_subset_log_v2.pdf"
     # )
     plt.savefig(
-        f"{indir_radius}/critical_radius_vs_epsilon_{epsilon}_twohalves_log_v2.pdf")
+        f"{indir_radius}/critical_radius_vs_epsilon_{epsilon}_offcenter_log_v2.pdf")
     plt.close()
     # plt.show()
 # %%

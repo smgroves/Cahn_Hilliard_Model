@@ -299,7 +299,7 @@ df = pd.read_csv(
 alpha = 0
 tmp = df.loc[df["alpha"] == alpha]
 xs = np.array(tmp["epsilon"])  # [0:2])
-ys = np.array(tmp["critical equilibrium radius (min)"])  # [0:2])
+ys = np.array(tmp["critical equilibrium radius (min)"])
 # ys = np.array(tmp["critical initial radius"])  # [0:2])
 
 print(df.head())
@@ -377,11 +377,11 @@ plt.legend()
 plt.xlim(0, 0.1)
 plt.ylim(0, 0.18)
 plt.tight_layout()
-plt.savefig(
-    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black_v2.pdf"
-)
-plt.close()
-# plt.show()
+# plt.savefig(
+# f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black_v2.pdf"
+# )
+# plt.close()
+plt.show()
 
 # %%
 # FIGURE 4D
@@ -438,9 +438,9 @@ plt.xticks(
 plt.title(
     rf"HeLa; $R_c$= 168 nm, IQR = 166-170 nm\n $\epsilon$ = {round(3200*0.00676,2)} nm, IQR = {round(3200*x_fill.min(),2)}-{round(3200*x_fill.max(),2)} nm")
 plt.legend()
-# plt.show()
-plt.savefig(
-    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap_nm_fixedx3200nm.pdf")
+plt.show()
+# plt.savefig(
+# f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap_nm_fixedx3200nm.pdf")
 
 
 # %% MCF10A supplement
@@ -497,9 +497,9 @@ plt.xticks(
 plt.legend()
 plt.title(
     rf"MCF10A; $R_c$= 189.2 nm, IQR = 186.4-192.2 nm\n $\epsilon$ = {0.0089*3200} nm, IQR = {round(3200*x_fill.min(),2)}-{round(3200*x_fill.max(),2)} nm")
-# plt.show()
-plt.savefig(
-    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap_nm_MCF10A_fixed3200nm.pdf")
+plt.show()
+# plt.savefig(
+# f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap_nm_MCF10A_fixed3200nm.pdf")
 # print(x_fill)
 # %% FIGURE S3C: multiple fits
 
@@ -517,8 +517,12 @@ def hyperbolic(x, m, t, b):
     # return
 
 
-def cubic_root(x, a, b, c, d):
-    return a * np.cbrt(b * x + c) + d
+def cubic_root(x, a):
+    return a * np.cbrt(x)
+
+
+def powerFit(x, a, b):
+    return a * np.power(x, b)
 
 
 def calculate_bic(xs, ys, func, p0):
@@ -561,30 +565,33 @@ initial_guess = [0.0, 0.0, 0.0]
 results_H2L = calculate_bic(xs, ys, h2l, initial_guess)
 print("H2L", results_H2L["bic"])
 xfit = np.linspace(0, 0.1)
-for fit in ["Linear", "Log", "Hyperbolic"]:
+for fit in ["Linear", "Log", "Hyperbolic", "Power", "Cubic Root"]:
     print(fit)
     if fit == "Linear":
         initial_guess = [1.0, 0.0]
         results = calculate_bic(xs, ys, linFit, initial_guess)
-        print("Linear", results["bic"])
         yfit = linFit(xfit, *results["best_fit_parameters"])
     elif fit == "Log":
         initial_guess = [1.0, 0.0]
         results = calculate_bic(xs, ys, logFit, initial_guess)
-        print("Log", results["bic"])
         yfit = logFit(xfit, *results["best_fit_parameters"])
     elif fit == "Hyperbolic":
         initial_guess = [1, 0.0, 0.0]
         results = calculate_bic(xs, ys, hyperbolic, initial_guess)
-        print("Hyperbolic", results["bic"])
         yfit = hyperbolic(xfit, *
                           results["best_fit_parameters"])
     elif fit == "Cubic Root":
-        initial_guess = [.1, 1, 0.0, 0.0]
+        initial_guess = [.1]
         results = calculate_bic(xs, ys, cubic_root, initial_guess)
-        print("Cubic Root", results["bic"])
         yfit = cubic_root(xfit, *
                           results["best_fit_parameters"])
+    elif fit == "Power":
+        initial_guess = [1.0, 1.0]
+        results = calculate_bic(xs, ys, powerFit, initial_guess)
+        yfit = powerFit(xfit, *results["best_fit_parameters"])
+
+    print("BIC: ", results["bic"])
+    print("Parameters: ", results["best_fit_parameters"])
     plt.figure(figsize=(4, 3))
 
     plt.plot(
@@ -614,16 +621,18 @@ for fit in ["Linear", "Log", "Hyperbolic"]:
     plt.xlim(0, 0.1)
     plt.ylim(0, 0.18)
     print(h2l(0.0125, m, t, b))
+
     plt.title("Different Fits of\n Critical Radius vs Epsilon")
     plt.xlabel("$\epsilon$")
     plt.ylabel("$R_{eq}$")
     plt.legend()
-    plt.savefig(
-        f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_{fit}_vs_H2L.pdf"
-    )
-    plt.close()
-    # plt.show()
+    # plt.savefig(
+    #     f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_{fit}_vs_H2L.pdf"
+    # )
+    # plt.close()
+    plt.show()
 
+# %%
 
 # initial_guess = [1.0, 0.0]
 # results = calculate_bic(xs, ys, linFit, initial_guess)
@@ -662,7 +671,7 @@ for fit in ["Linear", "Log", "Hyperbolic"]:
 #     # alpha=0.6,
 # )
 
-markers = {128: "o", 256: "^"}
+# markers = {128: "o", 256: "^"}
 
 # sns.scatterplot(
 #     data=tmp,
@@ -758,6 +767,152 @@ markers = {128: "o", 256: "^"}
 # plt.savefig(f"Critical initial radius_vs_epsilon_w_theory_128_256_black_v2.pdf")
 # plt.close()
 # plt.show()
+# %% power law for Rc values (0.168, IQR = 0.166-0.170)
+# power law fit from above
+a = 0.4586624
+exp = 0.43996249
+# ax^b = y
+# y/a = x^b
+# x = (y/a)^(1/b)
+
+
+exp = 0.43996249
+
+
+def power_law_inverse(y, a, exp):
+    return (y / a) ** (1 / exp)
+
+
+print(power_law_inverse(0.168/3.2, a, exp))
+print(power_law_inverse(0.166/3.2, a, exp))
+print(power_law_inverse(0.170/3.2, a, exp))
+
 # %%
+# comparing H2L and power law
+# run simulations with large epsilon to see which is fitting better:
+# eps = 0.12, M = 64
+
+print(h2l(0.12, m, t, b))  # 0.1966762832418493
+print(powerFit(0.12, a, exp))  # 0.18045437984979126
+
+# running simulations with the large epsilon (M = 64, Nx = 128) for R0 = 0.21, 0.2, 0.19, 0.18, 0.17
+
+
+# %%
+# Figure 4D Power Law
+fig, ax = plt.subplots(1, 1)
+x = np.linspace(0, 0.06, 10000)
+y = 3.2*powerFit(np.linspace(0, 0.06, 10000), a, exp)
+plt.plot(
+    x, y,
+    "--",
+    label=" Power Law Simulation Fit",
+    c="gray",
+)
+plt.ylabel(r"Critical Radius ($R_c$, $nm$)")
+plt.xlabel(r"Epsilon ($ \epsilon $, nm)")
+# ax.fill_between(x, y, where=(y <= .1), color='C1', alpha=0.3,
+#                 interpolate=True)
+# Mask values to ensure filling is within y1 and y2
+# y1 and y2 come from CI of bootstrapping from 10 images (choose 5)
+mask = (y >= .166) & (y <= .17)  # um values
+y_fill = y[mask]
+x_fill = x[mask]
+ax.fill_betweenx(y_fill, 0, x_fill, color='gray', alpha=0.3,
+                 interpolate=True, label="25-75% CI")
+
+# mask2 = (x >= .015) & (x <= .02)
+# y_fill2 = y[mask]
+# x_fill2 = x[mask]
+ax.fill_between(x_fill, 0, y_fill, color='gray', alpha=0.3, interpolate=True)
+
+# convert ymax and xmax to 0-1, percentage of axis
+# approx_Rc = 3.2*h2l(0.0067, m, t, b)
+approx_e = 0.00676  # unitless value
+plt.axvline(ymin=0,  ymax=(0.168-.1)/.1,
+            x=power_law_inverse(0.168/3.2, a, exp), label="Experimental CPC $R_{critical}$", c="k", linestyle="--")
+plt.axhline(xmin=0,  xmax=power_law_inverse(0.168/3.2, a, exp)/0.015,  # from previous cell execution power_law_inverse(0.168/3.2, a, b)
+            y=0.168, c="k", linestyle="--")
+
+plt.xlim(0, 0.015)
+plt.ylim(0.1, 0.2)
+
+# convert um to nm
+plt.yticks(
+    plt.yticks()[0][1:-1],
+    [round(j * 1000, 3) for j in plt.yticks()[0][1:-1]],
+    fontsize=8,
+)
+
+# convert unitless to nm
+plt.xticks(
+    plt.xticks()[0][1:-1],
+    [round(j * 3200, 3) for j in plt.xticks()[0][1:-1]],
+    fontsize=8,
+)
+plt.title(
+    rf"HeLa; $R_c$= 168 nm, IQR = 166-170 nm $\epsilon$ = {round(3200*power_law_inverse(0.168/3.2, a, exp),2)} nm, IQR = {round(3200*x_fill.min(),2)}-{round(3200*x_fill.max(),2)} nm")
+plt.legend()
+plt.show()
+
+# %%
+# %% MCF10A supplement POWER LAW
+# FIGURE 4D
+fig, ax = plt.subplots(1, 1)
+x = np.linspace(0, 0.06, 10000)
+y = 3.2*powerFit(np.linspace(0, 0.06, 10000), a, exp)
+plt.plot(
+    x, y,
+    "--",
+    label=" Power Law Simulation Fit",
+    c="gray",
+)
+plt.ylabel(r"Critical Radius ($R_eq$, $nm$)")
+plt.xlabel(r"Epsilon ($ \epsilon $, nm)")
+# ax.fill_between(x, y, where=(y <= .1), color='C1', alpha=0.3,
+#                 interpolate=True)
+# Mask values to ensure filling is within y1 and y2
+# y1 and y2 come from CI of bootstrapping from 10 images (choose 5)
+mask = (y >= .1864) & (y <= .1922)
+y_fill = y[mask]
+x_fill = x[mask]
+ax.fill_betweenx(y_fill, 0, x_fill, color='gray', alpha=0.3,
+                 interpolate=True, label="25-75% CI")
+
+# mask2 = (x >= .015) & (x <= .02)
+# y_fill2 = y[mask]
+# x_fill2 = x[mask]
+ax.fill_between(x_fill, 0, y_fill, color='gray', alpha=0.3, interpolate=True)
+
+# convert ymax and xmax to 0-1, percentage of axis
+# approx_Rc = 3.2*h2l(0.0067, m, t, b)
+approx_e = 0.00676
+plt.axvline(ymin=0,  ymax=(0.1892-.1)/.1,
+            x=power_law_inverse(0.1892/3.2, a, exp), label="Experimental CPC $R_{eq}$", c="k", linestyle="--")
+plt.axhline(xmin=0,  xmax=power_law_inverse(0.1892/3.2, a, exp)/0.015,
+            y=0.1892, c="k", linestyle="--")
+
+plt.xlim(0, 0.015)
+plt.ylim(0.1, 0.2)
+
+# convert um to nm
+plt.yticks(
+    plt.yticks()[0][1:-1],
+    [round(j * 1000, 3) for j in plt.yticks()[0][1:-1]],
+    fontsize=8,
+)
+
+plt.xticks(
+    plt.xticks()[0][1:-1],
+    [round(j * 3200, 3) for j in plt.xticks()[0][1:-1]],
+    fontsize=8,
+)
+plt.legend()
+plt.title(
+    rf"MCF10A; $R_c$= 189.2 nm, IQR = 186.4-192.2 nm $\epsilon$ = {round(power_law_inverse(0.1892/3.2, a, exp)*3200,3)} nm, IQR = {round(3200*x_fill.min(),2)}-{round(3200*x_fill.max(),2)} nm")
+plt.show()
+# plt.savefig(
+# f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_black_fill_experimental_bootstrap_nm_MCF10A_fixed3200nm.pdf")
+# print(x_fill)
 
 # %%
