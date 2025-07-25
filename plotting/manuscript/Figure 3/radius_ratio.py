@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 data = pd.read_table(
-    "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/manuscript/Figure 3/radius_0.5_level_set_epsilon_0.011257.txt", sep=",", header=0, index_col=None)
+    "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/plotting/manuscript//radius_0.5_level_set_epsilon_0.011257.txt", sep=",", header=0, index_col=None)
 
 print(data.head())
 
