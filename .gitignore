@@ -13,6 +13,7 @@
 # Large simulation output data files
 **/phi*.txt
 **/*.mat
+!**/tracked_droplets.mat
 nonlinear_multigrid/**/*.csv
 finite_difference_method/**/*.csv
 SAV/**/*.csv
