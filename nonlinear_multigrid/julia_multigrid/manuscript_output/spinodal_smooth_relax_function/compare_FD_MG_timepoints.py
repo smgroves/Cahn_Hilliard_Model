@@ -24,12 +24,8 @@ outdir = f"/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATL
 indir_MG = f"/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-{boundary}"
 indir_SAV = f"/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-{boundary}"
 
-# %%
-
-# %%
-
 # %% LOAD NMG
-phi_name_MG = "NMG_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_dtout_1_phi.csv"
+# phi_name_NMG = "NMG_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_dtout_1_phi.csv"
 # indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
 # phi_name_MG = "MG_2000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi.txt"
 
@@ -69,8 +65,8 @@ phi_FD = phi_FD.reshape(-1, 128, 128).transpose(1, 2, 0)
 
 # indir_MG = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
 
-timepoints = [40, 60]
-# timepoints = [1, 2, 40, 100, 200]
+# timepoints = [40, 60]
+timepoints = [1, 2, 40, 100, 200]
 
 # timepoints = [200, 400]
 dt_out = 100
@@ -89,14 +85,14 @@ for timepoint in timepoints:
     plt.yticks(ticks=[], labels=[])
     # plt.title(f"Time= {timepoint*dt}")
     plt.tight_layout()
-    plt.savefig(
-        f"{indir_MG}/MG_6000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}.png",
-        bbox_inches="tight",
-        pad_inches=0,
-        dpi=300,
-    )
-    plt.close()
-    # plt.show()
+    # plt.savefig(
+    #     f"{indir_MG}/MG_6000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}.png",
+    #     bbox_inches="tight",
+    #     pad_inches=0,
+    #     dpi=300,
+    # )
+    # plt.close()
+    plt.show()
 
 # %% zoom in to timepoint 10:
 timepoint = 1
@@ -210,13 +206,14 @@ for timepoint in timepoints:
     plt.yticks(ticks=[], labels=[])
     # plt.title(f"Time= {timepoint*dt}")
     plt.tight_layout()
-    plt.savefig(
-        f"{indir_SAV}/SAV_2000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}_neumann.png",
-        bbox_inches="tight",
-        pad_inches=0,
-        dpi=300,
-    )
-    plt.close()
+    plt.show()
+    # plt.savefig(
+    #     f"{indir_SAV}/SAV_2000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}_neumann.png",
+    #     bbox_inches="tight",
+    #     pad_inches=0,
+    #     dpi=300,
+    # )
+    # plt.close()
 # %%
 save = True
 dt = 5.5e-7

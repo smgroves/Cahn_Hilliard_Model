@@ -4,6 +4,7 @@
 using DelimitedFiles
 using Dates
 
+
 #use the official final code for smoothing
 include("/Users/smgroves/Documents/GitHub/CHsolvers_package/CahnHilliard_Julia_solvers/nmg_solver.jl")
 include("/Users/smgroves/Documents/GitHub/CHsolvers_package/CahnHilliard_Julia_solvers/relax.jl")
@@ -12,10 +13,10 @@ include("/Users/smgroves/Documents/GitHub/CHsolvers_package/CahnHilliard_Julia_s
 outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/IC_FIGURE1_FIGURE2/"
 
 #%%
-# include("../../CH_multigrid_solver.jl")
+include("../../CH_multigrid_solver.jl")
 #%%
 # tol = 1e-6
-nx = 128
+nx = 256
 ny = nx
 perc = "50p"
 
@@ -55,7 +56,7 @@ domain_right = 1
 tol = 1e-6
 dt = 6.25e-6
 m = 8
-epsilon = m * (1 / 128) / (2 * sqrt(2) * atanh(0.9))
+epsilon = m * (1 / 256) / (2 * sqrt(2) * atanh(0.9))
 Cahn = epsilon^2  # ϵ^2 defined as a global variable
 
 phi = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_$(perc).csv", nx, nx)
@@ -73,9 +74,9 @@ writedlm("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$
 using Plots
 using DelimitedFiles
 perc = "50p"
-nx = 128
+nx = 256
 boundary = "periodic"
-n_relax = 16
+n_relax = 4
 phi_smooth = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary)_v2.csv", nx, nx)
 gr()
 heatmap(1:size(phi_smooth, 1),
@@ -91,7 +92,7 @@ heatmap(1:size(phi_smooth, 1),
 using Plots
 using DelimitedFiles
 perc = "50p"
-nx = 128
+nx = 256
 boundary = "periodic"
 n_relax = 4
 phi_smooth_v1 = initialization_from_file("$(outdir)$(perc)/initial_phi_$(nx)_smooth_n_relax_$(n_relax)_$(perc)_$(boundary).csv", nx, nx)
@@ -254,3 +255,29 @@ open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Job_specs.csv", "a", 
     writedlm(f, [date_time "spinodal_smoothed_no_print" "Julia" nx epsilon dt tol max_it 10000 time_passed], ",")
 end
 # writedlm("$(outdir)/$(name)_final_phi.csv", final_phi, ',')
+#%%
+using DelimitedFiles
+using Dates
+using Plots
+
+indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/IC_FIGURE1_FIGURE2/50p/"
+outdir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output/"
+
+nx = 128
+dt = 5.5e-6
+n_relax = 4
+ny = nx
+tol = 1e-5
+m = 8
+epsilon = m * (1 / nx) / (2 * sqrt(2) * atanh(0.9))
+
+max_it = 6000
+total_time = max_it * dt
+date_time = now()
+name = "MG_$(max_it)_dt_$(dt)_Nx_$(nx)_n_relax_$(n_relax)_eps_$(epsilon)"
+phi = initialization_from_file("$(indir)initial_phi_$(nx)_smooth_n_relax_$(n_relax)_50p_periodic_v2.csv", nx, nx)
+date_time = now()
+time_passed = @elapsed multigrid_solver(phi, nx, tol, outdir, ns=10, dt=dt, epsilon=epsilon, max_it=max_it, print_mass=false, print_e=false, overwrite=true, print_r=false, print_phi=true, suffix=name, check_dir=false)
+# open("/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/Job_specs.csv", "a", lock=false) do f
+#     writedlm(f, [date_time "spinodal_smoothed_no_print" "Julia" nx epsilon dt tol max_it 10000 time_passed], ",")
+# end
