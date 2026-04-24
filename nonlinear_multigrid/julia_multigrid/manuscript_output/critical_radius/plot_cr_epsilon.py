@@ -1,6 +1,7 @@
 # %%
 # Plot relationship between critical radius and epsilon values for a given alpha.
 # This gives a line plot that allows us to approximate the epsilon value we should use to get a critical radius equal to the CPC critical radius from images.
+from matplotlib.ticker import FixedLocator, FixedFormatter
 import scipy.optimize
 import numpy as np
 import pandas as pd
@@ -368,19 +369,28 @@ for cat, group in tmp.groupby("Nx"):
         label=cat,
     )
 
+plt.xscale("log")
+plt.yscale("log")
+plt.xlim(0.0025, 0.10)
+plt.xticks([0.0025, 1e-2, 1e-1],
+           [r"$2.5\times10^{-3}$", r"$1\times10^{-2}$", r"$1\times10^{-1}$"])
 
+plt.ylim(0.025, 0.25)
+plt.yticks([0.025, 1e-1, 0.25],
+           [r"$2.5\times10^{-2}$", r"$1\times10^{-1}$", r"$2.5\times10^{-1}$"])
+ax.yaxis.set_minor_locator(FixedLocator([]))  # suppress minor ticks too
 print(h2l(0.0125, m, t, b))
 plt.title("Hyperbolic-to-Linear Fit of\n Critical Radius vs Epsilon")
 plt.xlabel(r"Epsilon ($ \epsilon $)")
 plt.ylabel(r"Critical Equilibrium Radius ($R_c$)")
 plt.legend()
-plt.xlim(0, 0.1)
-plt.ylim(0, 0.18)
+# plt.xlim(0, 0.1)
+# plt.ylim(0, 0.18)
 plt.tight_layout()
-# plt.savefig(
-# f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black_v2.pdf"
-# )
-# plt.close()
+plt.savefig(
+    f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_hyperlin_128_256_black_v_logscale.pdf"
+)
+plt.close()
 plt.show()
 
 # %%
@@ -578,13 +588,11 @@ for fit in ["Linear", "Log", "Hyperbolic", "Power", "Cubic Root"]:
     elif fit == "Hyperbolic":
         initial_guess = [1, 0.0, 0.0]
         results = calculate_bic(xs, ys, hyperbolic, initial_guess)
-        yfit = hyperbolic(xfit, *
-                          results["best_fit_parameters"])
+        yfit = hyperbolic(xfit, *results["best_fit_parameters"])
     elif fit == "Cubic Root":
         initial_guess = [.1]
         results = calculate_bic(xs, ys, cubic_root, initial_guess)
-        yfit = cubic_root(xfit, *
-                          results["best_fit_parameters"])
+        yfit = cubic_root(xfit, *results["best_fit_parameters"])
     elif fit == "Power":
         initial_guess = [1.0, 1.0]
         results = calculate_bic(xs, ys, powerFit, initial_guess)
@@ -592,44 +600,63 @@ for fit in ["Linear", "Log", "Hyperbolic", "Power", "Cubic Root"]:
 
     print("BIC: ", results["bic"])
     print("Parameters: ", results["best_fit_parameters"])
-    plt.figure(figsize=(4, 3))
+    fig, ax = plt.subplots(figsize=(3, 3))
 
     plt.plot(
         xfit,
         h2l(xfit, *results_H2L["best_fit_parameters"]),
         label=f"H2L Fit, BIC = {round(results_H2L['bic'],2)}",
+        c="gray",
+        linestyle="--",
     )
     plt.plot(
         xfit,
         yfit,
         label=f"{fit} Fit, BIC = {round(results['bic'],2)}",
     )
+    # make axes log-log
+    plt.xscale("log")
+    plt.yscale("log")
+
     markers = {128: "o", 256: "^"}
+
+    # black for 256, white for 128 palette for hue
+    palette = {128: "black", 256: "white"}
     sns.scatterplot(
         data=tmp,
         x="epsilon",
         y="critical equilibrium radius (min)",
-        # hue="Nx",
+        hue="Nx",
+        palette=palette,
         edgecolors="k",
-        facecolors="none",
         markers=markers,
         style="Nx",
         alpha=1,
-        zorder=10,
-        linewidth=1
-    )
-    plt.xlim(0, 0.1)
-    plt.ylim(0, 0.18)
+        linewidth=1)
+
+    # show the same axes lines in each plot: 10^-2, 10^-1, 10^0 for x and 10^-1, 10^0, 10^1 for y
+    # using latex to show the axes labels in scientific notation
+    plt.xticks(
+        [0.0025, 1e-2, 1e-1],
+        ["0.0025", "0.01", "0.1"])
+    plt.xlim(0.0025, 0.1)
+
+    plt.yticks(
+        [0.025, 1e-1, 0.25],
+        ["0.025", "0.1", "0.25"])
+    plt.ylim(0.025, .25)
+
+    ax.yaxis.set_minor_locator(FixedLocator([]))  # suppress minor ticks too
     print(h2l(0.0125, m, t, b))
 
     plt.title("Different Fits of\n Critical Radius vs Epsilon")
     plt.xlabel("$\epsilon$")
     plt.ylabel("$R_{eq}$")
     plt.legend()
-    # plt.savefig(
-    #     f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_{fit}_vs_H2L.pdf"
-    # )
-    # plt.close()
+    plt.savefig(
+        f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_{fit}_vs_H2L_logscale.pdf"
+    )
+    plt.close()
     plt.show()
 
 # %%
@@ -712,61 +739,74 @@ for fit in ["Linear", "Log", "Hyperbolic", "Power", "Cubic Root"]:
 # plt.show()
 
 
-# # %% FIGURE 3
-# tmp = df.loc[df["alpha"] == 0]
+# # %% FIGURE 3D
+tmp = df.loc[df["alpha"] == 0]
 
-# fig = plt.figure(figsize=(5, 4))
-
-
-# def crit_init_r_theory(e, V=1):
-#     return np.cbrt((np.sqrt(6) / (8 * np.pi)) * V * e)
+fig = plt.figure(figsize=(5, 4))
 
 
-# plt.rcParams["mathtext.fontset"] = "cm"
+def crit_init_r_theory(e, V=1):
+    return np.cbrt((np.sqrt(6) / (8 * np.pi)) * V * e)
 
 
-# f, ax = plt.subplots(figsize=(5, 4))
+plt.rcParams["mathtext.fontset"] = "cm"
 
-# plt.plot(
-#     np.linspace(0, 0.10),
-#     crit_init_r_theory(np.linspace(0, 0.10)),
-#     "--",
-#     label=f"Theory",
-#     c="grey",
-#     alpha=0.6,
+
+f, ax = plt.subplots(figsize=(5, 4))
+
+plt.plot(
+    np.linspace(0, 0.10),
+    crit_init_r_theory(np.linspace(0, 0.10)),
+    "--",
+    label=f"Theory",
+    c="grey",
+    alpha=0.6,
+)
+
+markers = {128: "o", 256: "^"}
+
+# sns.scatterplot(
+#     data=tmp,
+#     x="epsilon",
+#     y="critical initial radius",
+#     # hue="Nx",
+#     palette=sns.color_palette("bright"),
+#     edgecolor="k",
+#     markers=markers,
+#     style="Nx",
 # )
+for cat, group in tmp.groupby("Nx"):
+    ax.scatter(
+        group["epsilon"],
+        group["critical initial radius"],
+        edgecolors="k",
+        facecolors="none",
+        marker=markers[cat],
+        label=cat,
+    )
+plt.legend()
+# convert to log-log axis
+plt.xscale("log")
+plt.yscale("log")
+plt.xlim(0.0025, 0.10)
+plt.xticks([0.0025, 1e-2, 1e-1],
+           [r"$2.5\times10^{-3}$", r"$1\times10^{-2}$", r"$1\times10^{-1}$"])
 
-# markers = {128: "o", 256: "^"}
+plt.ylim(0.06, 0.25)
+plt.yticks([0.06, 1e-1, 0.25],
+           [r"$6\times10^{-2}$", r"$1\times10^{-1}$", r"$2.5\times10^{-1}$"])
+ax.yaxis.set_minor_locator(FixedLocator([]))  # suppress minor ticks too
 
-# # sns.scatterplot(
-# #     data=tmp,
-# #     x="epsilon",
-# #     y="critical initial radius",
-# #     # hue="Nx",
-# #     palette=sns.color_palette("bright"),
-# #     edgecolor="k",
-# #     markers=markers,
-# #     style="Nx",
-# # )
-# for cat, group in tmp.groupby("Nx"):
-#     ax.scatter(
-#         group["epsilon"],
-#         group["critical initial radius"],
-#         edgecolors="k",
-#         facecolors="none",
-#         marker=markers[cat],
-#         label=cat,
-#     )
-# plt.legend()
-# plt.xlim(0, 0.10)
-# plt.ylim(0, 0.25)
-# plt.title("Critical Initial Radius vs Epsilon")
-# plt.xlabel(r"Epsilon ($ \epsilon $)")
-# plt.ylabel(r"Critical Initial Radius ($R_0$)")
-# plt.tight_layout()
-# plt.savefig(f"Critical initial radius_vs_epsilon_w_theory_128_256_black_v2.pdf")
-# plt.close()
-# plt.show()
+plt.title("Critical Initial Radius vs Epsilon")
+plt.xlabel(r"Epsilon ($ \epsilon $)")
+plt.ylabel(r"Critical Initial Radius ($R_0$)")
+
+
+plt.tight_layout()
+plt.savefig(
+    f"Critical initial radius_vs_epsilon_w_theory_128_256_black_v2_log_scale.pdf")
+plt.close()
+plt.show()
 # %% power law for Rc values (0.168, IQR = 0.166-0.170)
 # power law fit from above
 a = 0.4586624
