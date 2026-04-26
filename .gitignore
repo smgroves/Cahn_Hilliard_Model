@@ -13,7 +13,8 @@
 # Large simulation output data files
 **/phi*.txt
 **/*.mat
-!**/tracked_droplets.mat
+!**/trackedDroplets.mat
+!nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smoothed_July_2024/t_*/*.mat
 nonlinear_multigrid/**/*.csv
 finite_difference_method/**/*.csv
 SAV/**/*.csv
