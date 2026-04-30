@@ -367,7 +367,67 @@ def plot_phase_field_samples(phi_list, times=None, figsize=(12, 4)):
 
     plt.tight_layout()
     return fig, axes
-
+def plot_phi_cross_section(phi_list, times=None, y_index=None, figsize=(10, 6)):
+    """
+    Plot φ vs x at a fixed y-coordinate for 3 time snapshots.
+    
+    Parameters
+    ----------
+    phi_list : list of ndarray
+        Phase field at successive times (each is N×N)
+    times : array-like, optional
+        Time values
+    y_index : int, optional
+        y-index to extract (default: middle, N/2)
+    figsize : tuple
+        Figure size
+    
+    Returns
+    -------
+    fig, ax
+    """
+    
+    if times is None:
+        times = np.arange(len(phi_list))
+    
+    # Get N from first phi
+    N = phi_list[0].shape[0]
+    
+    # Default to middle of domain
+    if y_index is None:
+        y_index = N // 2
+    
+    # Select 3 snapshots
+    n = len(phi_list)
+    if n <= 3:
+        indices = list(range(n))
+    else:
+        indices = [0, n//2, n-1]
+    
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    colors = plt.cm.viridis(np.linspace(0, 1, len(indices)))
+    
+    for idx_num, i in enumerate(indices):
+        phi = phi_list[i]
+        t_val = times[i]
+        
+        # Extract cross-section at y = y_index
+        phi_slice = phi[y_index, :]
+        x = np.arange(N)
+        
+        ax.plot(x, phi_slice, 'o-', linewidth=2.5, markersize=6,
+                color=colors[idx_num], label=f't = {t_val:.2e}', alpha=0.8)
+    
+    ax.set_xlabel('x', fontsize=12, fontweight='bold')
+    ax.set_ylabel('φ(x, y=' + str(y_index) + ')', fontsize=12, fontweight='bold')
+    ax.set_title('Phase Field Cross-Section', fontsize=13, fontweight='bold')
+    ax.legend(fontsize=11, loc='best')
+    ax.grid(True, alpha=0.3)
+    ax.set_xlim(0, N-1)
+    
+    plt.tight_layout()
+    return fig, ax
 
 # %%
 L = 1
@@ -460,3 +520,8 @@ fig2, _, _ = plot_coarsening_law(result['t'],
                                  t_max=t_max)
 
 # %%
+fig4, ax4 = plot_phi_cross_section(phi_list, times=times, y_index=64)
+fig4.savefig('./structure_factor_results/phi_cross_section_y64.png',
+             dpi=150,
+             bbox_inches='tight')
+print("    ✓ Saved: phi_cross_section_y64.png")

@@ -653,12 +653,46 @@ for fit in ["Linear", "Log", "Hyperbolic", "Power", "Cubic Root"]:
     plt.xlabel("$\epsilon$")
     plt.ylabel("$R_{eq}$")
     plt.legend()
-    plt.savefig(
-        f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_{fit}_vs_H2L_logscale.pdf"
-    )
-    plt.close()
+    # plt.savefig(
+        # f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_multi_fits_{fit}_vs_H2L_logscale.pdf"
+    # )
+    # plt.close()
     plt.show()
 
+#%% bootstrapping H2L vs power law fit to get BIC ranges
+
+def power_H2L(xs,ys):
+    initial_guess = [0.0, 0.0, 0.0]
+    results_H2L = calculate_bic(xs, ys, h2l, initial_guess)
+    print("H2L", results_H2L["bic"])
+    print("H2L Parameters: ", results_H2L["best_fit_parameters"])
+    initial_guess = [1.0, 1.0]
+    results_power = calculate_bic(xs, ys, powerFit, initial_guess)
+    yfit = powerFit(xfit, *results_power["best_fit_parameters"])
+    print("Power Fit BIC: ", results_power["bic"])
+    print("Power Fit Parameters: ", results_power["best_fit_parameters"])
+    return results_H2L["bic"], results_power["bic"]
+
+#bootstrap the data 1000 times and get the distribution of BIC values for H2L and power law fit
+n_bootstraps = 1000
+bic_H2L = []
+bic_power = []
+for i in range(n_bootstraps):
+    # resample the data with replacement
+    resampled_data = tmp.sample(frac=1, replace=True)
+    xs_resampled = np.array(resampled_data["epsilon"])
+    ys_resampled = np.array(resampled_data["critical equilibrium radius (min)"])
+    bic_H2L_i, bic_power_i = power_H2L(xs_resampled, ys_resampled)
+    bic_H2L.append(bic_H2L_i)
+    bic_power.append(bic_power_i)
+# plot the distribution of BIC values for H2L and power law fit
+plt.figure(figsize=(5, 4))
+sns.histplot(bic_H2L, color="gray", label="H2L Fit", kde=True, binwidth=1)
+sns.histplot(bic_power, color="blue", label="Power Law Fit", kde=True, binwidth=1)
+plt.xlabel("BIC")
+plt.title("Bootstrap Distribution of BIC Values")
+plt.legend()
+plt.show()
 # %%
 
 # initial_guess = [1.0, 0.0]
