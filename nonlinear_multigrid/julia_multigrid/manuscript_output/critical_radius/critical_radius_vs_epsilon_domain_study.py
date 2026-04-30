@@ -24,27 +24,45 @@ level_set_radius = "0.5"
 Nx = 256
 L = "2.0"
 epsilon = "0.01501"
-indir_radius = "/Users/sarahmaddox/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/domain_size_study/"
+indir_radius = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/domain_size_study"
 
-for R0 in [0.09, 0.1, 0.105, 0.11, 0.12]:  # [0.09, 0.1, 0.105, 0.11, 0.12]:#np.arange(0.09, 0.13, 0.01):
-
-    tmp = pd.read_csv(
+# [0.09, 0.1, 0.105, 0.11, 0.12]:#np.arange(0.09, 0.13, 0.01):
+for R0 in [0.09, 0.1, 0.105, 0.11, 0.12]:
+    R0 = str(R0*2)
+    domain2 = pd.read_csv(
         f"{indir_radius}/radius_0.5_nx256.0_L{L}_R0{R0}_eps0.01501_phi.txt",
         header=0,
         index_col=None,
         sep=",",
         on_bad_lines="skip",
     )
-    #append to a master dataframe
-    if R0 == 0.09:
-        master_df = tmp
+    # append to a master dataframe
+    if R0 == "0.18":
+        master_df = domain2
     else:
-        master_df = pd.concat([master_df, tmp], ignore_index=True)
-tmp = master_df.dropna()
-print(tmp.shape)
+        master_df = pd.concat([master_df, domain2], ignore_index=True)
+domain2 = master_df.dropna()
+print(domain2.shape)
 # tmp.fillna(0, inplace=True)
+tmp = domain2
+# tmp = domain2.sort_values("R0", ascending=False)
 
-tmp = tmp.sort_values("R0", ascending=False)
+# epsilon = "0.011257"
+# indir_radius = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius"
+# tmp = pd.read_csv(
+
+#     f"{indir_radius}/alpha_0.0/radius_{level_set_radius}_level_set_epsilon_{epsilon}_alpha_0.0.txt",
+#     # f"{indir_radius}/radius_{level_set_radius}_level_set_epsilon_{epsilon}_128.txt",
+#     header=0,
+#     index_col=None,
+#     sep=",",
+#     on_bad_lines="skip",
+# )
+
+# # what to keep
+# tmp = tmp.drop(tmp[~tmp["R0"].isin([0.09, 0.1, 0.105, 0.11, 0.12])].index)
+# print(tmp.shape)
+# tmp = tmp.sort_values("R0", ascending=False)
 
 # sns.lineplot(data=tmp, x="time", y="radius", hue="R0", palette="tab20")
 for i, r in enumerate(np.unique(tmp["R0"])):
@@ -65,17 +83,17 @@ plt.legend(
     fontsize="large",
     reverse=True,
 )
-plt.xscale("log")
+# plt.xscale("log")
 plt.title(f"Epsilon = {epsilon}")
 # plt.axhline(0.07, linestyle="--", color="gray")
-plt.ylim(0, 0.14)
-plt.xlim(1e-3, 1e1)
+# plt.ylim(0, 0.14)
+# plt.xlim(1e-3, 1e1)
 plt.xlabel("Time (tchar)")
 plt.ylabel("Radius (R)")
 plt.tight_layout()
 
 # plt.savefig(
-    # f"{indir_radius}/critical_radius_vs_epsilon_domain_size_study_Nx{Nx}_L{L}.pdf")
+# f"{indir_radius}/critical_radius_vs_epsilon_domain_size_study_Nx{Nx}_L{L}.pdf")
 # plt.close()
 plt.show()
 # %%
