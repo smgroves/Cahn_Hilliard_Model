@@ -711,7 +711,7 @@ for i in range(n_bootstraps):
 # plot the distribution of BIC values for H2L and power law fit
 plt.figure(figsize=(5, 4))
 sns.histplot(bic_H2L, color="gray", label="H2L Fit", kde=True, binwidth=1)
-sns.histplot(bic_power, color="blue", label="Power Law Fit", kde=True, binwidth=1)
+sns.histplot(bic_power, color=sns.color_palette("Set1")[1], label="Power Law Fit", kde=True, binwidth=1)
 plt.xlabel("BIC")
 plt.title("Bootstrap Distribution of BIC Values")
 plt.legend()
@@ -765,8 +765,8 @@ sns.lineplot(
     label=f"Power Law Fit, BIC = {round(results_power['bic'],2)}",
     color=sns.color_palette("Set1")[1],
 )
-plt.fill_between(xfit, ci_H2L_lower, ci_H2L_upper, color="gray", alpha=0.3, label="H2L Fit 90% CI")
-plt.fill_between(xfit, ci_power_lower, ci_power_upper, color=sns.color_palette("Set1")[1], alpha=0.3, label="Power Law Fit 90% CI")
+plt.fill_between(xfit, ci_H2L_lower, ci_H2L_upper, color="gray", alpha=0.3)
+plt.fill_between(xfit, ci_power_lower, ci_power_upper, color=sns.color_palette("Set1")[1], alpha=0.3)
 markers = {128: "o", 256: "^"}
 palette = {128: "black", 256: "white"}
 sns.scatterplot(
@@ -963,26 +963,37 @@ for cat, group in tmp.groupby("Nx"):
     )
 plt.legend()
 # convert to log-log axis
-plt.xscale("log")
-plt.yscale("log")
-plt.xlim(0.0025, 0.10)
-plt.xticks([0.0025, 1e-2, 1e-1],
-           [r"$2.5\times10^{-3}$", r"$1\times10^{-2}$", r"$1\times10^{-1}$"])
+# plt.xscale("log")
+# plt.yscale("log")
+# plt.xlim(0.0025, 0.10)
+# plt.xticks([0.0025, 1e-2, 1e-1],
+#            [r"$2.5\times10^{-3}$", r"$1\times10^{-2}$", r"$1\times10^{-1}$"])
 
-plt.ylim(0.06, 0.25)
-plt.yticks([0.06, 1e-1, 0.25],
-           [r"$6\times10^{-2}$", r"$1\times10^{-1}$", r"$2.5\times10^{-1}$"])
-ax.yaxis.set_minor_locator(FixedLocator([]))  # suppress minor ticks too
-
+# plt.ylim(0.06, 0.25)
+# plt.yticks([0.06, 1e-1, 0.25],
+#            [r"$6\times10^{-2}$", r"$1\times10^{-1}$", r"$2.5\times10^{-1}$"])
+# ax.yaxis.set_minor_locator(FixedLocator([]))  # suppress minor ticks too
 plt.title("Critical Initial Radius vs Epsilon")
 plt.xlabel(r"Epsilon ($ \epsilon $)")
 plt.ylabel(r"Critical Initial Radius ($R_0$)")
 
+# calculate the max epsilon that could be used with a given initial radius based on 128 grid size and e = m/128 *(1/(2*sqrt(2)*atanh(0.9)))
+Ric = np.arange(.1,.3,.001)
+e_max = []
+for r in Ric:
+    droplet_width = np.ceil(128*r)
+    m_max = (128-droplet_width)/2
+    print(f"Ric: {r}, droplet width: {droplet_width}, m_max: {m_max}")
+    e_max.append((m_max)/(128*2*np.sqrt(2)*np.arctanh(0.9)))
+plt.plot(e_max, Ric, label="Max Epsilon for 128 Grid Size", c="gray")
 
+
+plt.xlim(0,0.1)
+plt.ylim(0,0.3)
 plt.tight_layout()
-plt.savefig(
-    f"Critical initial radius_vs_epsilon_w_theory_128_256_black_v2_log_scale.pdf")
-plt.close()
+# plt.savefig(
+#     f"Critical initial radius_vs_epsilon_w_theory_128_256_black_v2_log_scale.pdf")
+# plt.close()
 plt.show()
 # %% power law for Rc values (0.168, IQR = 0.166-0.170)
 # power law fit from above
