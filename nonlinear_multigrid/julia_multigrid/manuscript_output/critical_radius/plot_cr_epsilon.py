@@ -568,6 +568,22 @@ def calculate_bic(xs, ys, func, p0):
 
     return {"best_fit_parameters": params, "bic": bic, "residuals": residuals}
 
+#%%
+#calculate BICw for H2L fit vs other fits (linear, log, hyperbolic, power law) to see which one is best for the data. We want to see if H2L is significantly better than the other fits, or if the other fits are just as good. We can also use the BIC values to calculate the relative likelihood of each model given the data.
+def calculate_relative_likelihood(bic_values):
+    """
+    Calculate the relative likelihood of each model given the BIC values.
+
+    Parameters:
+    bic_values (dict): Dictionary containing BIC values for each model.
+
+    Returns:
+    dict: Dictionary containing relative likelihoods for each model.
+    """
+    min_bic = min(bic_values.values())
+    relative_likelihoods = {model: np.exp((min_bic - bic) / 2) for model, bic in bic_values.items()}
+    return relative_likelihoods
+
 # %%
 
 
@@ -602,6 +618,7 @@ for fit in ["Linear", "Log", "Hyperbolic", "Power", "Cubic Root"]:
     print("Parameters: ", results["best_fit_parameters"])
     fig, ax = plt.subplots(figsize=(3, 3))
 
+    print("BICw: ", calculate_relative_likelihood({"H2L": results_H2L["bic"], fit: results["bic"]}))
     plt.plot(
         xfit,
         h2l(xfit, *results_H2L["best_fit_parameters"]),
@@ -671,20 +688,26 @@ def power_H2L(xs,ys):
     yfit = powerFit(xfit, *results_power["best_fit_parameters"])
     print("Power Fit BIC: ", results_power["bic"])
     print("Power Fit Parameters: ", results_power["best_fit_parameters"])
-    return results_H2L["bic"], results_power["bic"]
+    return results_H2L, results_power
 
 #bootstrap the data 1000 times and get the distribution of BIC values for H2L and power law fit
 n_bootstraps = 1000
 bic_H2L = []
 bic_power = []
+#save best fit parameters to add 90% confidence intervals to the plot
+best_fit_parameters_H2L = []
+best_fit_parameters_power = []
 for i in range(n_bootstraps):
     # resample the data with replacement
     resampled_data = tmp.sample(frac=1, replace=True)
     xs_resampled = np.array(resampled_data["epsilon"])
     ys_resampled = np.array(resampled_data["critical equilibrium radius (min)"])
     bic_H2L_i, bic_power_i = power_H2L(xs_resampled, ys_resampled)
-    bic_H2L.append(bic_H2L_i)
-    bic_power.append(bic_power_i)
+    bic_H2L.append(bic_H2L_i["bic"])
+    bic_power.append(bic_power_i["bic"])
+    best_fit_parameters_H2L.append(bic_H2L_i["best_fit_parameters"])
+    best_fit_parameters_power.append(bic_power_i["best_fit_parameters"])
+
 # plot the distribution of BIC values for H2L and power law fit
 plt.figure(figsize=(5, 4))
 sns.histplot(bic_H2L, color="gray", label="H2L Fit", kde=True, binwidth=1)
@@ -692,6 +715,126 @@ sns.histplot(bic_power, color="blue", label="Power Law Fit", kde=True, binwidth=
 plt.xlabel("BIC")
 plt.title("Bootstrap Distribution of BIC Values")
 plt.legend()
+plt.show()
+
+#%%
+#calculate 90% confidence intervals for the fit parameters for H2L and power law fit
+best_fit_parameters_H2L = np.array(best_fit_parameters_H2L)
+best_fit_parameters_power = np.array(best_fit_parameters_power)
+# ci_H2L = np.percentile(best_fit_parameters_H2L, [5, 95], axis=0)
+# ci_power = np.percentile(best_fit_parameters_power, [5, 95], axis=0)
+
+# Evaluate FUNCTION with each bootstrap fit
+#for H2L
+yfit_H2L_all_bootstrap = []
+for params in best_fit_parameters_H2L:
+    y_pred = h2l(xfit, *params)
+    yfit_H2L_all_bootstrap.append(y_pred)
+
+# Then get percentiles of FUNCTION VALUES
+ci_H2L_lower = np.percentile(yfit_H2L_all_bootstrap, 5, axis=0)
+ci_H2L_upper = np.percentile(yfit_H2L_all_bootstrap, 95, axis=0)
+
+#for power law fit
+yfit_power_all_bootstrap = []
+for params in best_fit_parameters_power:
+    y_pred = powerFit(xfit, *params)
+    yfit_power_all_bootstrap.append(y_pred)
+ci_power_lower = np.percentile(yfit_power_all_bootstrap, 5, axis=0)
+ci_power_upper = np.percentile(yfit_power_all_bootstrap, 95, axis=0)
+
+
+initial_guess = [1.0, 1.0]
+results_power = calculate_bic(xs, ys, powerFit, initial_guess)
+yfit = powerFit(xfit, *results_power["best_fit_parameters"])
+#add to line plot of H2L vs power law fit with confidence intervals for the parameters
+xfit = np.linspace(0, 0.1)
+yfit_H2L = h2l(xfit, *results_H2L["best_fit_parameters"])
+yfit_power = powerFit(xfit, *results_power["best_fit_parameters"])
+plt.figure(figsize=(5, 4))
+sns.lineplot(
+    x=xfit,
+    y=yfit_H2L,
+    linestyle="--",
+    label=f"H2L Fit, BIC = {round(results_H2L['bic'],2)}",
+    color="gray",
+)
+sns.lineplot(
+    x=xfit,
+    y=yfit_power,
+    label=f"Power Law Fit, BIC = {round(results_power['bic'],2)}",
+    color=sns.color_palette("Set1")[1],
+)
+plt.fill_between(xfit, ci_H2L_lower, ci_H2L_upper, color="gray", alpha=0.3, label="H2L Fit 90% CI")
+plt.fill_between(xfit, ci_power_lower, ci_power_upper, color=sns.color_palette("Set1")[1], alpha=0.3, label="Power Law Fit 90% CI")
+markers = {128: "o", 256: "^"}
+palette = {128: "black", 256: "white"}
+sns.scatterplot(
+    data=tmp,
+    x="epsilon",
+    y="critical equilibrium radius (min)",
+    hue="Nx",
+    palette=palette,
+    edgecolors="k",
+    markers=markers,
+    style="Nx",
+    alpha=1,
+    linewidth=1,
+    zorder=1000)  # on top of lineplots
+plt.xscale("log")
+plt.yscale("log")       
+plt.xlim(0.0025, 0.1)
+plt.ylim(0.025, .25)
+ax.yaxis.set_minor_locator(FixedLocator([]))  # suppress minor ticks too
+plt.xticks(
+    [0.0025, 1e-2, 1e-1],
+    ["0.0025", "0.01", "0.1"])
+plt.yticks(
+    [0.025, 1e-1, 0.25],
+    ["0.025", "0.1", "0.25"])
+plt.title("H2L vs Power Law Fit of\n Critical Radius vs Epsilon with 90% CI")
+plt.xlabel("$\epsilon$")
+plt.ylabel("$R_{eq}$")
+plt.legend()
+# plt.savefig(
+#     f"Critical equilibrium radius_vs_epsilon_alpha_{alpha}_H2L_vs_Power_Law_fit_bootstrap_logscale.pdf"
+# )
+plt.show()
+
+#%%
+#overlay all the fits from best_fit_parameters_H2L on the same plot with the data, with BIC values in the legend, and use log-log axes
+for i in best_fit_parameters_H2L:
+    yfit_H2L = h2l(xfit, *i)
+    sns.lineplot(
+        x =  xfit,
+        y = yfit_H2L,
+        linewidth=1,
+        color   ="gray",
+        alpha=0.1,
+    )
+for i in best_fit_parameters_power:
+    yfit_power = powerFit(xfit, *i)
+    sns.lineplot(
+        x =  xfit,
+        y = yfit_power,
+        linewidth=1,
+        color   =sns.colorpalette("Set1")[3],
+        alpha=0.1,
+    )
+markers = {128: "o", 256: "^"}
+palette = {128: "black", 256: "white"}
+sns.scatterplot(
+    data=tmp,
+    x="epsilon",
+    y="critical equilibrium radius (min)",      
+    hue="Nx",
+    palette=palette,
+    edgecolors="k",
+    markers=markers,
+    style="Nx",
+    alpha=1,
+    linewidth=1,
+    zorder=1000) #on top of lineplots
 plt.show()
 # %%
 
