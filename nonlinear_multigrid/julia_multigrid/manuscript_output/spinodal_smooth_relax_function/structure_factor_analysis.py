@@ -41,7 +41,7 @@ phi_SAV = phi_SAV.reshape(-1, 128, 128).transpose(1, 2, 0)
 # indir_MG = f"/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/spinodal_smooth_relax_function/output"
 phi_MG_name = "NMG_MATLAB_6000_dt_5.50e-06_Nx_128_n_relax_4_dtout_1_tol_1e-6phi.csv"
 # phi_MG_name = "MG_6000_dt_5.5e-6_Nx_128_n_relax_4_eps_0.015009369912862116_phi.txt"
-phi_MG = np.genfromtxt(f"{indir_MG}/{phi_MG_name}")  # , delimiter=",")
+phi_MG = np.genfromtxt(f"{indir_MG}/{phi_MG_name}", delimiter=",")
 phi_MG = phi_MG.reshape(-1, 128, 128).transpose(1, 2, 0)
 
 # %%
@@ -367,10 +367,12 @@ def plot_phase_field_samples(phi_list, times=None, figsize=(12, 4)):
 
     plt.tight_layout()
     return fig, axes
+
+
 def plot_phi_cross_section(phi_list, times=None, y_index=None, figsize=(10, 6)):
     """
     Plot φ vs x at a fixed y-coordinate for 3 time snapshots.
-    
+
     Parameters
     ----------
     phi_list : list of ndarray
@@ -381,57 +383,59 @@ def plot_phi_cross_section(phi_list, times=None, y_index=None, figsize=(10, 6)):
         y-index to extract (default: middle, N/2)
     figsize : tuple
         Figure size
-    
+
     Returns
     -------
     fig, ax
     """
-    
+
     if times is None:
         times = np.arange(len(phi_list))
-    
+
     # Get N from first phi
     N = phi_list[0].shape[0]
-    
+
     # Default to middle of domain
     if y_index is None:
         y_index = N // 2
-    
+
     # Select 3 snapshots
     n = len(phi_list)
     if n <= 3:
         indices = list(range(n))
     else:
         indices = [0, n//2, n-1]
-    
+
     fig, ax = plt.subplots(figsize=figsize)
-    
+
     colors = plt.cm.viridis(np.linspace(0, 1, len(indices)))
-    
+
     for idx_num, i in enumerate(indices):
         phi = phi_list[i]
         t_val = times[i]
-        
+
         # Extract cross-section at y = y_index
         phi_slice = phi[y_index, :]
         x = np.arange(N)
-        
+
         ax.plot(x, phi_slice, 'o-', linewidth=2.5, markersize=6,
                 color=colors[idx_num], label=f't = {t_val:.2e}', alpha=0.8)
-    
+
     ax.set_xlabel('x', fontsize=12, fontweight='bold')
-    ax.set_ylabel('φ(x, y=' + str(y_index) + ')', fontsize=12, fontweight='bold')
+    ax.set_ylabel('φ(x, y=' + str(y_index) + ')',
+                  fontsize=12, fontweight='bold')
     ax.set_title('Phase Field Cross-Section', fontsize=13, fontweight='bold')
     ax.legend(fontsize=11, loc='best')
     ax.grid(True, alpha=0.3)
     ax.set_xlim(0, N-1)
-    
+
     plt.tight_layout()
     return fig, ax
 
+
 # %%
 L = 1
-N = 256
+N = 128
 phi_list, times = [], []
 
 for i in range(phi_MG.shape[2]):
@@ -472,15 +476,16 @@ print(f"    Amplitude:         {fit['amplitude']:.6f}")
 print(f"    R² quality:        {fit['r2']:.8f}")
 print(f"    Fit window:        t ∈ [{t_min:.3f}, {t_max:.3f}]")
 
+# %%
 # Plots
 print("\n[4] Generating plots...")
 
-fig1, _ = plot_structure_factor_snapshots(result, n_snapshots=4)
+fig1, _ = plot_structure_factor_snapshots(result, n_snapshots=3)
 fig1.savefig('./structure_factor_results/s_k_evolution.png',
              dpi=150,
              bbox_inches='tight')
 print("    ✓ Saved: s_k_evolution.png")
-
+# %%
 fig2, _, _ = plot_coarsening_law(result['t'],
                                  result['l'],
                                  t_min=t_min,
@@ -489,7 +494,7 @@ fig2.savefig('./structure_factor_results/coarsening_law.png',
              dpi=150,
              bbox_inches='tight')
 print("    ✓ Saved: coarsening_law.png")
-
+# %%
 fig3, _ = plot_phase_field_samples(phi_list, times=times)
 fig3.savefig('./structure_factor_results/phase_field_evolution.png',
              dpi=150,
@@ -525,3 +530,4 @@ fig4.savefig('./structure_factor_results/phi_cross_section_y64.png',
              dpi=150,
              bbox_inches='tight')
 print("    ✓ Saved: phi_cross_section_y64.png")
+# %%
