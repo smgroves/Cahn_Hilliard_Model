@@ -23,14 +23,14 @@ plt.rcParams["font.family"] = "Arial"
 level_set_radius = "0.5"
 Nx = 256
 L = "2.0"
-epsilon = "0.01501"
+epsilon = "0.02251"
 indir_radius = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/domain_size_study"
 
 # [0.09, 0.1, 0.105, 0.11, 0.12]:#np.arange(0.09, 0.13, 0.01):
-for R0 in [0.09, 0.1, 0.105, 0.11, 0.12]:
+for R0 in [0.09, 0.1, 0.105, 0.11, 0.12]:  # , 0.11, 0.12]:
     R0 = str(R0*2)
     domain2 = pd.read_csv(
-        f"{indir_radius}/radius_0.5_nx256.0_L{L}_R0{R0}_eps0.01501_phi.txt",
+        f"{indir_radius}/radius_0.5_nx256.0_L{L}_R0{R0}_eps0.02251_phi.txt",
         header=0,
         index_col=None,
         sep=",",
@@ -83,18 +83,18 @@ plt.legend(
     fontsize="large",
     reverse=True,
 )
-# plt.xscale("log")
+plt.xscale("log")
 plt.title(f"Epsilon = {epsilon}")
-# plt.axhline(0.07, linestyle="--", color="gray")
-# plt.ylim(0, 0.14)
-# plt.xlim(1e-3, 1e1)
+plt.axhline(0.13, linestyle="--", color="gray")
+plt.ylim(0, 0.28)
+plt.xlim(1e-3, 1e1)
 plt.xlabel("Time (tchar)")
 plt.ylabel("Radius (R)")
 plt.tight_layout()
 
-# plt.savefig(
-# f"{indir_radius}/critical_radius_vs_epsilon_domain_size_study_Nx{Nx}_L{L}.pdf")
-# plt.close()
+plt.savefig(
+    f"{indir_radius}/critical_radius_vs_epsilon_domain_size_study_Nx{Nx}_L{L}.pdf")
+plt.close()
 plt.show()
 # %%
 
