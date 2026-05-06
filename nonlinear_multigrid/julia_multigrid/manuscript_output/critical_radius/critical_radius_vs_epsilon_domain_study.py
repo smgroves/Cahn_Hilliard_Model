@@ -19,6 +19,22 @@ indir = "/Users/smgroves/Documents/GitHub/Cahn_Hilliard_Model/nonlinear_multigri
 # %%
 # Reuse this one
 # alpha = "0.5"
+alpha = "0.0"
+level_set_radius = "0.5"
+Nx = 128
+
+
+# for epsilon in ["0.015009", "0.030019", "0.0075046", "0.0018761", "0.0037523"]:
+meta = pd.read_csv(
+    f"/Users/smgroves/Documents/Github/Cahn_Hilliard_Model/nonlinear_multigrid/julia_multigrid/manuscript_output/critical_radius/critical_radii_epsilon copy.csv", header=0, index_col=None
+)
+crit_rad = meta.loc[
+    (meta["alpha"] == float(alpha))
+    & (meta["epsilon"] == float("0.011257"))
+    & (meta["Nx"] == Nx)
+]["critical equilibrium radius (min)"].iloc[0]
+
+
 plt.rcParams["font.family"] = "Arial"
 level_set_radius = "0.5"
 Nx = 256
@@ -64,6 +80,7 @@ tmp = domain2
 # print(tmp.shape)
 # tmp = tmp.sort_values("R0", ascending=False)
 
+
 # sns.lineplot(data=tmp, x="time", y="radius", hue="R0", palette="tab20")
 for i, r in enumerate(np.unique(tmp["R0"])):
     tmp_r = tmp.loc[tmp["R0"] == r].sort_values("time")
@@ -72,7 +89,7 @@ for i, r in enumerate(np.unique(tmp["R0"])):
     tmp_r.loc[last + 1, "radius"] = 0
     plt.plot(
         tmp_r["time"],
-        tmp_r["radius"],
+        tmp_r["radius"]/2,
         color=sns.color_palette()[i],
         label=r,
     )
@@ -85,8 +102,8 @@ plt.legend(
 )
 plt.xscale("log")
 plt.title(f"Epsilon = {epsilon}")
-plt.axhline(0.13, linestyle="--", color="gray")
-plt.ylim(0, 0.28)
+plt.axhline(crit_rad, linestyle="--", color="gray")
+plt.ylim(0, 0.14)
 plt.xlim(1e-3, 1e1)
 plt.xlabel("Time (tchar)")
 plt.ylabel("Radius (R)")
