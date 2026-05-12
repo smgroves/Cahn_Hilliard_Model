@@ -48,7 +48,7 @@ phi_SAV = np.genfromtxt(f"{indir_SAV}/{phi_name_SAV}", delimiter=",")
 phi_SAV = phi_SAV.reshape(-1, 128, 128).transpose(1, 2, 0)
 
 # %% LOAD FD IE
-indir_FD = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-periodic_FD_IE"
+indir_FD = "/Users/smgroves/Documents/GitHub/CHsolvers_package/output/output_MATLAB-neumann_FD_IE"
 phi_name_FD = "FD_IE_MATLAB_2000_dt_5.50e-06_Nx_128_n_relax_4_dtout_1_phi.csv"
 
 phi_FD = np.genfromtxt(f"{indir_FD}/{phi_name_FD}", delimiter=",")
@@ -79,14 +79,15 @@ for timepoint in timepoints:
     plt.yticks(ticks=[], labels=[])
     # plt.title(f"Time= {timepoint*dt}")
     plt.tight_layout()
-    # plt.savefig(
-    #     f"{indir_MG}/MG_6000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}.png",
-    #     bbox_inches="tight",
-    #     pad_inches=0,
-    #     dpi=300,
-    # )
-    # plt.close()
+    plt.savefig(
+        f"{indir_FD}/FD_IE_2000_dt_5.5e-6_t_{timepoint*dt*dt_out:.2e}_neumann.png",
+        bbox_inches="tight",
+        pad_inches=0,
+        dpi=300,
+    )
     plt.show()
+
+    plt.close()
 
 ###############################################
 # %% comparing energy and mass
